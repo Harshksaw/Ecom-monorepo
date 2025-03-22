@@ -82,7 +82,7 @@ const forgetPassword = async (req, res,next) => {
         to: `${email}`,
         subject: "Password Reset",
         html: `<h2>Hello ${email}</h2>
-        <p>A request has been received to change the password for your <strong>Shofy</strong> account </p>
+        <p>A request has been received to change the password for your <strong>ecom</strong> account </p>
 
         <p>This link will expire in <strong> 10 minute</strong>.</p>
 
@@ -90,10 +90,10 @@ const forgetPassword = async (req, res,next) => {
 
         <a href=${secret.admin_url}/forget-password/${token} style="background:#0989FF;color:white;border:1px solid #0989FF; padding: 10px 15px; border-radius: 4px; text-decoration:none;">Reset Password</a>
 
-        <p style="margin-top: 35px;">If you did not initiate this request, please contact us immediately at support@shofy.com</p>
+        <p style="margin-top: 35px;">If you did not initiate this request, please contact us immediately at support@ecom.com</p>
 
         <p style="margin-bottom:0px;">Thank you</p>
-        <strong>Shofy Team</strong>
+        <strong>ecom Team</strong>
         `,
       };
       admin.confirmationToken = token;
