@@ -72,7 +72,7 @@ To get started with Shofy, follow these steps:
 1. Clone the repository:
 
    ```bash
-
+   https://github.com/Hamed-Hasan/shofy-Beauty-and-Cosmetics-ecommerce-client.git
    ```
 
 2. Install dependencies:
