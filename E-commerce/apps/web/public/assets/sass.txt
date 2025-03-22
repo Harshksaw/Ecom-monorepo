@@ -1,1 +1,0 @@
-sass --watch D:\Dropbox\Shahnewaz\ecom\ecom-prv\ecom\assets\scss\main.scss:D:\Dropbox\Shahnewaz\ecom\ecom-prv\ecom\assets\css\main.css
