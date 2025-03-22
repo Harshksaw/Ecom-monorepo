@@ -4,7 +4,7 @@ services:
     build: ./backend
     container_name: node_backend
     ports:
-      - '3004:3004'
+      - '3004:7000'
     volumes:
       - ./backend:/usr/src/app
     restart: always
@@ -17,9 +17,8 @@ services:
     build: ./frontend
     container_name: next_frontend
     ports:
-      - '3005:3005'
+      - '3005:3000'
     volumes:
       - ./frontend:/app
     restart: always
-    environment:
-      - NODE_ENV=development
+    command: sh -c "npm run build && npm start"
