@@ -1,0 +1,25 @@
+
+services:
+  backend:
+    build: ./backend
+    container_name: node_backend
+    ports:
+      - '3004:3004'
+    volumes:
+      - ./backend:/usr/src/app
+    restart: always
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - frontend
+
+  frontend:
+    build: ./frontend
+    container_name: next_frontend
+    ports:
+      - '3005:3005'
+    volumes:
+      - ./frontend:/app
+    restart: always
+    environment:
+      - NODE_ENV=development
