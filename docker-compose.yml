@@ -22,3 +22,12 @@ services:
       - ./frontend:/app
     restart: always
     command: sh -c "npm run build && npm start"
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    ports:
+      - "80:80"     # 🌐 This exposes your frontend on VPS
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
