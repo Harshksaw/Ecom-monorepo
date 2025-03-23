@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Expose the port the app runs on
-EXPOSE 7000
+EXPOSE 7003
 
 # Start the backend server
 CMD ["npm", "start"]
