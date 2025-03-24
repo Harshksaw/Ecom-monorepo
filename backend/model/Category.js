@@ -1,40 +1,14 @@
 const mongoose = require('mongoose');
-const { ObjectId } = mongoose.Schema.Types;
 
-const CategorySchema = mongoose.Schema({
-  img:{
-    type:String,
-    required:false,
-   },
-   parent:{
-    type:String,
-    required:true,
-    trim:true,
-    unique:true,
-   },
-   children:[{type:String}],
-   productType:{
-    type:String,
-    trim:true,
-    required:true,
-    lowercase: true,
-   },
-   description:{
-    type:String,
-    required:false,
-   },
-   products: [{
-    type: ObjectId,
-    ref: "Products"
-  }],
-   status: {
-    type: String,
-    enum: ['Show', 'Hide'],
-    default: 'Show',
-  },
-},{
-  timestamps: true
-})
 
-const Category = mongoose.model('Category',CategorySchema);
+const categorySchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  description: { type: String },
+  slug: { type: String, required: true, unique: true },
+  imageUrl: { type: String },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+const Category = mongoose.models.Category || mongoose.model('Category', categorySchema);
 module.exports = Category;

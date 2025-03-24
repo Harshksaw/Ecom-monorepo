@@ -2,79 +2,27 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
-
-const userSchema = mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, "Please provide a name"],
-      trim: true,
-      minLength: [3, "Name must be at least 3 characters."],
-      maxLength: [100, "Name is too large"],
-    },
-    email: {
-      type: String,
-      validate: [validator.isEmail, "Provide a valid Email"],
-      trim: true,
-      lowercase: true,
-      unique: true,
-      required: [true, "Email address is required"],
-    },
-    password: {
-      type: String,
-      required: [false, "Password is required"],
-      minLength: [6, "Must be at least 6 character"],
-    },
-
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
-
-    contactNumber: {
-      type: String,
-      validate: [
-        validator.isMobilePhone,
-        "Please provide a valid contact number",
-      ],
-    },
-
-    shippingAddress: String,
-
-    imageURL: {
-      type: String,
-      validate: [validator.isURL, "Please provide a valid url"],
-    },
-    phone: {
-      type: String,
-      required: false,
-    },
-    address: {
-      type: String,
-      required: false,
-    },
-    bio: {
-      type: String,
-      required: false,
-    },
-    status: {
-      type: String,
-      default: "inactive",
-      enum: ["active", "inactive", "blocked"],
-    },
-    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reviews" }],
-    confirmationToken: String,
-    confirmationTokenExpires: Date,
-
-    passwordChangedAt: Date,
-    passwordResetToken: String,
-    passwordResetExpires: Date,
-  },
-  {
-    timestamps: true,
-  }
-);
+// User Schema (for customers and admins)
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
+  phoneNumber: { type: String },
+  addresses: [{
+    type: { type: String, enum: ['billing', 'shipping'], required: true },
+    addressLine1: { type: String, required: true },
+    addressLine2: { type: String },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    country: { type: String, required: true },
+    isDefault: { type: Boolean, default: false }
+  }],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
 
 userSchema.pre("save", function (next) {
   if (!this.isModified("password")) {

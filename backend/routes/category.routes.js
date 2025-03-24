@@ -1,23 +1,21 @@
 const express = require('express');
 const router = express.Router();
-// internal
 const categoryController = require('../controller/category.controller');
+const { authenticate, isAdmin } = require('../middleware/authorization');
 
-// get
-router.get('/get/:id', categoryController.getSingleCategory);
-// add
-router.post('/add', categoryController.addCategory);
-// add All Category
-router.post('/add-all', categoryController.addAllCategory);
-// get all Category
-router.get('/all', categoryController.getAllCategory);
-// get Product Type Category
-router.get('/show/:type', categoryController.getProductTypeCategory);
-// get Show Category
-router.get('/show', categoryController.getShowCategory);
-// delete category
-router.delete('/delete/:id', categoryController.deleteCategory);
-// delete product
-router.patch('/edit/:id', categoryController.updateCategory);
+// Create a new category (admin only)
+router.post('/', authenticate, isAdmin, categoryController.createCategory);
+
+// Get all categories
+router.get('/', categoryController.getAllCategories);
+
+// Get category by ID
+router.get('/:id', categoryController.getCategoryById);
+
+// Update category (admin only)
+router.put('/:id', authenticate, isAdmin, categoryController.updateCategory);
+
+// Delete category (admin only)
+router.delete('/:id', authenticate, isAdmin, categoryController.deleteCategory);
 
 module.exports = router;

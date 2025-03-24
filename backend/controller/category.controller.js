@@ -1,107 +1,121 @@
-const categoryServices = require("../services/category.service");
 
+const Category = require('../model/Category');
+const Product = require('../model/Products');
 
-// add category
-exports.addCategory = async (req,res,next) => {
+// Create a new category
+exports.createCategory = async (req, res) => {
   try {
-    const result = await categoryServices.createCategoryService(req.body);
-    res.status(200).json({
-      status: "success",
-      message: "Category created successfully!",
-      data: result,
+    const { name, description, slug, imageUrl } = req.body;
+    
+    // Check if category with same name or slug exists
+    const existingCategory = await Category.findOne({ $or: [{ name }, { slug }] });
+    if (existingCategory) {
+      return res.status(400).json({ message: 'Category with same name or slug already exists' });
+    }
+    
+    const newCategory = new Category({
+      name,
+      description,
+      slug,
+      imageUrl
+    });
+    
+    await newCategory.save();
+    
+    res.status(201).json({
+      message: 'Category created successfully',
+      category: newCategory
     });
   } catch (error) {
-    console.log(error)
-    next(error)
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
-}
+};
 
-// add all category
-exports.addAllCategory = async (req,res,next) => {
+// Get all categories
+exports.getAllCategories = async (req, res) => {
   try {
-    const result = await categoryServices.addAllCategoryService(req.body);
-    res.json({
-      message:'Category added successfully',
-      result,
-    })
+    const categories = await Category.find({ isActive: true });
+    res.status(200).json({ categories });
   } catch (error) {
-    next(error)
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
-}
+};
 
-// add all category
-exports.getShowCategory = async (req,res,next) => {
+// Get category by ID
+exports.getCategoryById = async (req, res) => {
   try {
-    const result = await categoryServices.getShowCategoryServices();
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.status(200).json({ category });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Update category
+exports.updateCategory = async (req, res) => {
+  try {
+    const { name, description, slug, imageUrl, isActive } = req.body;
+    
+    // Check if updated slug or name conflicts with another category
+    if (slug || name) {
+      const query = { _id: { $ne: req.params.id } };
+      if (slug) query.slug = slug;
+      if (name) query.name = name;
+      
+      const existingCategory = await Category.findOne(query);
+      if (existingCategory) {
+        return res.status(400).json({ message: 'Category with same name or slug already exists' });
+      }
+    }
+    
+    const updatedCategory = await Category.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...(name && { name }),
+        ...(description && { description }),
+        ...(slug && { slug }),
+        ...(imageUrl && { imageUrl }),
+        ...(typeof isActive === 'boolean' && { isActive }),
+        updatedAt: Date.now()
+      },
+      { new: true }
+    );
+    
+    if (!updatedCategory) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    
     res.status(200).json({
-      success:true,
-      result,
-    })
+      message: 'Category updated successfully',
+      category: updatedCategory
+    });
   } catch (error) {
-    next(error)
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
-}
+};
 
-// add all category
-exports.getAllCategory = async (req,res,next) => {
+// Delete category
+exports.deleteCategory = async (req, res) => {
   try {
-    const result = await categoryServices.getAllCategoryServices();
-    res.status(200).json({
-      success:true,
-      result,
-    })
+    // Check if category is being used by products
+    const productsUsingCategory = await Product.countDocuments({ categoryId: req.params.id });
+    if (productsUsingCategory > 0) {
+      return res.status(400).json({
+        message: 'Cannot delete category as it is being used by products',
+        count: productsUsingCategory
+      });
+    }
+    
+    const deletedCategory = await Category.findByIdAndDelete(req.params.id);
+    if (!deletedCategory) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    
+    res.status(200).json({ message: 'Category deleted successfully' });
   } catch (error) {
-    next(error)
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
-}
-
-
-// add all category
-exports.getProductTypeCategory = async (req,res,next) => {
-  try {
-    const result = await categoryServices.getCategoryTypeService(req.params.type);
-    res.status(200).json({
-      success:true,
-      result,
-    })
-  } catch (error) {
-    next(error)
-  }
-}
-
-// delete category
-exports.deleteCategory = async (req,res,next) => {
-  try {
-    const result = await categoryServices.deleteCategoryService(req.params.id);
-    res.status(200).json({
-      success:true,
-      result,
-    })
-  } catch (error) {
-    next(error)
-  }
-}
-
-// update category
-exports.updateCategory = async (req,res,next) => {
-  try {
-    const result = await categoryServices.updateCategoryService(req.params.id,req.body);
-    res.status(200).json({
-      status:'success',
-      message:'Category update successfully',
-      result,
-    })
-  } catch (error) {
-    next(error)
-  }
-}
-
-// get single category
-exports.getSingleCategory = async (req,res,next) => {
-  try {
-    const result = await categoryServices.getSingleCategoryService(req.params.id);
-    res.status(200).json(result)
-  } catch (error) {
-    next(error)
-  }
-}
+};

@@ -1,109 +1,65 @@
 const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    cart: [{}],
-    name: {
-      type: String,
-      required: true,
-    },
-    address: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    contact: {
-      type: String,
-      required: true,
-    },
-
-    city: {
-      type: String,
-      required: true,
-    },
-    country: {
-      type: String,
-      required: true,
-    },
-    zipCode: {
-      type: String,
-      required: true,
-    },
-    subTotal: {
-      type: Number,
-      required: true,
-    },
-    shippingCost: {
-      type: Number,
-      required: true,
-    },
-    discount: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
-    shippingOption: {
-      type: String,
-      required: false,
-    },
-    cardInfo: {
-      type: Object,
-      required: false,
-    },
-    paymentIntent: {
-      type: Object,
-      required: false,
-    },
-    paymentMethod: {
-      type: String,
-      required: true,
-    },
-    orderNote: {
-      type: String,
-      required: false,
-    },
-    invoice: {
-      type: Number,
-      unique: true,
-    },
-    status: {
-      type: String,
-      enum: ["pending", "processing", "delivered",'cancel'],
-      lowercase: true,
-    },
+// Order Schema
+const orderSchema = new mongoose.Schema({
+  orderNumber: { type: String, required: true, unique: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  items: [{
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+    quantity: { type: Number, required: true },
+    price: { type: Number, required: true } // Price at time of purchase
+  }],
+  subtotal: { type: Number, required: true },
+  tax: { type: Number, required: true },
+  shipping: { type: Number, required: true },
+  total: { type: Number, required: true },
+  shippingAddress: {
+    addressLine1: { type: String, required: true },
+    addressLine2: { type: String },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    country: { type: String, required: true }
   },
-  {
-    timestamps: true,
-  }
-);
+  billingAddress: {
+    addressLine1: { type: String, required: true },
+    addressLine2: { type: String },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    country: { type: String, required: true }
+  },
+  paymentMethod: { type: String, required: true },
+  paymentStatus: { 
+    type: String, 
+    enum: ['pending', 'processing', 'completed', 'failed', 'refunded'], 
+    default: 'pending' 
+  },
+  orderStatus: { 
+    type: String, 
+    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'], 
+    default: 'pending' 
+  },
+  trackingNumber: { type: String },
+  notes: { type: String },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
 
 // define pre-save middleware to generate the invoice number
 orderSchema.pre('save', async function (next) {
   const order = this;
-  if (!order.invoice) { // check if the order already has an invoice number
+  if (!order.invoice) {
     try {
-      // find the highest invoice number in the orders collection
       const highestInvoice = await mongoose
         .model('Order')
         .find({})
-        .sort({ invoice: 'desc' })
+        .sort({ invoice: -1 })
         .limit(1)
         .select({ invoice: 1 });
-      // if there are no orders in the collection, start at 1000
+      
       const startingInvoice = highestInvoice.length === 0 ? 1000 : highestInvoice[0].invoice + 1;
-      // set the invoice number for the new order
       order.invoice = startingInvoice;
       next();
     } catch (error) {
