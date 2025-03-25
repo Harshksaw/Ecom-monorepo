@@ -13,9 +13,6 @@ router.get('/', categoryController.getAllCategories);
 router.get('/:id', categoryController.getCategoryById);
 
 // Update category (admin only)
-router.put('/:id', categoryController.updateCategory);
 
-// Delete category (admin only)
-router.delete('/:id', categoryController.deleteCategory);
 
 module.exports = router;
