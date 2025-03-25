@@ -1,3 +1,4 @@
+'use client'
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 
 import { BiArrowBack, BiArrowFromLeft, BiArrowFromRight } from "react-icons/bi";
