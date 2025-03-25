@@ -47,7 +47,7 @@ const adminSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      required: true,
+      required: false,
       default: "Admin",
       enum: [
         "Admin",
@@ -69,14 +69,14 @@ const adminSchema = new mongoose.Schema(
 );
 
 // generateConfirmationToken
-adminSchema.methods.generateConfirmationToken = function () {
-  const token = crypto.randomBytes(32).toString("hex");
-  this.confirmationToken = token;
-  const date = new Date();
-  date.setDate(date.getDate() + 1);
-  this.confirmationTokenExpires = date;
-  return token;
-};
+// adminSchema.methods.generateConfirmationToken = function () {
+//   const token = crypto.randomBytes(32).toString("hex");
+//   this.confirmationToken = token;
+//   const date = new Date();
+//   date.setDate(date.getDate() + 1);
+//   this.confirmationTokenExpires = date;
+//   return token;
+// };
 
 const Admin = mongoose.model("Admin", adminSchema);
 

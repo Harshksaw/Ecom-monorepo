@@ -9,12 +9,13 @@ router.get('/', productController.getAllProducts);
 router.get('/search', productController.searchProducts);
 router.get('/featured', productController.getFeaturedProducts);
 router.get('/materials', productController.getProductMaterials);
+
 router.get('/:id', productController.getProductById);
 router.get('/sku/:sku', productController.getProductBySlug);
 router.get('/:id/related', productController.getRelatedProducts);
 
 // Admin routes
-router.post('/', authenticate, isAdmin, productController.createProduct);
+router.post('/', productController.createProduct);
 router.put('/:id', authenticate, isAdmin, productController.updateProduct);
 router.delete('/:id', authenticate, isAdmin, productController.deleteProduct);
 router.patch('/:id/stock', authenticate, isAdmin, productController.updateStock);
