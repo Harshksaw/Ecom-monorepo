@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
  * @returns {string} JWT token
  */
 exports.generateToken = (user, expiresIn = '24h') => {
+  console.log( process.env.JWT_SECRET)
   return jwt.sign(
     { 
       id: user._id, 
