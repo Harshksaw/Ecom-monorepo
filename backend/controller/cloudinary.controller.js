@@ -2,7 +2,7 @@ const fs = require("fs");
 const { cloudinaryServices } = require("../services/cloudinary.service");
 
 // add image
-const saveImageCloudinary = async (req, res,next) => {
+const saveImageCloudinary = async (req, res, next) => {
   // console.log(req.file)
   try {
     const result = await cloudinaryServices.cloudinaryImageUpload(
@@ -11,11 +11,11 @@ const saveImageCloudinary = async (req, res,next) => {
     res.status(200).json({
       success: true,
       message: "image uploaded successfully",
-      data:{url:result.secure_url,id:result.public_id},
+      data: { url: result.secure_url, id: result.public_id },
     });
   } catch (err) {
     console.log(err);
-    next(err)
+    next(err);
   }
 };
 
@@ -78,6 +78,7 @@ const cloudinaryDeleteController = async (req, res) => {
     });
   }
 };
+//
 
 exports.cloudinaryController = {
   cloudinaryDeleteController,
