@@ -10,9 +10,11 @@ import { BsCart } from 'react-icons/bs'
 import { IoMdHeartEmpty } from 'react-icons/io'
 import { VscChromeClose } from 'react-icons/vsc'
 
-import { getCategories, Category } from '../../lib/api'
+
 import Menu from './Menu'
 import MobileMenu from './MobileMenu'
+import { CategoryService } from '@/app/lib/api'
+
 
 const Header = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
@@ -52,7 +54,7 @@ const Header = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const categoriesData = await getCategories()
+        const categoriesData = await CategoryService.getAllCategories()
         setCategories(categoriesData)
       } catch (error) {
         console.error('Error fetching categories:', error)
@@ -80,7 +82,7 @@ const Header = () => {
         <Menu 
           showCatMenu={showCatMenu} 
           setShowCatMenu={setShowCatMenu} 
-          categories={categories} 
+          categories={categories.categories} 
         />
         
         {mobileMenu && (
