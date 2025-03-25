@@ -4,7 +4,7 @@ const categoryController = require('../controller/category.controller');
 const { authenticate, isAdmin } = require('../middleware/authorization');
 
 // Create a new category (admin only)
-router.post('/', authenticate, isAdmin, categoryController.createCategory);
+router.post('/', categoryController.createCategory);
 
 // Get all categories
 router.get('/', categoryController.getAllCategories);
@@ -13,9 +13,9 @@ router.get('/', categoryController.getAllCategories);
 router.get('/:id', categoryController.getCategoryById);
 
 // Update category (admin only)
-router.put('/:id', authenticate, isAdmin, categoryController.updateCategory);
+router.put('/:id',  categoryController.updateCategory);
 
 // Delete category (admin only)
-router.delete('/:id', authenticate, isAdmin, categoryController.deleteCategory);
+router.delete('/:id',  categoryController.deleteCategory);
 
 module.exports = router;

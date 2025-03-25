@@ -3,11 +3,11 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 
 // Import providers
-import { Providers } from '@/store/provider'
+import { Providers } from './store/provider'
 
 // Import components
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import Header from './components/layout/Header'
+import Footer from './components/layout/Footer'
 
 const inter = Inter({ subsets: ['latin'] })
 
