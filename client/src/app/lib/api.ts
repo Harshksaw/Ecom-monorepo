@@ -1,13 +1,19 @@
-// src/lib/api.ts
+// src/lib/api-service.ts
 
-/**
- * This file contains all the API utility functions for fetching data from the backend
- */
+import axios from 'axios';
 
 // API base URL - make sure to set this in your .env.local file
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7003/api';
 
-// Types for API responses and data models
+// Create an axios instance with default configuration
+const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Type definitions
 export interface Product {
   id: string;
   attributes: {
@@ -68,214 +74,242 @@ export interface ApiResponse<T> {
       total: number;
     }
   };
-  error?: {
-    status: number;
-    message: string;
-  };
 }
 
-/**
- * Fetch data from the API with error handling
- * @param endpoint - API endpoint to fetch from
- * @param options - Fetch options
- * @returns API response with typed data
- */
-export async function fetchDataFromApi<T>(
-  endpoint: string, 
-  options: RequestInit = {}
-): Promise<ApiResponse<T>> {
-  try {
-    // Set default cache option if not provided
-    const cacheOption = options.cache || options.next || 'force-cache';
-    
-    // Set headers
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    };
-
-    // Combine options
-    const fetchOptions: RequestInit = {
-      ...options,
-      headers,
-      cache: cacheOption
-    };
-
-    // Make API request
-    const response = await fetch(`${API_URL}${endpoint}`, fetchOptions);
-
-    // Handle error responses
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error(`API error (${response.status}):`, errorData);
+// API Services
+export const ProductService = {
+  /**
+   * Get all products with optional filtering
+   */
+  async getAllProducts(params: Record<string, any> = {}) {
+    try {
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      queryParams.append('populate', '*');
       
-      return {
-        data: [] as unknown as T,
-        error: {
-          status: response.status,
-          message: errorData.message || response.statusText || 'An error occurred'
+      // Add filters
+      Object.entries(params).forEach(([key, value]) => {
+        if (key === 'featured' && value === true) {
+          queryParams.append('filters[featured][$eq]', 'true');
+        } else if (key === 'category') {
+          queryParams.append('filters[categories][slug][$eq]', value as string);
+        } else if (key === 'slug') {
+          queryParams.append('filters[slug][$eq]', value as string);
+        } else if (key === 'search') {
+          queryParams.append('filters[$or][0][name][$containsi]', value as string);
+          queryParams.append('filters[$or][1][description][$containsi]', value as string);
+        } else {
+          queryParams.append(key, value as string);
         }
-      };
-    }
-
-    // Parse and return successful response
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error(`Error fetching ${endpoint}:`, error);
-    
-    return {
-      data: [] as unknown as T,
-      error: {
-        status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      });
+      
+      // Add pagination
+      if (params.page) {
+        queryParams.append('pagination[page]', params.page.toString());
       }
-    };
-  }
-}
-
-/**
- * Get all products with optional filtering
- * @param params - Query parameters
- * @returns Promise with product data
- */
-export async function getProducts(
-  params: Record<string, any> = {}
-): Promise<ApiResponse<Product[]>> {
-  // Construct query string from params
-  const queryParams = new URLSearchParams();
-  
-  // Always include images, categories, etc.
-  queryParams.append('populate', '*');
-  
-  // Add custom filters
-  Object.entries(params).forEach(([key, value]) => {
-    if (key === 'featured' && value === true) {
-      queryParams.append('filters[featured][$eq]', 'true');
-    } else if (key === 'category') {
-      queryParams.append('filters[categories][slug][$eq]', value as string);
-    } else if (key === 'slug') {
-      queryParams.append('filters[slug][$eq]', value as string);
-    } else if (key === 'search') {
-      queryParams.append('filters[$or][0][name][$containsi]', value as string);
-      queryParams.append('filters[$or][1][description][$containsi]', value as string);
-    } else {
-      queryParams.append(key, value as string);
+      if (params.pageSize) {
+        queryParams.append('pagination[pageSize]', params.pageSize.toString());
+      }
+      
+      const response = await apiClient.get<ApiResponse<Product[]>>(`/products?${queryParams.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      throw error;
     }
-  });
+  },
   
-  // Add pagination if provided
-  if (params.page) {
-    queryParams.append('pagination[page]', params.page.toString());
-  }
-  if (params.pageSize) {
-    queryParams.append('pagination[pageSize]', params.pageSize.toString());
-  }
+  /**
+   * Get a product by slug
+   */
+  async getProductBySlug(slug: string) {
+    try {
+      const response = await apiClient.get<ApiResponse<Product[]>>(`/products?populate=*&filters[slug][$eq]=${slug}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching product with slug ${slug}:`, error);
+      throw error;
+    }
+  },
   
-  // Make the API request
-  return fetchDataFromApi<Product[]>(`/products?${queryParams.toString()}`);
-}
+  /**
+   * Search for products
+   */
+  async searchProducts(query: string) {
+    try {
+      const response = await apiClient.get<ApiResponse<Product[]>>(
+        `/products?populate=*&filters[$or][0][name][$containsi]=${query}&filters[$or][1][description][$containsi]=${query}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error searching products with query "${query}":`, error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Get featured products
+   */
+  async getFeaturedProducts() {
+    try {
+      const response = await apiClient.get<ApiResponse<Product[]>>('/products?populate=*&filters[featured][$eq]=true');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching featured products:', error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Get related products (excluding current product)
+   */
+  async getRelatedProducts(currentSlug: string, categoryId?: string) {
+    try {
+      let url = `/products?populate=*&filters[slug][$ne]=${currentSlug}`;
+      if (categoryId) {
+        url += `&filters[categories][id][$eq]=${categoryId}`;
+      }
+      const response = await apiClient.get<ApiResponse<Product[]>>(url);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching related products:', error);
+      throw error;
+    }
+  }
+};
 
-/**
- * Get a single product by slug
- * @param slug - Product slug
- * @returns Promise with product data
- */
-export async function getProductBySlug(
-  slug: string
-): Promise<ApiResponse<Product[]>> {
-  return fetchDataFromApi<Product[]>(`/products?populate=*&filters[slug][$eq]=${slug}`);
-}
+export const CategoryService = {
+  /**
+   * Get all categories
+   */
+  async getAllCategories() {
+    try {
+      const response = await apiClient.get<ApiResponse<Category[]>>('/categories');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Get a category by slug
+   */
+  async getCategoryBySlug(slug: string) {
+    try {
+      const response = await apiClient.get<ApiResponse<Category[]>>(`/categories?populate=*&filters[slug][$eq]=${slug}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching category with slug ${slug}:`, error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Get products from a specific category
+   */
+  async getProductsByCategory(categorySlug: string, page = 1, pageSize = 10) {
+    try {
+      const response = await apiClient.get<ApiResponse<Product[]>>(
+        `/products?populate=*&filters[categories][slug][$eq]=${categorySlug}&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching products for category ${categorySlug}:`, error);
+      throw error;
+    }
+  }
+};
 
-/**
- * Get all categories
- * @returns Promise with categories data
- */
-export async function getCategories(): Promise<ApiResponse<Category[]>> {
-  return fetchDataFromApi<Category[]>('/categories?populate=*');
-}
+export const OrderService = {
+  /**
+   * Create a payment session
+   */
+  async createPaymentSession(products: any) {
+    try {
+      const response = await apiClient.post('/orders', { products });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating payment session:', error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Get order history (requires authentication)
+   */
+  async getOrderHistory() {
+    try {
+      const response = await apiClient.get('/orders/me');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching order history:', error);
+      throw error;
+    }
+  }
+};
 
-/**
- * Get a single category by slug with its products
- * @param slug - Category slug
- * @param page - Page number for pagination
- * @param pageSize - Items per page
- * @returns Promise with category data including products
- */
-export async function getCategoryBySlug(
-  slug: string,
-  page = 1,
-  pageSize = 10
-): Promise<ApiResponse<Category[]>> {
-  return fetchDataFromApi<Category[]>(
-    `/categories?populate=*&filters[slug][$eq]=${slug}&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
-  );
-}
+// Helper functions
+export const Helpers = {
+  /**
+   * Format price with currency
+   */
+  formatPrice(price: number, currency = '₹'): string {
+    return `${currency}${price.toFixed(2)}`;
+  },
+  
+  /**
+   * Calculate discount percentage
+   */
+  getDiscountPercentage(originalPrice: number, discountedPrice: number): string {
+    if (!originalPrice || !discountedPrice) return '0';
+    const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
+    return discount.toFixed(2);
+  }
+};
 
-/**
- * Get products from a specific category
- * @param categorySlug - Category slug
- * @param page - Page number
- * @param pageSize - Products per page
- * @returns Promise with products in category
- */
-export async function getProductsByCategory(
-  categorySlug: string,
-  page = 1,
-  pageSize = 10
-): Promise<ApiResponse<Product[]>> {
-  return fetchDataFromApi<Product[]>(
-    `/products?populate=*&filters[categories][slug][$eq]=${categorySlug}&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
-  );
-}
+// Authentication interceptor - add token to requests
+apiClient.interceptors.request.use(
+  (config) => {
+    // Add authentication token if available
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-/**
- * Search for products
- * @param query - Search query
- * @returns Promise with matching products
- */
-export async function searchProducts(query: string): Promise<ApiResponse<Product[]>> {
-  return fetchDataFromApi<Product[]>(
-    `/products?populate=*&filters[$or][0][name][$containsi]=${query}&filters[$or][1][description][$containsi]=${query}`
-  );
-}
+// Response interceptor for global error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const { response } = error;
+    
+    if (response?.status === 401) {
+      // Handle unauthorized access
+      console.error('Unauthorized: Please login again');
+      
+      // Clear invalid token
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+      }
+      
+      // Redirect to login (if needed)
+      // window.location.href = '/login';
+    }
+    
+    return Promise.reject(error);
+  }
+);
 
-/**
- * Create a payment session or order
- * @param endpoint - API endpoint for payment/order
- * @param payload - Order data
- * @returns Promise with payment/order response
- */
-export async function makePaymentRequest<T = any>(
-  endpoint: string,
-  payload: any
-): Promise<ApiResponse<T>> {
-  return fetchDataFromApi<T>(endpoint, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    cache: 'no-store',
-    next: { revalidate: 0 }
-  });
-}
-
-/**
- * Helper function to format price in currency
- * @param price - Price value
- * @param currency - Currency symbol
- * @returns Formatted price string
- */
-export function formatPrice(price: number, currency = '₹'): string {
-  return `${currency}${price.toFixed(2)}`;
-}
-
-/**
- * Calculate discount percentage
- * @param originalPrice - Original price
- * @param discountedPrice - Discounted price
- * @returns Discount percentage
- */
-export function getDiscountPercentage(originalPrice: number, discountedPrice: number): string {
-  if (!originalPrice || !discountedPrice) return '0';
-  const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
-  return discount.toFixed(2);
-}
+// Export services
+export default {
+  product: ProductService,
+  category: CategoryService,
+  order: OrderService,
+  helpers: Helpers
+};
