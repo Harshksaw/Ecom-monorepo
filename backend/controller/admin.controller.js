@@ -53,7 +53,7 @@ const loginAdmin = async (req, res,next) => {
         name: admin.name,
         phone: admin.phone,
         email: admin.email,
-        image: admin.image,
+
         role: admin.role,
       });
     } else {
@@ -62,7 +62,7 @@ const loginAdmin = async (req, res,next) => {
       });
     }
   } catch (err) {
-    next(err)
+    console.log(err)
   }
 };
 // forget password
