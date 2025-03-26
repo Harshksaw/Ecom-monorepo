@@ -52,6 +52,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 };
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+  console.log("🚀 ~ product:", product)
   // Calculate discount percentage if applicable
   const discountPercentage = product.salePrice 
     ? Math.round(((product.price - product.salePrice) / product.price) * 100)
@@ -61,14 +62,15 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
       {/* Product Image */}
       <Link href={`/products/${product.slug}`} className="block relative">
-        {discountPercentage > 0 && (
+        {/* {discountPercentage > 0 && (
           <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs z-10">
             {discountPercentage}% OFF
           </div>
-        )}
+        )} */}
         <div className="relative w-full pt-[100%]">
           <Image 
-            src={product.images[0] || '/placeholder-product.jpg'}
+            loading='lazy'
+            src={product.images[1] }
             alt={product.name}
             fill
             className="absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-300"

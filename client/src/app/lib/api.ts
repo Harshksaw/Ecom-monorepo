@@ -1,8 +1,7 @@
-// src/lib/api-service.ts
-
+// lib/api-service.ts
 import axios from 'axios';
 
-// API base URL - make sure to set this in your .env.local file
+// API base URL
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7003/api';
 
 // Create an axios instance with default configuration
@@ -13,7 +12,7 @@ const apiClient = axios.create({
   },
 });
 
-// Type definitions
+// Type Definitions
 export interface Product {
   id: string;
   attributes: {
@@ -48,6 +47,7 @@ export interface Product {
     categories?: {
       data: Category[];
     };
+    featured?: boolean;
     [key: string]: any;
   }
 }
@@ -76,137 +76,138 @@ export interface ApiResponse<T> {
   };
 }
 
-// API Services
+// Product Service
 export const ProductService = {
   /**
-   * Get all products with optional filtering
+   * Fetch all products with flexible filtering
    */
-  async getAllProducts(params: Record<string, any> = {}) {
-    try {
-      // Build query parameters
-      const queryParams = new URLSearchParams();
-      queryParams.append('populate', '*');
-      
-      // Add filters
-      Object.entries(params).forEach(([key, value]) => {
-        if (key === 'featured' && value === true) {
-          queryParams.append('filters[featured][$eq]', 'true');
-        } else if (key === 'category') {
-          queryParams.append('filters[categories][slug][$eq]', value as string);
-        } else if (key === 'slug') {
-          queryParams.append('filters[slug][$eq]', value as string);
-        } else if (key === 'search') {
-          queryParams.append('filters[$or][0][name][$containsi]', value as string);
-          queryParams.append('filters[$or][1][description][$containsi]', value as string);
-        } else {
-          queryParams.append(key, value as string);
-        }
-      });
-      
-      // Add pagination
-      if (params.page) {
-        queryParams.append('pagination[page]', params.page.toString());
-      }
-      if (params.pageSize) {
-        queryParams.append('pagination[pageSize]', params.pageSize.toString());
-      }
-      
-      const response = await apiClient.get<ApiResponse<Product[]>>(`/products?${queryParams.toString()}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      throw error;
-    }
-  },
+  async getAllProducts(options: {
+    category?: string;
+    page?: number;
+    pageSize?: number;
+  }) {
+
+    // console.log(options);
+    // const { 
+    //   category, 
+    //   page = 1, 
+    //   pageSize = 12 
+    // } = options;
   
+    // // When category is provided, filter products by that category
+    // const filters: any = {};
+    // if (category) {
+    //   filters.categories = {
+    //     slug: category  // Filter by category slug
+    //   };
+    // }
+  
+    // Fetch products with applied filters
+    const response = await axios.get(`${API_URL}/products`);
+  
+    console.log("🚀 ~ response:", response.data)
+    return response.data.products;
+  },
+
   /**
-   * Get a product by slug
+   * Fetch a product by slug
    */
   async getProductBySlug(slug: string) {
     try {
-      const response = await apiClient.get<ApiResponse<Product[]>>(`/products?populate=*&filters[slug][$eq]=${slug}`);
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Product[]>>(
+        `/products?populate=*&filters[slug][$eq]=${slug}`
+      );
+      // Return first product or null
+      return response.data.data[0] || null;
     } catch (error) {
       console.error(`Error fetching product with slug ${slug}:`, error);
       throw error;
     }
   },
-  
+
   /**
-   * Search for products
+   * Fetch featured products
    */
-  async searchProducts(query: string) {
+  async getFeaturedProducts(limit = 6) {
     try {
       const response = await apiClient.get<ApiResponse<Product[]>>(
-        `/products?populate=*&filters[$or][0][name][$containsi]=${query}&filters[$or][1][description][$containsi]=${query}`
+        `/products?populate=*&filters[featured][$eq]=true&pagination[pageSize]=${limit}`
       );
-      return response.data;
-    } catch (error) {
-      console.error(`Error searching products with query "${query}":`, error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Get featured products
-   */
-  async getFeaturedProducts() {
-    try {
-      const response = await apiClient.get<ApiResponse<Product[]>>('/products?populate=*&filters[featured][$eq]=true');
       return response.data;
     } catch (error) {
       console.error('Error fetching featured products:', error);
       throw error;
     }
   },
-  
+
   /**
-   * Get related products (excluding current product)
+   * Fetch related products
    */
-  async getRelatedProducts(currentSlug: string, categoryId?: string) {
+  async getRelatedProducts(currentSlug: string, categoryId?: string, limit = 4) {
     try {
       let url = `/products?populate=*&filters[slug][$ne]=${currentSlug}`;
       if (categoryId) {
         url += `&filters[categories][id][$eq]=${categoryId}`;
       }
+      url += `&pagination[pageSize]=${limit}`;
+
       const response = await apiClient.get<ApiResponse<Product[]>>(url);
       return response.data;
     } catch (error) {
       console.error('Error fetching related products:', error);
       throw error;
     }
+  },
+
+  /**
+   * Search products
+   */
+  async searchProducts(query: string, page = 1, pageSize = 10) {
+    try {
+      const response = await apiClient.get<ApiResponse<Product[]>>(
+        `/products?populate=*&filters[$or][0][name][$containsi]=${query}&filters[$or][1][description][$containsi]=${query}&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error searching products with query "${query}":`, error);
+      throw error;
+    }
   }
 };
 
+// Category Service
 export const CategoryService = {
   /**
-   * Get all categories
+   * Fetch all categories
    */
   async getAllCategories() {
     try {
-      const response = await apiClient.get<ApiResponse<Category[]>>('/categories');
+      const response = await apiClient.get<ApiResponse<Category[]>>('/categories?populate=*');
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
       throw error;
     }
   },
-  
+
   /**
-   * Get a category by slug
+   * Fetch a category by slug
    */
   async getCategoryBySlug(slug: string) {
     try {
-      const response = await apiClient.get<ApiResponse<Category[]>>(`/categories?populate=*&filters[slug][$eq]=${slug}`);
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Category[]>>(
+        `/categories?populate=*&filters[slug][$eq]=${slug}`
+      );
+      // Return first category or null
+      return response.data.data[0] || null;
     } catch (error) {
       console.error(`Error fetching category with slug ${slug}:`, error);
       throw error;
     }
   },
-  
+
   /**
-   * Get products from a specific category
+   * Fetch products in a specific category
    */
   async getProductsByCategory(categorySlug: string, page = 1, pageSize = 10) {
     try {
@@ -221,35 +222,7 @@ export const CategoryService = {
   }
 };
 
-export const OrderService = {
-  /**
-   * Create a payment session
-   */
-  async createPaymentSession(products: any) {
-    try {
-      const response = await apiClient.post('/orders', { products });
-      return response.data;
-    } catch (error) {
-      console.error('Error creating payment session:', error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Get order history (requires authentication)
-   */
-  async getOrderHistory() {
-    try {
-      const response = await apiClient.get('/orders/me');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching order history:', error);
-      throw error;
-    }
-  }
-};
-
-// Helper functions
+// Utility Helpers
 export const Helpers = {
   /**
    * Format price with currency
@@ -257,7 +230,7 @@ export const Helpers = {
   formatPrice(price: number, currency = '₹'): string {
     return `${currency}${price.toFixed(2)}`;
   },
-  
+
   /**
    * Calculate discount percentage
    */
@@ -265,10 +238,26 @@ export const Helpers = {
     if (!originalPrice || !discountedPrice) return '0';
     const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
     return discount.toFixed(2);
+  },
+
+  /**
+   * Get product image URL
+   */
+  getProductImageUrl(product: Product, index = 0): string {
+    // Handle thumbnail or first image
+    if (product.attributes.thumbnail?.data?.attributes?.url) {
+      return `${API_URL}${product.attributes.thumbnail.data.attributes.url}`;
+    }
+    
+    if (product.attributes.image?.data?.[index]?.attributes?.url) {
+      return `${API_URL}${product.attributes.image.data[index].attributes.url}`;
+    }
+    
+    return '/placeholder-image.jpg'; // Fallback placeholder
   }
 };
 
-// Authentication interceptor - add token to requests
+// Configure Axios Interceptors
 apiClient.interceptors.request.use(
   (config) => {
     // Add authentication token if available
@@ -283,36 +272,28 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for global error handling
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const { response } = error;
     
     if (response?.status === 401) {
-      // Handle unauthorized access
       console.error('Unauthorized: Please login again');
       
-      // Clear invalid token
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
+        // Optional: redirect to login
+        // window.location.href = '/login';
       }
-      
-      // Redirect to login (if needed)
-      // window.location.href = '/login';
     }
     
     return Promise.reject(error);
   }
 );
 
-
-
 // Export services
 export default {
   product: ProductService,
   category: CategoryService,
-  order: OrderService,
-  helpers: Helpers,
-
+  helpers: Helpers
 };
