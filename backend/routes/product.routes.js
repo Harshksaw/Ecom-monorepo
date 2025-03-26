@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const productController = require('../controller/product.controller');
 const { authenticate, isAdmin } = require('../middleware/authorization');
+const { upload, handleUpload } = require('../utils/cloudinary');
 
 // Public routes
 router.get('/', productController.getAllProducts);
@@ -15,7 +16,7 @@ router.get('/sku/:sku', productController.getProductBySlug);
 router.get('/:id/related', productController.getRelatedProducts);
 
 // Admin routes
-router.post('/', productController.createProduct);
+router.post('/',handleUpload , productController.createProduct);
 router.put('/:id', authenticate, isAdmin, productController.updateProduct);
 router.delete('/:id', authenticate, isAdmin, productController.deleteProduct);
 router.patch('/:id/stock', authenticate, isAdmin, productController.updateStock);

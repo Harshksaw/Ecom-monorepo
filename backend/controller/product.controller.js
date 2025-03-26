@@ -6,12 +6,21 @@ const { validateProductInput } = require('../utils/validator');
 
 // Create a new product
 exports.createProduct = async (req, res) => {
+
+
   try {
+     const images = req.files.map(file => file.path);
+    console.log("🚀 ~ exports.createProduct= ~ images:", images)
     const {
       name, sku, description, price, salePrice, categoryId,
-      images, weight, dimensions, materials, gems,
+       weight, dimensions, materials, gems,
       stockQuantity, isActive, isFeatured, tags
     } = req.body;
+
+   
+
+
+    
     
     // Validate input
     const { errors, isValid } = validateProductInput(req.body);
@@ -56,6 +65,7 @@ exports.createProduct = async (req, res) => {
       product: newProduct
     });
   } catch (error) {
+    console.log("🚀 ~ file: product.controller.js ~ line 63 ~ exports.createProduct= ~ error", error)
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
