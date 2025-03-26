@@ -80,36 +80,7 @@ export const HeroBanner = () => {
         showThumbs={false}
         showIndicators={false}
         showStatus={false}
-        // renderArrowPrev={(clickHandler, hasPrev, label) => {
-        //   if (!hasPrev) {
-        //     return null;
-        //   }
-        //   return (
-        //     <button
-        //       type="button"
-        //       onClick={clickHandler}
-        //       title={label}
-        //       style={{ ...arrowStyles, left: 15 }}
-        //     >
-        //       <BiArrowFromRight size={30} />
-        //     </button>
-        //   )
-        // }}
-        // renderArrowNext={(clickHandler, hasNext, label) => {
-        //   if (!hasNext) {
-        //     return null;
-        //   }
-        //   return (
-        //     <button
-        //       type="button"
-        //       onClick={clickHandler}
-        //       title={label}
-        //       style={{ ...arrowStyles, right: 15 }}
-        //     >
-        //       <BiArrowFromLeft size={30} />
-        //     </button>
-        //   )
-        // }}
+       
       >
         {images.map((image) => (
           <div key={image._id}>
