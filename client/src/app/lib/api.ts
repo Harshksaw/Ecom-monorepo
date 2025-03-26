@@ -1,5 +1,6 @@
 // lib/api-service.ts
 import axios from 'axios';
+import { get } from 'http';
 
 // API base URL
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7003/api';
@@ -109,9 +110,37 @@ export const ProductService = {
     return response.data.products;
   },
 
-  /**
-   * Fetch a product by slug
-   */
+  async getAllProductByCategory(options: {
+    category?: string;
+    page?: number;
+    pageSize?: number;
+  }) {
+    try {
+      const { category, page = 1, pageSize = 12 } = options;
+      
+      // Make sure category is provided
+      if (!category) {
+        throw new Error('Category is required');
+      }
+      
+      // Build the query parameters
+      // const queryString = new URLSearchParams({
+      //   category,
+      //   page: page.toString(),
+      //   limit: pageSize.toString()
+      // }).toString();
+      
+      // Make the request with proper parameters
+      const response = await axios.get(`${API_URL}/products/categories/${category}`);
+      
+      // Return the data from the response
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching products by category:', error);
+      throw error;
+    }
+  },
+
   async getProductBySlug(slug: string) {
     try {
       const response = await apiClient.get<ApiResponse<Product[]>>(

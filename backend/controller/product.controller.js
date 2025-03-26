@@ -7,7 +7,7 @@ const { validateProductInput } = require('../utils/validator');
 // Create a new product
 exports.createProduct = async (req, res) => {
 
-
+  console.log("🚀 ~ file: product.controller.js ~ line 10 ~ exports.createProduct= ~ req.files", req.files)
   try {
      const images = req.files.map(file => file.path);
     console.log("🚀 ~ exports.createProduct= ~ images:", images)
@@ -144,6 +144,66 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+exports.getAllProductsByCategory = async (req, res) => {
+
+  try {
+    const { 
+
+      page = 1, 
+      limit = 12,
+      sortBy = 'createdAt',
+      sortOrder = 'desc' 
+    } = req.query;
+  const category = req.params.category;    
+    if (!category) {
+      return res.status(400).json({ message: 'Category parameter is required' });
+    }
+    
+    // First find the category by slug
+    const categoryObj = await Category.findOne({ slug: category });
+    
+    if (!categoryObj) {
+      return res.status(404).json({ message: `Category with slug '${category}' not found` });
+    }
+    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Build filter using the category's _id
+    const filter = { 
+      isActive: true,
+      categoryId: categoryObj._id  // This is the key relation - we use the _id from the category
+    };
+    
+    // Build sort
+    const sort = {};
+    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    
+    // Get products for this category with pagination
+    const products = await Product.find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('categoryId', 'name slug');
+    
+    const total = await Product.countDocuments(filter);
+    
+    res.status(200).json({
+      data: products,
+      meta: {
+        pagination: {
+          total,
+          page: parseInt(page),
+          pageSize: parseInt(limit),
+          pageCount: Math.ceil(total / parseInt(limit))
+        }
+      }
+    });
+  }
+  catch (error) {
+    console.error('Error fetching products by category:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+}
 // Get product by ID
 exports.getProductById = async (req, res) => {
   try {
