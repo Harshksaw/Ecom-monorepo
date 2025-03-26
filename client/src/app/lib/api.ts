@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // API base URL - make sure to set this in your .env.local file
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7003/api';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7003/api';
 
 // Create an axios instance with default configuration
 const apiClient = axios.create({
@@ -311,5 +311,6 @@ export default {
   product: ProductService,
   category: CategoryService,
   order: OrderService,
-  helpers: Helpers
+  helpers: Helpers,
+
 };

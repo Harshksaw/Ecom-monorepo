@@ -25,7 +25,7 @@ const storage = new CloudinaryStorage({
 // Setup multer with Cloudinary storage with better error handling
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 5000000 }, // 5MB limit
+  limits: { fileSize: 15000000 }, // 5MB limit
   
   // Add custom error handling
   fileFilter: (req, file, cb) => {

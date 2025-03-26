@@ -11,7 +11,10 @@ const morgan = require('morgan')
 // error handler
 const globalErrorHandler = require("./middleware/global-error-handler");
 // routes
-
+const {
+  getAllImages,
+  getImageById,
+} = require("./controller/image.controller");
 const categoryRoutes = require("./routes/category.routes");
 
 const productRoutes = require("./routes/product.routes");
@@ -20,6 +23,8 @@ const orderRoutes = require("./routes/order.routes");
 const adminRoutes = require("./routes/admin.routes");
 // const uploadRouter = require('./routes/uploadFile.route');
 const userRoutes = require("./routes/auth.routes");
+const { uploadCarouselImages } = require('./controller/image.controller');
+const { upload } = require('./utils/cloudinary');
 
 // middleware
 app.use(cors());
@@ -36,6 +41,17 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 
 app.use("/api/admin", adminRoutes);
+
+
+app.post(
+  "/upload-carousel",
+  upload,
+  uploadCarouselImages
+);
+
+app.get("/api/images", getAllImages);
+app.get("/images/:id", getImageById);
+
 
 // root route
 app.get("/", (req, res) => res.send("Apps worked successfully"));
