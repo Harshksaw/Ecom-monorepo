@@ -82,31 +82,16 @@ export const ProductService = {
   /**
    * Fetch all products with flexible filtering
    */
-  async getAllProducts(options: {
-    category?: string;
-    page?: number;
-    pageSize?: number;
-  }) {
+  async getAllProducts(
 
-    // console.log(options);
-    // const { 
-    //   category, 
-    //   page = 1, 
-    //   pageSize = 12 
-    // } = options;
-  
-    // // When category is provided, filter products by that category
-    // const filters: any = {};
-    // if (category) {
-    //   filters.categories = {
-    //     slug: category  // Filter by category slug
-    //   };
-    // }
-  
-    // Fetch products with applied filters
+
+
+  ) {
+
+
     const response = await axios.get(`${API_URL}/products`);
   
-    console.log("🚀 ~ response:", response.data)
+
     return response.data.products;
   },
 

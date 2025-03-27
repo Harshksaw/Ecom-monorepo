@@ -53,10 +53,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   console.log("🚀 ~ product:", product)
-  // Calculate discount percentage if applicable
-  const discountPercentage = product.salePrice 
-    ? Math.round(((product.price - product.salePrice) / product.price) * 100)
-    : 0;
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
@@ -80,7 +76,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
       {/* Product Details */}
       <div className="p-4">
-        <Link href={`/products/${product.slug}`}>
+        <Link href={`/products/₹{product.slug}`}>
           <h3 className="text-lg font-semibold mb-2 line-clamp-2">
             {product.name}
           </h3>
@@ -92,15 +88,15 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             {product.salePrice ? (
               <>
                 <span className="text-red-600 font-bold mr-2">
-                  ${product.salePrice.toFixed(2)}
+                  ₹{product.salePrice.toFixed(2)}
                 </span>
                 <span className="text-gray-400 line-through">
-                  ${product.price.toFixed(2)}
+                  ₹{product.price.toFixed(2)}
                 </span>
               </>
             ) : (
               <span className="text-black font-bold">
-                ${product.price.toFixed(2)}
+                ₹{product.price.toFixed(2)}
               </span>
             )}
           </div>

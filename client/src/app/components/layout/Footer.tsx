@@ -13,18 +13,12 @@ const Footer = () => {
               <div className="font-medium uppercase text-sm cursor-pointer">
                 Find a store
               </div>
-              <div className="font-medium uppercase text-sm cursor-pointer">
-                Become a partner
-              </div>
-              <div className="font-medium uppercase text-sm cursor-pointer">
-                Sign up for email
-              </div>
+         
+            
               <div className="font-medium uppercase text-sm cursor-pointer">
                 Send us feedback
               </div>
-              <div className="font-medium uppercase text-sm cursor-pointer">
-                Student discount
-              </div>
+          
             </div>
             
             {/* Second column group */}
@@ -34,18 +28,10 @@ const Footer = () => {
                 <div className="font-medium uppercase text-sm">
                   Get help
                 </div>
-                <div className="text-sm text-white/[0.5] hover:text-white cursor-pointer">
-                  Order Status
-                </div>
-                <div className="text-sm text-white/[0.5] hover:text-white cursor-pointer">
-                  Delivery
-                </div>
-                <div className="text-sm text-white/[0.5] hover:text-white cursor-pointer">
-                  Returns
-                </div>
-                <div className="text-sm text-white/[0.5] hover:text-white cursor-pointer">
-                  Payment Options
-                </div>
+               
+            
+          
+              
                 <div className="text-sm text-white/[0.5] hover:text-white cursor-pointer">
                   Contact Us
                 </div>
@@ -56,18 +42,7 @@ const Footer = () => {
                 <div className="font-medium uppercase text-sm">
                   About us
                 </div>
-                <div className="text-sm text-white/[0.5] hover:text-white cursor-pointer">
-                  News
-                </div>
-                <div className="text-sm text-white/[0.5] hover:text-white cursor-pointer">
-                  Careers
-                </div>
-                <div className="text-sm text-white/[0.5] hover:text-white cursor-pointer">
-                  Investors
-                </div>
-                <div className="text-sm text-white/[0.5] hover:text-white cursor-pointer">
-                  Sustainability
-                </div>
+             
               </div>
             </div>
           </div>

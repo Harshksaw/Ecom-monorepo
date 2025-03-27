@@ -6,32 +6,33 @@ import { addToCart } from '@/app/store/slices/cartSlice';
 import { toast } from 'react-hot-toast';
 
 const AddToCartButton = ({ product }) => {
+  console.log("🚀 ~ AddToCartButton ~ product:", product)
   const [selectedSize, setSelectedSize] = useState(null);
   const [showError, setShowError] = useState(false);
   const dispatch = useDispatch();
 
   const handleAddToCart = () => {
-    if (!selectedSize) {
-      setShowError(true);
-      // Scroll to size selection
-      document.getElementById('size-selection')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
-      return;
-    }
+    // if (!selectedSize) {
+    //   setShowError(true);
+    //   // Scroll to size selection
+    //   document.getElementById('size-selection')?.scrollIntoView({
+    //     behavior: 'smooth',
+    //     block: 'center'
+    //   });
+    //   return;
+    // }
 
     // Reset error state
     setShowError(false);
 
     // Create a payload for the cart
     const payload = {
-      id: product.id,
+      id: product._id,
       selectedSize,
-      oneQuantityPrice: product.attributes.price,
+      oneQuantityPrice: product.price,
       attributes: {
-        ...product.attributes,
-        price: product.attributes.price // Initial price is for one item
+        ...product,
+        price: product.price // Initial price is for one item
       }
     };
 
@@ -39,7 +40,7 @@ const AddToCartButton = ({ product }) => {
     dispatch(addToCart(payload));
     
     // Show success message
-    toast.success(`${product.attributes.name} added to cart`);
+    toast.success(`${product.name} added to cart`);
   };
 
   return (

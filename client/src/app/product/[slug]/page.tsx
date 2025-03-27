@@ -133,7 +133,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {/* Product pricing */}
               <div className="flex items-center mb-2">
                 <p className="text-2xl font-bold">
-                  ${product.price}
+                ₹{product.price}
                 </p>
               </div>
 
@@ -142,7 +142,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
               <div className="text-md font-medium text-black/[0.5] mb-8">
                 {product.stockQuantity > 0 
-                  ? `In stock (${product.stockQuantity} available)` 
+                  ? `In stock (${product?.stockQuantity} available)` 
                   : 'Out of stock'}
               </div>
 
