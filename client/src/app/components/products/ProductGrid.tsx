@@ -61,7 +61,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
       {/* Product Image */}
-      <Link href={`/products/${product.slug}`} className="block relative">
+      <Link href={`/product/${product._id}`} className="block relative">
         {/* {discountPercentage > 0 && (
           <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs z-10">
             {discountPercentage}% OFF

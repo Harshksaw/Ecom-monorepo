@@ -1,6 +1,7 @@
+'use client'
 import React from "react";
 
-import Carousel from "react-multi-carousel";
+import { Carousel } from "react-responsive-carousel";
 import "react-multi-carousel/lib/styles.css";
 import ProductCard from "./ProductCard";
 

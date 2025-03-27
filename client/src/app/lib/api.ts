@@ -141,19 +141,19 @@ export const ProductService = {
     }
   },
 
+
   async getProductBySlug(slug: string) {
     try {
-      const response = await apiClient.get<ApiResponse<Product[]>>(
-        `/products?populate=*&filters[slug][$eq]=${slug}`
-      );
-      // Return first product or null
-      return response.data.data[0] || null;
+      // Make the API request to fetch product by slug
+      const response = await axios.get(`${API_URL}/products/${slug}`);
+      
+      // Return the product data
+      return response.data.product
     } catch (error) {
       console.error(`Error fetching product with slug ${slug}:`, error);
-      throw error;
+      return null;
     }
   },
-
   /**
    * Fetch featured products
    */
