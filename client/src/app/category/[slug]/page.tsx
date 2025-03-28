@@ -1,23 +1,42 @@
-// app/categories/[slug]/page.tsx
+// src/app/category/[slug]/page.tsx
 import { Metadata } from 'next';
-import Image from 'next/image';
-import { ProductService } from '../../lib/api';
-import ProductGrid from '../../components/products/ProductGrid';
+import { notFound } from 'next/navigation';
+import { ProductService } from '@/app/lib/api';
+import ProductGrid from '@/app/components/products/ProductGrid';
 
-type CategoryPageProps = {
+// Define the props type correctly for Next.js App Router
+type Props = {
   params: { slug: string };
-  searchParams: { 
-    page?: string;
-    sort?: string;
-    price?: string;
-  };
+  searchParams: Record<string, string | string[] | undefined>;
 };
 
+// Generate metadata for the page
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  try {
+    const category = params.slug;
+    
+    return {
+      title: `${category.charAt(0).toUpperCase() + category.slice(1)} Collection | Jewelry Store`,
+      description: `Explore our exclusive collection of ${category.toLowerCase()} jewelry at great prices.`
+    };
+  } catch (error) {
+    return {
+      title: 'Category | Jewelry Store',
+      description: 'Explore our jewelry collections'
+    };
+  }
+}
+
+// Main page component
 export default async function CategoryDetailPage({ 
   params, 
   searchParams 
-}: CategoryPageProps) {
-  const page = searchParams.page ? parseInt(searchParams.page) : 1;
+}: Props) {
+
+
+  
+  const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
+  const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'default';
   
   try {
     const category = params.slug;
@@ -33,8 +52,22 @@ export default async function CategoryDetailPage({
     // Check if products array is empty
     const hasProducts = productResponse && productResponse.length > 0;
 
+    if (!hasProducts && page > 1) {
+      // If we're on a page that doesn't exist, redirect to first page
+      notFound();
+    }
+
     return (
       <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">
+            {category.charAt(0).toUpperCase() + category.slice(1)}
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Explore our collection of {category} designs
+          </p>
+        </div>
+
         {/* No Products Message */}
         {!hasProducts ? (
           <div className="text-center py-16 bg-gray-50 rounded-lg">
@@ -47,7 +80,9 @@ export default async function CategoryDetailPage({
           </div>
         ) : (
           <>
-            {/* Products Grid */}
+            {/* Sort options - can be added here */}
+            
+            {/* Product Grid */}
             <ProductGrid 
               products={productResponse} 
               totalPages={productResponse.meta?.pagination?.pageCount || 1}

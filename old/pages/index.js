@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { HeroBanner } from "../components/HeroBanner";
-import ProductCard from "../components/ProductCard.jsx";
+import ProductCard from "../components/ProductCard.js";
 import Wrapper from "../components/Wrapper";
 import {fetchDataFromApi} from "../utils/api";
 

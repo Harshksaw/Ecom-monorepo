@@ -82,31 +82,16 @@ export const ProductService = {
   /**
    * Fetch all products with flexible filtering
    */
-  async getAllProducts(options: {
-    category?: string;
-    page?: number;
-    pageSize?: number;
-  }) {
+  async getAllProducts(
 
-    // console.log(options);
-    // const { 
-    //   category, 
-    //   page = 1, 
-    //   pageSize = 12 
-    // } = options;
-  
-    // // When category is provided, filter products by that category
-    // const filters: any = {};
-    // if (category) {
-    //   filters.categories = {
-    //     slug: category  // Filter by category slug
-    //   };
-    // }
-  
-    // Fetch products with applied filters
+
+
+  ) {
+
+
     const response = await axios.get(`${API_URL}/products`);
   
-    console.log("🚀 ~ response:", response.data)
+
     return response.data.products;
   },
 
@@ -141,19 +126,19 @@ export const ProductService = {
     }
   },
 
+
   async getProductBySlug(slug: string) {
     try {
-      const response = await apiClient.get<ApiResponse<Product[]>>(
-        `/products?populate=*&filters[slug][$eq]=${slug}`
-      );
-      // Return first product or null
-      return response.data.data[0] || null;
+      // Make the API request to fetch product by slug
+      const response = await axios.get(`${API_URL}/products/${slug}`);
+      
+      // Return the product data
+      return response.data.product
     } catch (error) {
       console.error(`Error fetching product with slug ${slug}:`, error);
-      throw error;
+      return null;
     }
   },
-
   /**
    * Fetch featured products
    */

@@ -23,7 +23,7 @@ interface MenuProps {
 }
 
 const Menu: React.FC<MenuProps> = ({ showCatMenu, setShowCatMenu, categories }) => {
-  console.log("🚀 ~ categories:", categories)
+
   const navigationItems = [
     { id: 1, name: "Home", url: "/" },
     { id: 2, name: "About", url: "/about" },
