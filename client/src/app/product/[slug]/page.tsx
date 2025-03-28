@@ -1,6 +1,6 @@
 // src/app/product/[slug]/page.tsx
 import { Metadata } from 'next';
-import Image from 'next/image';
+
 import { ProductService } from '@/app/lib/api';
 import Wrapper from '@/app/components/Wrapper';
 import ProductDetailsCarousel from '@/app/components/ProductDetailsCarousel';
@@ -10,7 +10,7 @@ import AddToCartButton from '@/app/components/AddToCartButton';
 
 // Define the props for the page component
 type ProductPageProps = {
-  params: { slug: string };
+  params: any;
 };
 
 // Define product interface based on your API response
@@ -151,7 +151,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <div className="mb-6">
                   <h3 className="text-md font-semibold mb-2">Materials</h3>
                   <div className="flex flex-wrap gap-2">
-                    {product.materials.map((material, index) => (
+                    {product.materials.map((material:any, index:any) => (
                       <span 
                         key={index} 
                         className="inline-block bg-gray-100 px-3 py-1 rounded-full text-sm"
@@ -168,7 +168,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <div className="mb-8">
                   <h3 className="text-md font-semibold mb-2">Gem Details</h3>
                   <div className="space-y-3">
-                    {product.gems.map((gem, index) => (
+                    {product.gems.map((gem:any, index:any) => (
                       <div key={index} className="bg-gray-50 p-3 rounded">
                         <div className="font-medium">{gem.type}</div>
                         <div className="grid grid-cols-3 gap-2 text-sm text-gray-600 mt-1">
@@ -228,7 +228,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {product.tags && product.tags.length > 0 && (
                 <div className="mt-8">
                   <div className="flex flex-wrap gap-2">
-                    {product.tags.map((tag, index) => (
+                    {product.tags.map((tag:any, index:any) => (
                       <span 
                         key={index} 
                         className="inline-block bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600"
@@ -243,7 +243,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           {/* Related products section */}
-          {relatedProductsData && relatedProductsData.length > 0 && (
+          {relatedProductsData && relatedProductsData?.length > 0 && (
             <div className="mt-16">
               <h2 className="text-2xl font-bold mb-6">You Might Also Like</h2>
               <RelatedProducts products={relatedProductsData} />

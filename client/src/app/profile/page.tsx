@@ -21,6 +21,15 @@ interface Address {
   isDefault: boolean;
 }
 
+// User profile interface
+interface UserProfile {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  addresses?: Address[];
+}
+
 // Indian states list
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -33,11 +42,28 @@ const INDIAN_STATES = [
   'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
 ];
 
+// Utility function for safe localStorage access
+const getFromLocalStorage = (key: string) => {
+  if (typeof window !== 'undefined') {
+    const item = localStorage.getItem(key);
+    if (item) {
+      try {
+        return JSON.parse(item);
+      } catch (error) {
+        console.error(`Error parsing ${key} from localStorage:`, error);
+        return null;
+      }
+    }
+  }
+  return null;
+};
+
 export default function ProfilePage() {
   const { user, token } = useAuth();
   
   const [isLoading, setIsLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userId, setUserId] = useState<{ id: string } | null>(null);
   
   // Address management
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -52,12 +78,18 @@ export default function ProfilePage() {
     country: 'India',
     isDefault: false
   });
-  const userId = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Get userId from localStorage on client-side only
+  useEffect(() => {
+    const storedUser = getFromLocalStorage('user');
+    if (storedUser && storedUser.id) {
+      setUserId(storedUser);
+    }
+  }, []);
 
   // Fetch user profile with addresses
   useEffect(() => {
     const fetchProfile = async () => {
-     
       if (!token || !userId?.id) return;
       
       try {
@@ -123,10 +155,15 @@ export default function ProfilePage() {
     setEditingAddressIndex(index);
     setShowAddressModal(true);
   };
+
+  // Save address (create or update)
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!token) return;
+    if (!token || !userId?.id) {
+      toast.error('You need to be logged in to save addresses');
+      return;
+    }
     
     try {
       setIsLoading(true);
@@ -139,14 +176,10 @@ export default function ProfilePage() {
         },
         index: editingAddressIndex
       };
-      console.log('Submitting payload:', payload);
-  
-      const userId = JSON.parse(localStorage.getItem('user') || '{}');
-      console.log("🚀 ~ handleSaveAddress ~ userId:", userId)
-      const endpoint =
-        editingAddressIndex !== null 
-          ? `${API_URL}/auth/address/${editingAddressIndex}` 
-          : `${API_URL}/auth/address/${userId.id}`;
+      
+      const endpoint = editingAddressIndex !== null 
+        ? `${API_URL}/auth/address/${editingAddressIndex}` 
+        : `${API_URL}/auth/address/${userId.id}`;
       
       const method = editingAddressIndex !== null ? 'put' : 'post';
       
@@ -173,7 +206,10 @@ export default function ProfilePage() {
   
   // Delete address
   const handleDeleteAddress = async (index: number) => {
-    if (!token) return;
+    if (!token || !userId?.id) {
+      toast.error('You need to be logged in to delete addresses');
+      return;
+    }
     
     if (!confirm('Are you sure you want to delete this address?')) {
       return;
@@ -182,11 +218,9 @@ export default function ProfilePage() {
     try {
       setIsLoading(true);
       
-      const response = await axios.delete(`${API_URL}/users/addresses/${index}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.delete(`${API_URL}/auth/address/${index}/${userId.id}`);
       
-      if (response.data.success) {
+      if (response.status === 200) {
         setProfile(response.data.user);
         toast.success('Address deleted');
       } else {
@@ -202,19 +236,20 @@ export default function ProfilePage() {
   
   // Set address as default
   const handleSetDefaultAddress = async (index: number, type: 'shipping' | 'billing') => {
-    if (!token) return;
+    if (!token || !userId?.id) {
+      toast.error('You need to be logged in to set a default address');
+      return;
+    }
     
     try {
       setIsLoading(true);
       
       const response = await axios.patch(
         `${API_URL}/auth/address/${index}/default/${userId.id}`,
-        { type },
-
-
+        { type }
       );
       
-      if (response.data.success) {
+      if (response.status === 200) {
         setProfile(response.data.user);
         toast.success('Default address updated');
       } else {
@@ -236,11 +271,25 @@ export default function ProfilePage() {
     return digits.slice(0, 6);
   };
 
+  // Show loading state
   if (isLoading && !profile) {
     return (
       <Wrapper>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </Wrapper>
+    );
+  }
+  
+  // Show login prompt if no user
+  if (!isLoading && !userId?.id) {
+    return (
+      <Wrapper>
+        <div className="py-10 max-w-4xl mx-auto">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <p className="text-yellow-700">Please log in to view and manage your profile.</p>
+          </div>
         </div>
       </Wrapper>
     );

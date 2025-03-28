@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { BsChevronDown } from 'react-icons/bs'
-import { Category } from '@/lib/api'
+import { Category } from '../../lib/api'
 
 interface MobileMenuProps {
   showCatMenu: boolean

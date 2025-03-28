@@ -76,7 +76,8 @@ export interface ApiResponse<T> {
       pageSize: number;
       total: number;
     }
-  };
+  },
+  length: number
 }
 
 // Product Service

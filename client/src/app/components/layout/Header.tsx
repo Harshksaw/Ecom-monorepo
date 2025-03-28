@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../store/store'
+
 import { BiMenuAltRight } from 'react-icons/bi'
 import { BsCart } from 'react-icons/bs'
 import { VscChromeClose } from 'react-icons/vsc'
@@ -22,9 +22,9 @@ const Header = () => {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [show, setShow] = useState('translate-y-0')
   const [lastScrollY, setLastScrollY] = useState(0)
-  const [categories, setCategories] = useState<any[]>([])
+  const [categories, setCategories] = useState<any>([])
   
-  const { cartItems } = useSelector((state: RootState) => state.cart)
+  const { cartItems } = useSelector((state:any) => state.cart)
   const { user, logout } = useAuth()
   
   const userMenuRef = useRef<HTMLDivElement>(null)

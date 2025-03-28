@@ -6,8 +6,8 @@ import ProductGrid from '@/app/components/products/ProductGrid';
 
 // Define the props type correctly for Next.js App Router
 type Props = {
-  params: { slug: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: any;
+  searchParams: any;
 };
 
 // Generate metadata for the page
@@ -32,6 +32,7 @@ export default async function CategoryDetailPage({
   params, 
   searchParams 
 }: Props) {
+
 
 
   

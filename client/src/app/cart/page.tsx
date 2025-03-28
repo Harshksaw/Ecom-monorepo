@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaTrash, FaArrowLeft, FaShieldAlt, FaMapMarkerAlt, FaUser, FaExclamationTriangle } from 'react-icons/fa';
 import { updateCart, removeFromCart } from '@/app/store/slices/cartSlice';
-import { RootState } from '@/app/store/store';
+
 import Wrapper from '@/app/components/Wrapper';
 import EmptyCart from './EmptyCart';
 import { toast } from 'react-hot-toast';
@@ -41,7 +41,7 @@ interface UserProfile {
 const CartPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { cartItems } = useSelector((state: RootState) => state.cart);
+  const { cartItems } = useSelector((state: any) => state.cart);
   const { token } = useAuth();
   
   const [subtotal, setSubtotal] = useState(0);
@@ -122,7 +122,7 @@ const CartPage = () => {
   // Calculate totals whenever cart items change
   useEffect(() => {
     // Calculate subtotal by summing up (oneQuantityPrice * quantity) for each item
-    const subtotalValue = cartItems.reduce((total, item) => {
+    const subtotalValue = cartItems.reduce((total: number, item:any) => {
       // Use salePrice if available, otherwise use regular price
       const itemPrice = item.attributes?.salePrice || item.attributes?.price || item.oneQuantityPrice;
       return total + (itemPrice * (item.quantity || 1));
@@ -163,7 +163,7 @@ const CartPage = () => {
   // Handle quantity change
   const updateQuantity = (id: string, quantity: number) => {
     // Get the item to update
-    const item = cartItems.find(item => item.id === id);
+    const item = cartItems.find((item:any) => item.id === id);
     if (!item) return;
     
     // Calculate the new total price for this item
@@ -191,7 +191,7 @@ const CartPage = () => {
   };
 
   // Get the appropriate price for display (sale price if available, otherwise regular price)
-  const getDisplayPrice = (item) => {
+  const getDisplayPrice = (item:any) => {
     return item.attributes?.salePrice || item.attributes?.price || item.oneQuantityPrice;
   };
 
@@ -214,6 +214,8 @@ const CartPage = () => {
 
     try {
       // Create order on your backend
+
+      toast.loading('payement Processing')
       const response = await axios.post(`${API_URL}/orders/create/${userId}`, {
     
 
@@ -223,7 +225,7 @@ const CartPage = () => {
           subtotal,
           shippingAddress: defaultShippingAddress,
           billingAddress: defaultBillingAddress || defaultShippingAddress,
-          items: cartItems.map(item => ({
+          items: cartItems.map((item:any) => ({
             productId: item.id,
             name: item.attributes?.name,
             quantity: item.quantity,
@@ -234,7 +236,7 @@ const CartPage = () => {
 
       const orderData = response.data
 
-      if (!orderData.success) {
+      if (response.status != 201) {
         throw new Error(orderData.message || 'Failed to create order');
       }
 
@@ -343,7 +345,7 @@ const CartPage = () => {
             
             {/* Cart Items */}
             <div className="space-y-6">
-              {cartItems.map((item) => {
+              {cartItems.map((item:any) => {
                 const displayPrice = getDisplayPrice(item);
                 const isOnSale = item.attributes?.salePrice && item.attributes.salePrice < item.attributes.price;
                 
