@@ -15,6 +15,18 @@ services:
       - MONGO_URI=mongodb+srv://indianshahishere:Ae6QfKZUJo27fH7I@cluster0.2kwig.mongodb.net/?retryWrites=true&w=majority
       - TOKEN_SECRET=fbb2d60078ba3907a2eba275d2aeee5c6dd064c183b8a07013b56044c2156fbb1d0da15f2817a5f06bcc27a4c1b36027a2555b3997b4182f6d5a4c008be95d13
 
+  frontend:
+    build: ./ecom
+    container_name: next_frontend
+    expose:
+      - "3000"
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://node_backend:7003
+
   nginx:
     image: nginx:latest
     container_name: nginx_proxy
