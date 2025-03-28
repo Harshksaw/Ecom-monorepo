@@ -14,7 +14,7 @@ const authPaths = ['/auth/login', '/auth/signup', '/auth/forgot-password'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Get the token from the cookies
+  // Get the token from localStorage (client-side storage persisted as cookie in Next.js)
   const token = request.cookies.get('token')?.value;
   
   // Get the user from cookies (if exists)
@@ -46,7 +46,7 @@ export function middleware(request: NextRequest) {
   // If it's a protected path and no token exists, redirect to login
   if (isProtectedPath && !token) {
     const loginUrl = new URL('/auth/login', request.url);
-    // Add the current URL as a callback parameter
+    // Add the current URL as a callback parameter for redirect after login
     loginUrl.searchParams.set('callback', pathname);
     return NextResponse.redirect(loginUrl);
   }

@@ -41,7 +41,8 @@ exports.register = async (req, res) => {
         email: newUser.email,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
-        role: newUser.role
+        role: newUser.role,
+        phoneNumber: newUser.phoneNumber
       }
     });
   } catch (error) {
@@ -81,6 +82,7 @@ exports.login = async (req, res) => {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
         role: user.role
       }
     });

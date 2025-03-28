@@ -62,7 +62,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Save auth data to localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      
+      document.cookie = `token=${token}; path=/;`;
+        document.cookie = `user=${JSON.stringify(user)}; path=/;`;
       // Update state
       setToken(token);
       setUser(user);
@@ -70,11 +71,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Set axios default header
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      // Redirect based on user role
+      // Get callback URL from search params if any
+      let callbackUrl = '/';
+      if (typeof window !== 'undefined') {
+        const searchParams = new URLSearchParams(window.location.search);
+        const callback = searchParams.get('callback');
+        if (callback) {
+          callbackUrl = callback;
+        }
+      }
+      
+      // Redirect based on user role or callback
       if (user.role === 'admin') {
         router.push('/admin/dashboard');
       } else {
-        router.push('/');
+        router.push(callbackUrl);
       }
       
       return { success: true, message };
@@ -133,18 +144,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Logout function
-  const logout = () => {
+// Logout function
+const logout = () => {
     // Remove auth data from localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
+  
+    // Clear auth cookies by setting an expired date
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  
     // Reset state
     setToken(null);
     setUser(null);
-    
+  
     // Remove authorization header
     delete axios.defaults.headers.common['Authorization'];
-    
+  
     // Redirect to login page
     router.push('/auth/login');
   };
