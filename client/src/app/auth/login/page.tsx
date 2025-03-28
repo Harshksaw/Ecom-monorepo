@@ -1,61 +1,53 @@
+// src/app/auth/login/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook } from 'react-icons/fa';
+import { useAuth } from '../../context/authcontext';
+import { toast } from 'react-hot-toast';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
+  
+  const { login, user, loading, error } = useAuth();
+
+  // If user is already logged in, redirect
+  // useEffect(() => {
+  //   if (user) {
+  //     if (user.role === 'admin') {
+  //       router.push('/admin/dashboard');
+  //     } else {
+  //       router.push('/');
+  //     }
+  //   }
+  // }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
+    
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      // Handle successful login
-      const { token, user } = data;
-
-      // Store token and user info
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      // Redirect based on user role
-      if (user.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/');
-      }
-    } catch (err: any) {
-      setError(err.message);
-      setIsLoading(false);
+      await login(email, password);
+      toast.success('Login successful!');
+    } catch (err) {
+      // Error is handled in the AuthContext
+      console.error('Login submission error:', err);
     }
   };
 
-  const handleSocialLogin = (provider: 'google' | 'facebook') => {
-    // Implement social login logic
-    console.log(`Logging in with ${provider}`);
-  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -67,7 +59,7 @@ export default function LoginPage() {
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
             <Link 
-              href="/signup" 
+              href="/auth/signup" 
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               create a new account
@@ -139,6 +131,8 @@ export default function LoginPage() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label 
@@ -151,7 +145,7 @@ export default function LoginPage() {
 
             <div className="text-sm">
               <Link 
-                href="/forgot-password" 
+                href="/auth/forgot-password" 
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Forgot your password?
@@ -163,48 +157,20 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                loading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
 
           {/* Social Login */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Or continue with
-                </span>
-              </div>
-            </div>
+          
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('google')}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <FaGoogle className="h-5 w-5 mr-2" />
-                Google
-              </button>
+        
 
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('facebook')}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <FaFacebook className="h-5 w-5 mr-2" />
-                Facebook
-              </button>
-            </div>
-          </div>
         </form>
       </div>
     </div>

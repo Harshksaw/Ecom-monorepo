@@ -9,6 +9,7 @@ import { Providers } from './store/provider'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import { Toaster } from 'react-hot-toast'
+import { AuthProvider } from './context/authcontext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,6 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
+        <AuthProvider>
           <div className="flex min-h-screen flex-col">
             <Header />
             <main className="flex-grow">{children}</main>
@@ -56,6 +58,7 @@ export default function RootLayout({
 
             <Footer />
           </div>
+          </AuthProvider>
         </Providers>
       </body>
     </html>

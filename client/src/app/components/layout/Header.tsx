@@ -1,29 +1,33 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store/store'
 import { BiMenuAltRight } from 'react-icons/bi'
 import { BsCart } from 'react-icons/bs'
-import { IoMdHeartEmpty } from 'react-icons/io'
 import { VscChromeClose } from 'react-icons/vsc'
-
+import { FaUser, FaSignOutAlt, FaUserCog, FaShoppingBag } from 'react-icons/fa'
 
 import Menu from './Menu'
 import MobileMenu from './MobileMenu'
 import { CategoryService } from '@/app/lib/api'
+import { useAuth } from '@/app/context/authcontext'
 
 
 const Header = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
   const [showCatMenu, setShowCatMenu] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
   const [show, setShow] = useState('translate-y-0')
   const [lastScrollY, setLastScrollY] = useState(0)
-  const [categories, setCategories] = useState<Category[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   
   const { cartItems } = useSelector((state: RootState) => state.cart)
+  const { user, logout } = useAuth()
+  
+  const userMenuRef = useRef<HTMLDivElement>(null)
   
   // Navbar control based on scroll
   const controlNavbar = () => {
@@ -50,6 +54,20 @@ const Header = () => {
     }
   }, [lastScrollY])
   
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+  
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
@@ -63,6 +81,11 @@ const Header = () => {
     
     fetchCategories()
   }, [])
+  
+  const handleLogout = () => {
+    logout()
+    setShowUserMenu(false)
+  }
   
   return (
     <header
@@ -82,7 +105,7 @@ const Header = () => {
         <Menu 
           showCatMenu={showCatMenu} 
           setShowCatMenu={setShowCatMenu} 
-          categories={categories.categories} 
+          categories={categories?.categories || []} 
         />
         
         {mobileMenu && (
@@ -95,12 +118,73 @@ const Header = () => {
         )}
         
         <div className="flex items-center gap-2 text-black">
-          {/* Wishlist Icon */}
-          <Link href="/auth/login">
-            <button className="px-4 py-2 bg-blue-600 rounded text-white hover:bg-blue-700">
-              Login
-            </button>
-          </Link>
+          {/* User Account / Login Button */}
+          {user ? (
+            <div className="relative" ref={userMenuRef}>
+              <button 
+                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-full"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+              >
+                <FaUser className="text-[15px] md:text-[18px]" />
+                <span className="hidden md:block text-sm font-medium">
+                  {user.firstName || 'Account'}
+                </span>
+              </button>
+              
+              {/* User Dropdown Menu */}
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+                  <div className="px-4 py-2 text-sm text-gray-500 border-b">
+                    <p className="font-medium">Signed in as</p>
+                    <p className="truncate">{user.email}</p>
+                  </div>
+                  
+                  <Link 
+                    href="/profile" 
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <FaUser className="mr-2" />
+                    Profile
+                  </Link>
+                  
+                  <Link 
+                    href="/orders" 
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <FaShoppingBag className="mr-2" />
+                    My Orders
+                  </Link>
+                  
+                  {user.role === 'admin' && (
+                    <Link 
+                      href="/admin/dashboard" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <FaUserCog className="mr-2" />
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  
+                  <button 
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+                  >
+                    <FaSignOutAlt className="mr-2" />
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link href="/auth/login">
+              <button className="px-4 py-2 bg-blue-600 rounded text-white hover:bg-blue-700">
+                Login
+              </button>
+            </Link>
+          )}
           
           {/* Cart Icon */}
           <Link href="/cart">

@@ -3,8 +3,10 @@ const express = require('express');
 const router = express.Router();
 
 const { authenticate } = require('../middleware/authorization');
+const { register, login } = require('../controller/user.controller');
 
-
+router.post('/register',register)
+router.post('/login',login)
   
 router.get('/profile', authenticate, async (req, res) => {
     try {
