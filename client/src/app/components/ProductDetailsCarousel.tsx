@@ -17,7 +17,7 @@ interface ProductDetailsCarouselProps {
   images: ProductImage[];
 }
 
-const ProductDetailsCarousel: React.FC<ProductDetailsCarouselProps> = ({ images }) => {
+const ProductDetailsCarousel: React.FC<ProductDetailsCarouselProps> = ({ images }:any) => {
   console.log("🚀 ~ images:", images)
   // If no images are provided, show a placeholder
   if (!images || images.length === 0) {
@@ -37,7 +37,7 @@ const ProductDetailsCarousel: React.FC<ProductDetailsCarouselProps> = ({ images 
         thumbWidth={60}
         className="productCarousel"
       >
-        {images.map((img) => (
+        {images.map((img:any) => (
           <div key={img.id}>
             <img
               src={img}

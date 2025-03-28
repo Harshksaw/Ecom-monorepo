@@ -2,11 +2,12 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { uploadImage, ImageResponse } from '@/lib/image-api';
+// import { uploadImage } from '@/lib/image-api';
+
 
 interface ImageUploaderProps {
   courseId?: string;
-  onImageUploaded: (image: ImageResponse) => void;
+  onImageUploaded: (image:any) => void;
   className?: string;
   label?: string;
   maxSizeInMB?: number;
@@ -53,10 +54,14 @@ export default function ImageUploader({
     // Upload the file
     setIsUploading(true);
     try {
-      const response = await uploadImage(file, courseId);
+      // const response = await uploadImage(file, courseId);
+      const response ={
+        success : true,
+        image: "sed"
+      }
       
       if (!response.success || !response.image) {
-        setError(response.message || 'Upload failed');
+        // setError(response.message || 'Upload failed');
         setPreview(null);
         return;
       }

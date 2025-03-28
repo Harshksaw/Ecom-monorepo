@@ -1,61 +1,66 @@
+// src/app/auth/login/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook } from 'react-icons/fa';
+
+import { toast } from 'react-hot-toast';
+import { useAuth } from '@/app/context/authcontext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
+  
+  const { login, user, loading, error } = useAuth();
+
+  // Get callback URL from search params
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const callbackUrl = searchParams.get('callback') || '/';
+  
+  // If user is already logged in, redirect
+  // useEffect(() => {
+  //   if (user) {
+  //     if (user.role === 'admin') {
+  //       router.push('/admin/dashboard');
+  //     } else {
+  //       // Redirect to callback URL if present, otherwise to homepage
+  //       router.push(callbackUrl);
+  //     }
+  //   }
+  // }, [user, router, callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
+    
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+      const result = await login(email, password);
+      if (result.success) {
+        toast.success(result.message || 'Login successful!');
+        // Router navigation happens in the login function after setting the user state
       }
-
-      // Handle successful login
-      const { token, user } = data;
-
-      // Store token and user info
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      // Redirect based on user role
-      if (user.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/');
-      }
-    } catch (err: any) {
-      setError(err.message);
-      setIsLoading(false);
+    } catch (err) {
+      // Additional error handling if needed
+      console.error('Login submission error:', err);
     }
   };
 
   const handleSocialLogin = (provider: 'google' | 'facebook') => {
-    // Implement social login logic
-    console.log(`Logging in with ${provider}`);
+    // Social login implementation - could connect to your custom backend
+    toast.error(`${provider} login not implemented yet`);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -67,7 +72,7 @@ export default function LoginPage() {
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
             <Link 
-              href="/signup" 
+              href="/auth/signup" 
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               create a new account
@@ -139,6 +144,8 @@ export default function LoginPage() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label 
@@ -151,7 +158,7 @@ export default function LoginPage() {
 
             <div className="text-sm">
               <Link 
-                href="/forgot-password" 
+                href="/auth/forgot-password" 
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Forgot your password?
@@ -163,12 +170,12 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                loading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
 

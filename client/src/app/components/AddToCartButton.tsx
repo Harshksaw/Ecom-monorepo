@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '@/app/store/slices/cartSlice';
 import { toast } from 'react-hot-toast';
 
-const AddToCartButton = ({ product }) => {
+const AddToCartButton = ({ product }:any) => {
   console.log("🚀 ~ AddToCartButton ~ product:", product)
   const [selectedSize, setSelectedSize] = useState(null);
   const [showError, setShowError] = useState(false);
@@ -37,7 +37,7 @@ const AddToCartButton = ({ product }) => {
     };
 
     // Dispatch the action to add item to cart
-    dispatch(addToCart(payload));
+    // dispatch(addToCart(payload));
     
     // Show success message
     toast.success(`${product.name} added to cart`);

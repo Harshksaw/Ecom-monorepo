@@ -1,14 +1,40 @@
-// src/app/store/slices/cartSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+// src/app/store/slices/cartSlice.ts
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+// Define interfaces for type safety
+interface CartItem {
+  id: string;
+  quantity: number;
+  price: number;
+  oneQuantityPrice: number;
+  [key: string]: any; // For other properties
+}
+
+interface CartState {
+  cartItems: CartItem[];
+}
+
+interface UpdateCartPayload {
+  id: string;
+  key: string;
+  val: any;
+}
+
+interface RemoveFromCartPayload {
+  id: string;
+}
+
+// Initial state
+const initialState: CartState = {
+  cartItems: []
+};
 
 export const cartSlice = createSlice({
   name: 'cart',
-  initialState: {
-    cartItems: []
-  },
+  initialState,
   reducers: {
-    addToCart: (state, action) => {
-      const item = state.cartItems.find((p) => p.id === action.payload.id);
+    addToCart: (state, action: PayloadAction<CartItem>) => {
+      const item = state.cartItems.find(p => p.id === action.payload.id);
       if (item) {
         // If item exists, increase quantity
         item.quantity++;
@@ -19,8 +45,8 @@ export const cartSlice = createSlice({
       }
     },
     
-    updateCart: (state, action) => {
-      state.cartItems = state.cartItems.map((p) => {
+    updateCart: (state, action: PayloadAction<UpdateCartPayload>) => {
+      state.cartItems = state.cartItems.map(p => {
         if (p.id === action.payload.id) {
           if (action.payload.key === "quantity") {
             p.price = p.oneQuantityPrice * action.payload.val;
@@ -31,8 +57,8 @@ export const cartSlice = createSlice({
       });
     },
     
-    removeFromCart: (state, action) => {
-      state.cartItems = state.cartItems.filter((p) => p.id !== action.payload.id);
+    removeFromCart: (state, action: PayloadAction<RemoveFromCartPayload>) => {
+      state.cartItems = state.cartItems.filter(p => p.id !== action.payload.id);
     },
     
     clearCart: (state) => {

@@ -3,13 +3,13 @@ import React from "react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useDispatch } from "react-redux";
 import { updateCart } from "../store/slices/cartSlice";
-const CartItem = ({ data }) => {
+const CartItem = ({ data }:any) => {
     const p = data?.attributes;
     const dispatch = useDispatch()
 
 
 
-    const updateCartItem = (e, key)=>{
+    const updateCartItem = (e:any, key:any)=>{
         let payload = {
             key,
             val: key === "quantity" ? parseInt(e.target.value) : e.target.value,
@@ -62,17 +62,17 @@ const CartItem = ({ data }) => {
                             <div className="font-semibold">Size:</div>
                             <select
                                 className="hover:text-black"
-                                onChange={()=> updateCartItem(e, "selectedSize")}
+                                onChange={(e)=> updateCartItem(e , "selectedSize")}
 
                             >
                                 
-                                {p.size.data.map((item, i)=>{
+                                {p.size.data.map((item :any, i:any)=>{
                                     return (
                                         <option 
 
                                         key={i}
                                         disabled={!item.enabled ? true : false}
-                                        defaultValue = {item.selectedSize === item.size}
+                                        // defaultValue= {item.selectedSize === item.size}
                                         value={item.size}
                                         >{item.size}</option>
                                     )
@@ -99,9 +99,9 @@ const CartItem = ({ data }) => {
                         </div>
                     </div>
                     <RiDeleteBin6Line
-                        onClick={() =>
-                            dispatch(removeFromCart({ id: data.id }))
-                        }
+                        // onClick={() =>
+                        //     dispatch(removeFromCart({ id: data.id }))
+                        // }
                         className="cursor-pointer text-black/[0.5] hover:text-black text-[16px] md:text-[20px]"
                     />
                 </div>
