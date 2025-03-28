@@ -96,7 +96,7 @@ const Header = () => {
         
         <div className="flex items-center gap-2 text-black">
           {/* Wishlist Icon */}
-          <Link href="/login">
+          <Link href="/auth/login">
             <button className="px-4 py-2 bg-blue-600 rounded text-white hover:bg-blue-700">
               Login
             </button>
