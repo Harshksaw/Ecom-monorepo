@@ -13,6 +13,8 @@ const apiClient = axios.create({
   },
 });
 
+
+
 // Type Definitions
 export interface Product {
   id: string;
@@ -271,6 +273,15 @@ export const Helpers = {
   }
 };
 
+
+export const User = {
+
+  async getUserProfile(userId: string){
+    const res  = await axios.get(`${API_URL}/auth/profile/${userId}`);
+    return res
+  }
+
+}
 // Configure Axios Interceptors
 apiClient.interceptors.request.use(
   (config) => {
