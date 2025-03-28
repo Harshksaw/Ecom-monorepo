@@ -1,38 +1,27 @@
+version: '3.8'
 
 services:
   backend:
     build: ./backend
     container_name: node_backend
-    ports:
-      - '3004:7003'
+    expose:
+      - "3100:7003"  
+    restart: always
     volumes:
       - ./backend:/usr/src/app
-    restart: always
     environment:
       - PORT=7003
       - NODE_ENV=production
       - MONGO_URI=mongodb+srv://indianshahishere:Ae6QfKZUJo27fH7I@cluster0.2kwig.mongodb.net/?retryWrites=true&w=majority
       - TOKEN_SECRET=fbb2d60078ba3907a2eba275d2aeee5c6dd064c183b8a07013b56044c2156fbb1d0da15f2817a5f06bcc27a4c1b36027a2555b3997b4182f6d5a4c008be95d13
 
-
-  frontend:
-    build: ./client
-    container_name: next_frontend
-    ports:
-      - '3005:3000'
-    volumes:
-      - ./client:/app
-    restart: always
-    command: sh -c "npm install && npm run build && npm start"
-    depends_on:
-      - backend
-
   nginx:
     image: nginx:latest
     container_name: nginx_proxy
+    restart: always
     ports:
-      - "8080:80"     # 🌐 This exposes your frontend on VPS
+      - "80:80"     # Public port on your VPS
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - frontend
+      - backend
