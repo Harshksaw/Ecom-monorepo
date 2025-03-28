@@ -1,6 +1,6 @@
 // src/app/product/[slug]/not-found.tsx
 import Link from 'next/link';
-import Wrapper from '@/app/components/Wrapper';
+import Wrapper from '../../../app/components/Wrapper';
 
 export default function ProductNotFound() {
   return (

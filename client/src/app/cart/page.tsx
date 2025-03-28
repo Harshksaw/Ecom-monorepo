@@ -6,13 +6,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaTrash, FaArrowLeft, FaShieldAlt, FaMapMarkerAlt, FaUser, FaExclamationTriangle } from 'react-icons/fa';
-import { updateCart, removeFromCart } from '@/app/store/slices/cartSlice';
+import { updateCart, removeFromCart } from '../../app/store/slices/cartSlice';
 
-import Wrapper from '@/app/components/Wrapper';
+import Wrapper from '../../app/components/Wrapper';
 import EmptyCart from './EmptyCart';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/context/authcontext';
+import { useAuth } from '../../app/context/authcontext';
 import { API_URL, User } from '../lib/api';
 import axios from 'axios';
 

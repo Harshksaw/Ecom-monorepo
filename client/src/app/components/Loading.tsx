@@ -1,5 +1,5 @@
 // src/app/product/[slug]/loading.tsx
-import Wrapper from "@/app/components/Wrapper";
+import Wrapper from "../../app/components/Wrapper";
 
 export default function Loading() {
   return (

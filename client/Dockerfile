@@ -7,10 +7,10 @@ WORKDIR /app
 # Copy deps and install
 COPY package*.json ./
 RUN npm install
-
+RUN npm install -D tailwindcss postcss autoprefixer
 # Copy rest and build
 COPY . .
-RUN npm run build
+
 
 # Production image
 FROM node:18-alpine

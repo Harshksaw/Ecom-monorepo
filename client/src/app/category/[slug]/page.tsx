@@ -1,8 +1,8 @@
 // src/app/category/[slug]/page.tsx
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ProductService } from '@/app/lib/api';
-import ProductGrid from '@/app/components/products/ProductGrid';
+import { ProductService } from '../../../app/lib/api';
+import ProductGrid from '../../../app/components/products/ProductGrid';
 
 // Define the props type correctly for Next.js App Router
 type Props = {

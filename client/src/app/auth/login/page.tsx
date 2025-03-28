@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook } from 'react-icons/fa';
 
 import { toast } from 'react-hot-toast';
-import { useAuth } from '@/app/context/authcontext';
+import { useAuth } from '../../../app/context/authcontext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');

@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { FaShoppingCart, FaArrowRight } from 'react-icons/fa';
-import Wrapper from '@/app/components/Wrapper';
+import Wrapper from '../../app/components/Wrapper';
 
 const EmptyCart = () => {
   return (

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/app/context/authcontext';
+import { useAuth } from '../../app/context/authcontext';
 import { toast } from 'react-hot-toast';
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import axios from 'axios';
-import { API_URL } from '@/app/lib/api';
-import Wrapper from '@/app/components/Wrapper';
+import { API_URL } from '../../app/lib/api';
+import Wrapper from '../../app/components/Wrapper';
 
 // Address interface matching your schema
 interface Address {

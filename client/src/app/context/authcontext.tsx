@@ -4,7 +4,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { API_URL } from '@/app/lib/api';
+import { API_URL } from '../../app/lib/api';
 
 interface User {
   id: string;

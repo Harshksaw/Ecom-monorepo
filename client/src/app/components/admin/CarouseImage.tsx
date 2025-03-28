@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-// import { uploadImage } from '@/lib/image-api';
+// import { uploadImage } from '../../../lib/image-api';
 
 
 interface ImageUploaderProps {

@@ -18,9 +18,9 @@ import {
   FaCreditCard
 } from 'react-icons/fa';
 import axios from 'axios';
-import { API_URL } from '@/app/lib/api';
-import Wrapper from '@/app/components/Wrapper';
-import { useAuth } from '@/app/context/authcontext';
+import { API_URL } from '../../app/lib/api';
+import Wrapper from '../../app/components/Wrapper';
+import { useAuth } from '../../app/context/authcontext';
 import { useRouter } from 'next/navigation';
 
 // Define order status type for type safety

@@ -1,5 +1,5 @@
 // src/app/cart/loading.tsx
-import Wrapper from '@/app/components/Wrapper';
+import Wrapper from '../../app/components/Wrapper';
 
 export default function CartLoading() {
   return (

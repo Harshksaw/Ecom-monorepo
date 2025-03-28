@@ -1,11 +1,11 @@
 // src/app/product/[slug]/page.tsx
 import { Metadata } from 'next';
 
-import { ProductService } from '@/app/lib/api';
-import Wrapper from '@/app/components/Wrapper';
-import ProductDetailsCarousel from '@/app/components/ProductDetailsCarousel';
-import RelatedProducts from '@/app/components/RelatedProducts';
-import AddToCartButton from '@/app/components/AddToCartButton';
+import { ProductService } from '../../../app/lib/api';
+import Wrapper from '../../../app/components/Wrapper';
+import ProductDetailsCarousel from '../../../app/components/ProductDetailsCarousel';
+import RelatedProducts from '../../../app/components/RelatedProducts';
+import AddToCartButton from '../../../app/components/AddToCartButton';
 
 
 // Define the props for the page component

@@ -21,9 +21,12 @@ services:
     ports:
       - '3005:3000'
     volumes:
-      - ./frontend:/app
+      - ./client:/app
     restart: always
-    command: sh -c "npm run build && npm start"
+    command: sh -c "npm install && npm run build && npm start"
+    depends_on:
+      - backend
+
   nginx:
     image: nginx:latest
     container_name: nginx_proxy

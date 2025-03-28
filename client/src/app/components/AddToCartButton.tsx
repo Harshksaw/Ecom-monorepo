@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '@/app/store/slices/cartSlice';
+import { addToCart } from '../../app/store/slices/cartSlice';
 import { toast } from 'react-hot-toast';
 
 const AddToCartButton = ({ product }:any) => {

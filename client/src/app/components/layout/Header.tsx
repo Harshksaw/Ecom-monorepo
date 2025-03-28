@@ -12,8 +12,8 @@ import { FaUser, FaSignOutAlt, FaUserCog, FaShoppingBag } from 'react-icons/fa'
 
 import Menu from './Menu'
 import MobileMenu from './MobileMenu'
-import { CategoryService } from '@/app/lib/api'
-import { useAuth } from '@/app/context/authcontext'
+import { CategoryService } from '../../../app/lib/api'
+import { useAuth } from '../../../app/context/authcontext'
 
 
 const Header = () => {

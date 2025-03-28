@@ -9,14 +9,14 @@ import {
 import AdminLayout from '../AdminLayout';
 import StatCard from '../StatCard';
 
-// import AdminLayout from '@/components/admin/AdminLayout';
-// import StatCard from '@/components/admin/StatCard';
-// import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
-// import ProductService from '@/services/product.service';
-// import OrderService from '@/services/order.service';
-// import UserService from '@/services/user.service';
+// import AdminLayout from '../../../components/admin/AdminLayout';
+// import StatCard from '../../../components/admin/StatCard';
+// import RecentOrdersTable from '../../../components/admin/RecentOrdersTable';
+// import ProductService from '../../../services/product.service';
+// import OrderService from '../../../services/order.service';
+// import UserService from '../../../services/user.service';
 // import { OrderService } from '../services/order.service';
-// import { UserService } from '@/services/user.service';
+// import { UserService } from '../../../services/user.service';
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard',
