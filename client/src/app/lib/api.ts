@@ -3,7 +3,7 @@ import axios from 'axios';
 import { get } from 'http';
 
 // API base URL
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7003/api';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://node_backend:7003/api';
 
 // Create an axios instance with default configuration
 const apiClient = axios.create({
