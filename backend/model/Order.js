@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema({
   }],
   subtotal: { type: Number, required: true },
   tax: { type: Number, required: true },
-  shipping: { type: Number, required: true },
+  shipping: { type: Number, required: false },
   total: { type: Number, required: true },
   shippingAddress: {
     addressLine1: { type: String, required: true },
@@ -29,7 +29,7 @@ const orderSchema = new mongoose.Schema({
     postalCode: { type: String, required: true },
     country: { type: String, required: true }
   },
-  paymentMethod: { type: String, required: true },
+  paymentMethod: { type: String, required: false },
   paymentStatus: { 
     type: String, 
     enum: ['pending', 'processing', 'completed', 'failed', 'refunded'], 

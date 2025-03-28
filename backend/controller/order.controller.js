@@ -11,6 +11,7 @@ exports.createOrder = async (req, res) => {
   try {
     const {
       items,
+      tax, subtotal,total,
       shippingAddress,
       billingAddress,
       paymentMethod
@@ -20,56 +21,57 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Order must contain at least one item' });
     }
     
-    // Calculate order totals and validate items
-    let subtotal = 0;
-    const orderItems = [];
+    // // Calculate order totals and validate items
+    // let subtotal = 0;
+    // const orderItems = [];
     
-    for (const item of items) {
-      const product = await Product.findById(item.productId);
+    // for (const item of items) {
+    //   const product = await Product.findById(item.productId);
       
-      if (!product) {
-        return res.status(400).json({ message: `Product ${item.productId} not found` });
-      }
+    //   if (!product) {
+    //     return res.status(400).json({ message: `Product ${item.productId} not found` });
+    //   }
       
-      if (!product.isActive) {
-        return res.status(400).json({ message: `Product ${product.name} is not available` });
-      }
+    //   if (!product.isActive) {
+    //     return res.status(400).json({ message: `Product ${product.name} is not available` });
+    //   }
       
-      if (product.stockQuantity < item.quantity) {
-        return res.status(400).json({
-          message: `Not enough stock for ${product.name}. Available: ${product?.stockQuantity}`
-        });
-      }
+    //   if (product.stockQuantity < item.quantity) {
+    //     return res.status(400).json({
+    //       message: `Not enough stock for ${product.name}. Available: ${product?.stockQuantity}`
+    //     });
+    //   }
       
-      const itemPrice = product.salePrice || product.price;
-      const itemTotal = itemPrice * item.quantity;
-      subtotal += itemTotal;
+    //   const itemPrice = product.salePrice || product.price;
+    //   const itemTotal = itemPrice * item.quantity;
+    //   subtotal += itemTotal;
       
-      orderItems.push({
-        productId: product._id,
-        quantity: item.quantity,
-        price: itemPrice
-      });
+    //   orderItems.push({
+    //     productId: product._id,
+    //     quantity: item.quantity,
+    //     price: itemPrice
+    //   });
       
-      // Reduce stock quantity
-      product.stockQuantity -= item.quantity;
-      await product.save();
-    }
+    //   // Reduce stock quantity
+    //   product.stockQuantity -= item.quantity;
+    //   await product.save();
+    // }
     
-    // Calculate tax and shipping (simplified)
-    const tax = subtotal * 0.07; // 7% tax
-    const shipping = subtotal > 100 ? 0 : 10; // Free shipping over $100
-    const total = subtotal + tax + shipping;
+    // // Calculate tax and shipping (simplified)
+    // const tax = subtotal * 0.07; // 7% tax
+    // const shipping = subtotal > 100 ? 0 : 10; // Free shipping over $100
+    // const total = subtotal + tax + shipping;
     
     // Create order
     const newOrder = new Order({
       orderNumber: generateOrderNumber(),
-      userId: req.user.id,
-      items: orderItems,
+      userId: req.params.id,
+      items: items,
+
       subtotal,
       tax,
-      shipping,
-      total,
+
+      total: total,
       shippingAddress,
       billingAddress,
       paymentMethod,

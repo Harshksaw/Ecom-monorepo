@@ -13,7 +13,8 @@ import EmptyCart from './EmptyCart';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/authcontext';
-import { User } from '../lib/api';
+import { API_URL, User } from '../lib/api';
+import axios from 'axios';
 
 // Address interface
 interface Address {
@@ -48,6 +49,8 @@ const CartPage = () => {
   const [shipping, setShipping] = useState(0);
   const [total, setTotal] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [userId, setUserId] = useState('')
   
   // User profile and address states
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -67,6 +70,7 @@ const CartPage = () => {
         if (userInfo) {
           const parsedUser = JSON.parse(userInfo);
           if (parsedUser && parsedUser.id) {
+            setUserId(parsedUser.id)
             // Use the User.getUserProfile API
             const response = await User.getUserProfile(parsedUser.id);
             
@@ -210,28 +214,25 @@ const CartPage = () => {
 
     try {
       // Create order on your backend
-      const response = await fetch('/api/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          amount: Math.round(total * 100), // Amount in paise
-          currency: 'INR',
+      const response = await axios.post(`${API_URL}/orders/create/${userId}`, {
+    
+
+          total:  total, 
           receipt: `receipt_${Date.now()}`,
+          tax:gst,
+          subtotal,
           shippingAddress: defaultShippingAddress,
           billingAddress: defaultBillingAddress || defaultShippingAddress,
           items: cartItems.map(item => ({
-            id: item.id,
+            productId: item.id,
             name: item.attributes?.name,
             quantity: item.quantity,
             price: getDisplayPrice(item)
-          }))
-        }),
+      }))
+
       });
 
-      const orderData = await response.json();
+      const orderData = response.data
 
       if (!orderData.success) {
         throw new Error(orderData.message || 'Failed to create order');
