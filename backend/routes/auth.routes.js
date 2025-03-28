@@ -5,12 +5,15 @@ const router = express.Router();
 const { authenticate } = require('../middleware/authorization');
 const { register, login } = require('../controller/user.controller');
 
+const userController = require('../controller/user.controller');
+const User = require('../model/User');
+
 router.post('/register',register)
 router.post('/login',login)
   
-router.get('/profile', authenticate, async (req, res) => {
+router.get('/profile/:id', async (req, res) => {
     try {
-      const user = await User.findById(req.user.id).select('-password');
+      const user = await User.findById(req.params.id)
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
@@ -21,7 +24,7 @@ router.get('/profile', authenticate, async (req, res) => {
   });
   
   // Update user profile
-  router.put('/profile', authenticate, async (req, res) => {
+  router.put('/profile',async (req, res) => {
     try {
       const { firstName, lastName, phoneNumber } = req.body;
       
@@ -50,11 +53,15 @@ router.get('/profile', authenticate, async (req, res) => {
   });
   
   // Add address
-  router.post('/address', authenticate, async (req, res) => {
+  router.post('/address/:id', async (req, res) => {
     try {
-      const { type, addressLine1, addressLine2, city, state, postalCode, country, isDefault } = req.body;
-      
-      const user = await User.findById(req.user.id);
+       // Extract the address object and index from req.body
+       const { address } = req.body;
+       // Destructure the necessary fields from address
+       const { type, addressLine1, addressLine2, city, state, postalCode, country, isDefault } = address;
+       console.log("🚀 ~ router.post ~ req.body:", req.body)
+       
+      const user = await User.findById(req.params.id);
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
@@ -93,17 +100,17 @@ router.get('/profile', authenticate, async (req, res) => {
   });
   
   // Update address
-  router.put('/address/:addressId', authenticate, async (req, res) => {
+  router.put('/address/:id',  async (req, res) => {
     try {
       const { type, addressLine1, addressLine2, city, state, postalCode, country, isDefault } = req.body;
       
-      const user = await User.findById(req.user.id);
+      const user = await User.findById(req.params.id);
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
       
       // Find address by ID
-      const addressIndex = user.addresses.findIndex(addr => addr._id.toString() === req.params.addressId);
+      const addressIndex = user.addresses.findIndex(addr => addr._id.toString() === req.body.addressId);
       if (addressIndex === -1) {
         return res.status(404).json({ message: 'Address not found' });
       }
@@ -167,5 +174,19 @@ router.get('/profile', authenticate, async (req, res) => {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
   });
+
+  router.get('/addresses', userController.getUserAddresses);
+
+// Route for adding a new address
+router.post('/addresses', userController.addAddress);
+
+// Route for updating an existing address
+router.put('/addresses/:index', userController.updateAddress);
+
+// Route for deleting an address
+router.delete('/addresses/:index', userController.deleteAddress);
+
+// Route for setting an address as default
+router.patch('/address/:index/default/:id', userController.setDefaultAddress);
   
   module.exports = router;

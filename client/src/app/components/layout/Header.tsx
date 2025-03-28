@@ -93,13 +93,13 @@ const Header = () => {
     >
       <div className="container mx-auto px-4 h-[60px] flex justify-between items-center">
         <Link href="/" className="flex items-center">
-          <Image 
+          {/* <Image 
             src="/logo.svg" 
             alt="Store Logo" 
             width={60} 
             height={60}
             className="w-[40px] md:w-[60px]"
-          />
+          /> */}
         </Link>
         
         <Menu 
