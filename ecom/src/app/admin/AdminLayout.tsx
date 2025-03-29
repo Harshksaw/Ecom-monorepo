@@ -32,6 +32,11 @@ const ADMIN_MENU_ITEMS = [
     icon: <FaBox />
   },
   {
+    name: 'View Products',
+    href: '/admin/dashboard/products/viewall',
+    icon: <FaBox />
+  },
+  {
     name: 'Orders',
     href: '/admin/orders',
     icon: <FaShoppingCart />

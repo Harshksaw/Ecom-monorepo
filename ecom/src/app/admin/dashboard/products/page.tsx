@@ -7,9 +7,12 @@ import {
   FaCloudUploadAlt, 
   FaTimes, 
   FaPlus, 
-  FaTrash 
+  FaTrash,
+  FaGem
 } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
+import { API_URL } from '@/app/lib/api';
 
 // Interfaces for type safety
 interface Category {
@@ -17,9 +20,23 @@ interface Category {
   name: string;
 }
 
+interface Gem {
+  type: string;
+  carat: string;
+  color: string;
+  clarity: string;
+}
+
+interface Dimensions {
+  length: string;
+  width: string;
+  height: string;
+}
+
 export default function CreateProductPage() {
   // Form state
   const [name, setName] = useState('');
+  const [sku, setSku] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [salePrice, setSalePrice] = useState('');
@@ -28,10 +45,20 @@ export default function CreateProductPage() {
   const [stock, setStock] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [brand, setBrand] = useState('');
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [materials, setMaterials] = useState<string[]>(['']);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // New state fields based on schema
+  const [weight, setWeight] = useState('');
+  const [dimensions, setDimensions] = useState<Dimensions>({
+    length: '',
+    width: '',
+    height: ''
+  });
+  const [materials, setMaterials] = useState<string[]>(['']);
+  const [gems, setGems] = useState<Gem[]>([]);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [tags, setTags] = useState<string[]>(['']);
 
   const router = useRouter();
 
@@ -39,9 +66,9 @@ export default function CreateProductPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories');
-        const data = await response.json();
-        setCategories(data.data);
+        const response = await axios.get(`${API_URL}/categories`);
+        const data = await response.data;
+        setCategories(data.categories);
       } catch (error) {
         toast.error('Failed to fetch categories');
       }
@@ -49,6 +76,16 @@ export default function CreateProductPage() {
 
     fetchCategories();
   }, []);
+
+  // Generate SKU on name change
+  useEffect(() => {
+    if (name) {
+      // Create SKU from name: first 3 letters + timestamp
+      const prefix = name.replace(/[^a-zA-Z]/g, '').substring(0, 3).toUpperCase();
+      const timestamp = new Date().getTime().toString().slice(-6);
+      setSku(`${prefix}${timestamp}`);
+    }
+  }, [name]);
 
   // Image upload handler
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,6 +147,38 @@ export default function CreateProductPage() {
     setMaterials(newMaterials);
   };
 
+  // Add/remove gem input fields
+  const addGem = () => {
+    setGems([...gems, { type: '', carat: '', color: '', clarity: '' }]);
+  };
+
+  const removeGem = (index: number) => {
+    const newGems = gems.filter((_, i) => i !== index);
+    setGems(newGems);
+  };
+
+  const updateGem = (index: number, field: keyof Gem, value: string) => {
+    const newGems = [...gems];
+    newGems[index] = { ...newGems[index], [field]: value };
+    setGems(newGems);
+  };
+
+  // Add/remove tag input fields
+  const addTag = () => {
+    setTags([...tags, '']);
+  };
+
+  const removeTag = (index: number) => {
+    const newTags = tags.filter((_, i) => i !== index);
+    setTags(newTags);
+  };
+
+  const updateTag = (index: number, value: string) => {
+    const newTags = [...tags];
+    newTags[index] = value;
+    setTags(newTags);
+  };
+
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,6 +200,7 @@ export default function CreateProductPage() {
     // Create form data
     const formData = new FormData();
     formData.append('name', name);
+    formData.append('sku', sku);
     formData.append('description', description);
     formData.append('price', price);
     
@@ -138,14 +208,22 @@ export default function CreateProductPage() {
       formData.append('salePrice', salePrice);
     }
     
-    formData.append('category', category);
-    formData.append('stock', stock);
+    formData.append('categoryId', category);
+    formData.append('stockQuantity', stock);
+    formData.append('isActive', isActive.toString());
+    formData.append('isFeatured', isFeatured.toString());
     
-    if (brand) {
-      formData.append('brand', brand);
+    // Add weight
+    if (weight) {
+      formData.append('weight', weight);
     }
     
-    formData.append('isFeatured', isFeatured.toString());
+    // Add dimensions
+    if (dimensions.length || dimensions.width || dimensions.height) {
+      formData.append('dimensions[length]', dimensions.length);
+      formData.append('dimensions[width]', dimensions.width);
+      formData.append('dimensions[height]', dimensions.height);
+    }
     
     // Add materials
     materials.forEach((material, index) => {
@@ -153,26 +231,42 @@ export default function CreateProductPage() {
         formData.append(`materials[${index}]`, material);
       }
     });
+    
+    // Add gems
+    gems.forEach((gem, index) => {
+      if (gem.type.trim()) {
+        formData.append(`gems[${index}][type]`, gem.type);
+        formData.append(`gems[${index}][carat]`, gem.carat);
+        formData.append(`gems[${index}][color]`, gem.color);
+        formData.append(`gems[${index}][clarity]`, gem.clarity);
+      }
+    });
+    
+    // Add tags
+    tags.forEach((tag, index) => {
+      if (tag.trim()) {
+        formData.append(`tags[${index}]`, tag);
+      }
+    });
 
     // Add images
-    images.forEach((image, index) => {
-      formData.append(`images`, image);
+    images.forEach((image) => {
+      formData.append('images', image);
     });
 
     try {
-      const response = await fetch('/api/products', {
-        method: 'POST',
-        body: formData
-      });
+      const response = await axios.post(`${API_URL}/products`, formData);
 
-      const result = await response.json();
+      console.log("🚀 ~ handleSubmit ~ response:", response)
 
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to create product');
+
+      if (!response.status === 201) {
+        toast.error('Failed to create product');
+        return;
       }
 
       toast.success('Product created successfully');
-      router.push('/admin/products');
+      router.push('/admin/dashboard/products');
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -184,13 +278,46 @@ export default function CreateProductPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Create New Product</h1>
 
-      <form onSubmit={handleSubmit} className=" mx-auto bg-white shadow-md rounded-lg p-8">
-        {/* Basic Information (previous section remains the same) */}
+      <form onSubmit={handleSubmit} className="mx-auto bg-white shadow-md rounded-lg p-8">
+        {/* Basic Information */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Product Name */}
+          <div>
+            <label htmlFor="name" className="block text-gray-700 font-bold mb-2">
+              Product Name*
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter product name"
+              required
+            />
+          </div>
+
+          {/* SKU */}
+          <div>
+            <label htmlFor="sku" className="block text-gray-700 font-bold mb-2">
+              SKU*
+            </label>
+            <input
+              type="text"
+              id="sku"
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+              placeholder="Auto-generated SKU"
+              readOnly
+            />
+          </div>
+        </div>
         
-        {/* Description (continued from previous code) */}
+        {/* Description */}
         <div className="mt-6">
           <label htmlFor="description" className="block text-gray-700 font-bold mb-2">
-            Description
+            Description*
           </label>
           <textarea
             id="description"
@@ -199,6 +326,7 @@ export default function CreateProductPage() {
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter product description"
             rows={4}
+            required
           />
         </div>
 
@@ -207,7 +335,7 @@ export default function CreateProductPage() {
           {/* Price */}
           <div>
             <label htmlFor="price" className="block text-gray-700 font-bold mb-2">
-              Price
+              Price*
             </label>
             <input
               type="number"
@@ -242,7 +370,7 @@ export default function CreateProductPage() {
           {/* Category */}
           <div>
             <label htmlFor="category" className="block text-gray-700 font-bold mb-2">
-              Category
+              Category*
             </label>
             <select
               id="category"
@@ -261,12 +389,12 @@ export default function CreateProductPage() {
           </div>
         </div>
 
-        {/* Stock and Featured */}
-        <div className="grid md:grid-cols-2 gap-6 mt-6">
+        {/* Stock, Status, and Featured */}
+        <div className="grid md:grid-cols-3 gap-6 mt-6">
           {/* Stock */}
           <div>
             <label htmlFor="stock" className="block text-gray-700 font-bold mb-2">
-              Stock Quantity
+              Stock Quantity*
             </label>
             <input
               type="number"
@@ -280,18 +408,91 @@ export default function CreateProductPage() {
             />
           </div>
 
-          {/* Featured Toggle */}
-          <div className="flex items-center mt-8">
-            <input
-              type="checkbox"
-              id="isFeatured"
-              checked={isFeatured}
-              onChange={(e) => setIsFeatured(e.target.checked)}
-              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="isFeatured" className="text-gray-700">
-              Featured Product
+          {/* Product Weight */}
+          <div>
+            <label htmlFor="weight" className="block text-gray-700 font-bold mb-2">
+              Weight (g)
             </label>
+            <input
+              type="number"
+              id="weight"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Weight in grams"
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          {/* Status and Featured Toggles */}
+          {/* <div className="flex flex-col justify-center">
+            <div className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                id="isActive"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="isActive" className="text-gray-700">
+                Active Product
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="isFeatured"
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
+                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="isFeatured" className="text-gray-700">
+                Featured Product
+              </label>
+            </div>
+          </div> */}
+        </div>
+
+        {/* Dimensions */}
+        <div className="mt-6">
+          <label className="block text-gray-700 font-bold mb-2">
+            Dimensions (cm)
+          </label>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div>
+              <input
+                type="number"
+                value={dimensions.length}
+                onChange={(e) => setDimensions({...dimensions, length: e.target.value})}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Length"
+                min="0"
+                step="0.1"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                value={dimensions.width}
+                onChange={(e) => setDimensions({...dimensions, width: e.target.value})}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Width"
+                min="0"
+                step="0.1"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                value={dimensions.height}
+                onChange={(e) => setDimensions({...dimensions, height: e.target.value})}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Height"
+                min="0"
+                step="0.1"
+              />
+            </div>
           </div>
         </div>
 
@@ -326,6 +527,126 @@ export default function CreateProductPage() {
             className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
           >
             <FaPlus className="mr-2" /> Add Material
+          </button>
+        </div>
+
+        {/* Gems */}
+        <div className="mt-6">
+          <label className="block text-gray-700 font-bold mb-2">
+            Gems
+          </label>
+          {gems.map((gem, index) => (
+            <div key={index} className="p-4 border rounded-lg mb-4 bg-gray-50">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-lg font-medium flex items-center">
+                  <FaGem className="mr-2 text-purple-500" /> Gem {index + 1}
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => removeGem(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-1">
+                    Type
+                  </label>
+                  <input
+                    type="text"
+                    value={gem.type}
+                    onChange={(e) => updateGem(index, 'type', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Diamond, Ruby, etc."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-1">
+                    Carat
+                  </label>
+                  <input
+                    type="number"
+                    value={gem.carat}
+                    onChange={(e) => updateGem(index, 'carat', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Carat weight"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-1">
+                    Color
+                  </label>
+                  <input
+                    type="text"
+                    value={gem.color}
+                    onChange={(e) => updateGem(index, 'color', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Gem color"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-1">
+                    Clarity
+                  </label>
+                  <input
+                    type="text"
+                    value={gem.clarity}
+                    onChange={(e) => updateGem(index, 'clarity', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="VS1, SI2, etc."
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addGem}
+            className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
+          >
+            <FaPlus className="mr-2" /> Add Gem
+          </button>
+        </div>
+
+        {/* Tags */}
+        <div className="mt-6">
+          <label className="block text-gray-700 font-bold mb-2">
+            Tags
+          </label>
+          {tags.map((tag, index) => (
+            <div key={index} className="flex items-center space-x-2 mb-2">
+              <input
+                type="text"
+                value={tag}
+                onChange={(e) => updateTag(index, e.target.value)}
+                className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter tag"
+              />
+              {index > 0 && (
+                <button
+                  type="button"
+                  onClick={() => removeTag(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <FaTrash />
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addTag}
+            className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
+          >
+            <FaPlus className="mr-2" /> Add Tag
           </button>
         </div>
 
