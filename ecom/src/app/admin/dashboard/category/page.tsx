@@ -5,44 +5,21 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { FaCloudUploadAlt, FaTimes } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import AdminLayout from '../../AdminLayout';
 
 export default function CreateCategoryPage() {
   const [categoryName, setCategoryName] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const [isActive, setIsActive] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type and size
-      const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      const maxSize = 5 * 1024 * 1024; // 5MB
 
-      if (!validTypes.includes(file.type)) {
-        toast.error('Invalid file type. Please upload JPEG, PNG, or GIF.');
-        return;
-      }
 
-      if (file.size > maxSize) {
-        toast.error('File is too large. Maximum size is 5MB.');
-        return;
-      }
-
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const removeImage = () => {
-    setImage(null);
-    setImagePreview(null);
-  };
-
+ 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -86,6 +63,8 @@ export default function CreateCategoryPage() {
   };
 
   return (
+
+
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Create New Category</h1>
 
@@ -128,7 +107,7 @@ export default function CreateCategoryPage() {
         </div>
 
         {/* Image Upload */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <label className="block text-gray-700 font-bold mb-2">
             Category Image
           </label>
@@ -173,7 +152,7 @@ export default function CreateCategoryPage() {
               </>
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Active Toggle */}
         <div className="mb-6 flex items-center">
@@ -208,5 +187,6 @@ export default function CreateCategoryPage() {
         </div>
       </form>
     </div>
+
   );
 }

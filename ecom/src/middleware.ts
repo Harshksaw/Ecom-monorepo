@@ -52,7 +52,7 @@ export function middleware(request: NextRequest) {
   }
   
   // If it's an admin path and the user is not an admin, redirect to home
-  if (isAdminPath && (!user || user.role !== 'admin')) {
+  if (isAdminPath && (!user || user.role !== 'Admin')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
   

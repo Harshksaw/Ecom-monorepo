@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaHeart, FaShoppingCart } from 'react-icons/fa';
 
+
 interface Gem {
   type: string;
   carat: number;
@@ -108,9 +109,7 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   // Calculate discount percentage if sale price exists
-  const discountPercentage = product.salePrice 
-    ? Math.round(((product.price - product.salePrice) / product.price) * 100)
-    : 0;
+
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
@@ -122,7 +121,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           </div>
         )} */}
         <div className="relative w-full pt-[100%]">
-          <Image 
+          <Image
             src={product.images[0]}
             alt={product.name}
             fill

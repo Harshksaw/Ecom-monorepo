@@ -184,7 +184,7 @@ export default function CreateProductPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Create New Product</h1>
 
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-8">
+      <form onSubmit={handleSubmit} className=" mx-auto bg-white shadow-md rounded-lg p-8">
         {/* Basic Information (previous section remains the same) */}
         
         {/* Description (continued from previous code) */}

@@ -40,7 +40,7 @@ export default async function AdminDashboardPage() {
   // ]);
 
   return (
-    <AdminLayout>
+
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
@@ -74,6 +74,6 @@ export default async function AdminDashboardPage() {
           {/* <RecentOrdersTable orders={recentOrders} /> */}
         </div>
       </div>
-    </AdminLayout>
+
   );
 }

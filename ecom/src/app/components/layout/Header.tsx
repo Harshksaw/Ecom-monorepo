@@ -26,8 +26,13 @@ const Header = () => {
   
   const { cartItems } = useSelector((state:any) => state.cart)
   const { user, logout } = useAuth()
+  console.log("🚀 ~ Header ~ user:", user)
   
   const userMenuRef = useRef<HTMLDivElement>(null)
+
+
+  const isAdmin = user?.role === 'Admin'
+  console.log("🚀 ~ Header ~ isAdmin:", isAdmin)
   
   // Navbar control based on scroll
   const controlNavbar = () => {
@@ -157,7 +162,7 @@ const Header = () => {
                     My Orders
                   </Link>
                   
-                  {user.role === 'admin' && (
+                  {user.role === 'Admin' && (
                     <Link 
                       href="/admin/dashboard" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
