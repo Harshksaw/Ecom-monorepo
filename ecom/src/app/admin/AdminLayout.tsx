@@ -38,17 +38,17 @@ const ADMIN_MENU_ITEMS = [
   },
   {
     name: 'Orders',
-    href: '/admin/orders',
+    href: '/admin/dashboard/orders',
     icon: <FaShoppingCart />
   },
   {
     name: 'Users',
-    href: '/admin/users',
+    href: '/admin/dashboard/users',
     icon: <FaUsers />
   },
   {
     name: 'Settings',
-    href: '/admin/settings',
+    href: '/admin/dashboard/settings',
     icon: <FaCog />
   }
 ];
