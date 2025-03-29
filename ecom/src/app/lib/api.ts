@@ -2,7 +2,8 @@
 import axios from 'axios';
 
 // API base URL
-export const API_URL = "http://node_backend:7003"
+export const API_URL = "http://node_backend:7003/api"
+
 
 // Create an axios instance with default configuration
 const apiClient = axios.create({
