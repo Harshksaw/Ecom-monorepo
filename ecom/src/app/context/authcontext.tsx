@@ -56,6 +56,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     try {
       const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+
+  
       
       const { token, user, message } = response.data;
       
@@ -165,6 +167,50 @@ const logout = () => {
     router.push('/auth/login');
   };
 
+
+  const adminLogin = async (email: string, password: string) => {
+    try {
+      const response = await axios.post(`${API_URL}/admin/login`,{email, password});
+      const { token, user, message } = response.data;
+      
+      // Save auth data to localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      document.cookie = `token=${token}; path=/;`;
+      document.cookie = `user=${JSON.stringify(user)}; path=/;`;
+    // Update state
+
+      
+      // Update state
+      setToken(token);
+      setUser(user);
+      
+      // Set axios default header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        // Get callback URL from search params if any
+        let callbackUrl = '/';
+        if (typeof window !== 'undefined') {
+          const searchParams = new URLSearchParams(window.location.search);
+          const callback = searchParams.get('callback');
+          if (callback) {
+            callbackUrl = callback;
+          }
+        }
+      // Redirect to admin dashboard
+      // router.push('/admin/dashboard');
+      
+      return { success: true, message };
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Admin login failed. Please try again.';
+      setError(errorMessage);
+      console.error('Admin login error:', err);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const value = {
     user,
     token,
@@ -172,7 +218,8 @@ const logout = () => {
     login,
     signup,
     logout,
-    error
+    error,
+    adminLogin
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

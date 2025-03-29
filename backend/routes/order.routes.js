@@ -7,16 +7,16 @@ const { authenticate, isAdmin } = require('../middleware/authorization');
 router.post('/create/:id',  orderController.createOrder);
 
 // Get all orders (admin only)
-router.get('/', authenticate, isAdmin, orderController.getAllOrders);
+router.get('/', orderController.getAllOrders);
 
 // Get customer orders
-router.get('/my-orders', authenticate, orderController.getCustomerOrders);
+router.get('/my-orders', orderController.getCustomerOrders);
 
 // Get order by ID
-router.get('/:id', authenticate, orderController.getOrderById);
+router.get('/:id', orderController.getOrderById);
 
 // Update order status (admin only)
-router.put('/:id/status', authenticate, isAdmin, orderController.updateOrderStatus);
+router.put('/:id/status',  orderController.updateOrderStatus);
 
 // Cancel order
 router.put('/:id/cancel', authenticate, orderController.cancelOrder);

@@ -49,12 +49,15 @@ const loginAdmin = async (req, res,next) => {
       const token = generateToken(admin);
       res.send({
         token,
-        _id: admin._id,
-        name: admin.name,
-        phone: admin.phone,
-        email: admin.email,
+        user: {
 
-        role: admin.role,
+          _id: admin._id,
+          name: admin.name,
+          phone: admin.phone,
+          email: admin.email,
+          
+          role: admin.role,
+        }
       });
     } else {
       res.status(401).send({

@@ -34,7 +34,7 @@ app.use(globalErrorHandler);
 connectDB();
 
 // root route
-app.get('/get', (req, res) => {
+app.get('/', (req, res) => {
   res.send({ success: true, message: "Welcome to Ecom API 🚀" });
 });
 

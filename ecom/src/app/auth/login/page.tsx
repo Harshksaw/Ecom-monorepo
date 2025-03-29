@@ -4,8 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaEye, FaEyeSlash, FaGoogle, FaFacebook } from 'react-icons/fa';
-
+import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaUserShield } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/authcontext';
 
@@ -16,23 +15,11 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   
-  const { login, user, loading, error } = useAuth();
+  const { login, user, loading, error, adminLogin } = useAuth();
 
   // Get callback URL from search params
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
   const callbackUrl = searchParams.get('callback') || '/';
-  
-  // If user is already logged in, redirect
-  // useEffect(() => {
-  //   if (user) {
-  //     if (user.role === 'admin') {
-  //       router.push('/admin/dashboard');
-  //     } else {
-  //       // Redirect to callback URL if present, otherwise to homepage
-  //       router.push(callbackUrl);
-  //     }
-  //   }
-  // }, [user, router, callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,9 +36,25 @@ export default function LoginPage() {
     }
   };
 
-  const handleSocialLogin = (provider: 'google' | 'facebook') => {
-    // Social login implementation - could connect to your custom backend
-    toast.error(`${provider} login not implemented yet`);
+  const handleAdminLogin = async () => {
+    // Set email field to admin email (you might want to set this to a specific value)
+    // or just navigate to a dedicated admin login page
+    try {
+      // Example: Pre-fill with admin email
+        const result = await adminLogin(email, password);
+        if (result.success) {
+          toast.success(result.message || 'Login successful!');
+          // Router navigation happens in the login function after setting the user state
+        }
+      
+      // Alternative: Direct navigation to admin login
+      router.push('/admin/dashboard');
+      
+      toast.success('Admin credentials pre-filled. Enter your password to continue.');
+    } catch (err) {
+      console.error('Admin login error:', err);
+      toast.error('Failed to setup admin login');
+    }
   };
 
   if (loading) {
@@ -178,40 +181,37 @@ export default function LoginPage() {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
+          
+          {/* Admin Login Button */}
+          <div>
+            <button
+              type="button"
+              onClick={handleAdminLogin}
+              disabled={loading}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 mt-3 ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                <FaUserShield className="h-5 w-5 text-gray-400 group-hover:text-gray-300" />
+              </span>
+              Admin Login
+            </button>
+          </div>
 
-          {/* Social Login */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Or continue with
-                </span>
-              </div>
+          {/* Divider */}
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
             </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('google')}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <FaGoogle className="h-5 w-5 mr-2" />
-                Google
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('facebook')}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <FaFacebook className="h-5 w-5 mr-2" />
-                Facebook
-              </button>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-50 text-gray-500">
+                Or continue with
+              </span>
             </div>
           </div>
+
+          {/* Social Login Buttons can be added here */}
         </form>
       </div>
     </div>

@@ -18,7 +18,7 @@ router.get('/:id/related', productController.getRelatedProducts);
 // Admin routes
 router.post('/',handleUpload , productController.createProduct);
 router.put('/:id', authenticate, isAdmin, productController.updateProduct);
-router.delete('/:id', authenticate, isAdmin, productController.deleteProduct);
+router.delete('/:id',  productController.deleteProduct);
 router.patch('/:id/stock', authenticate, isAdmin, productController.updateStock);
 router.post('/bulk-status', authenticate, isAdmin, productController.bulkUpdateStatus);
 router.post('/bulk-delete', authenticate, isAdmin, productController.bulkDeleteProducts);
