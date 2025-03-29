@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // API base URL
-export const API_URL = "http://node_backend:7003/api"
+export const API_URL = "https://ecom-turborepo.onrender.com/api"
 
 
 // Create an axios instance with default configuration
