@@ -101,7 +101,7 @@ exports.validateCategoryInput = (data) => {
     }
     
     if (!data.shippingAddress) errors.shippingAddress = 'Shipping address is required';
-    if (!data.billingAddress) errors.billingAddress = 'Billing address is required';
+
     if (!data.paymentMethod) errors.paymentMethod = 'Payment method is required';
     
     return {

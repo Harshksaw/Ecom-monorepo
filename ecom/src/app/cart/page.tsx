@@ -55,7 +55,7 @@ const CartPage = () => {
   // User profile and address states
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [defaultShippingAddress, setDefaultShippingAddress] = useState<Address | null>(null);
-  const [defaultBillingAddress, setDefaultBillingAddress] = useState<Address | null>(null);
+
   const [isAddressLoading, setIsAddressLoading] = useState(true);
   const [showAddressRequired, setShowAddressRequired] = useState(false);
 
@@ -96,12 +96,10 @@ const CartPage = () => {
                   );
                   
                   // If no default billing found, use the first billing address
-                  const firstBilling = userData.addresses.find(
-                    (addr: Address) => addr.type === 'billing'
-                  );
+       
                   
                   setDefaultShippingAddress(defaultShipping || firstShipping || null);
-                  setDefaultBillingAddress(defaultBilling || firstBilling || null);
+
                 }
               }
             } else {
@@ -191,131 +189,112 @@ const CartPage = () => {
   };
 
   // Get the appropriate price for display (sale price if available, otherwise regular price)
-  const getDisplayPrice = (item:any) => {
-    return item.attributes?.salePrice || item.attributes?.price || item.oneQuantityPrice;
-  };
 
   // Handle Razorpay checkout
-  const handleCheckout = async () => {
-    if (cartItems.length === 0) {
-      toast.error('Your cart is empty');
-      return;
+// snippet from handleCheckout in CartPage
+const handleCheckout = async () => {
+  if (cartItems.length === 0) {
+    toast.error('Your cart is empty');
+    return;
+  }
+
+  if (!isCheckoutReady()) {
+    setShowAddressRequired(true);
+    toast.error('Please add your shipping address to continue');
+    return;
+  }
+
+  setIsProcessing(true);
+  try {
+    // 1) Create order on your backend
+    toast.loading('Payment Processing...');
+
+    console.log(cartItems)
+
+    const response = await axios.post(`${API_URL}/orders/create/${userId}`, {
+      total,
+      receipt: `receipt_${Date.now()}`,
+      tax: gst,
+      subtotal,
+      shippingAddress: defaultShippingAddress,
+      items: cartItems.map((item:any) => ({
+        productId: item.id || item._id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.oneQuantityPrice
+        
+      })),
+    });
+
+    const orderData = response.data;
+
+    if (response.status !== 201) {
+      throw new Error(orderData.message || 'Failed to create order');
     }
 
-    // Validate if we have all required information
-    if (!isCheckoutReady()) {
-      // Show address required warning
-      setShowAddressRequired(true);
-      toast.error('Please add your shipping address to continue');
-      return;
-    }
+    // 2) Initialize Razorpay checkout
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: Math.round(total * 100),
+      currency: 'INR',
+      name: 'Jewelry Store',
+      description: 'Purchase of fine jewelry',
+      order_id: orderData.orderId,  // from your backend
+      image: '/logo.png',
+      handler: (response: any) => {
+        handlePaymentSuccess(response);
+      },
+      prefill: {
+        name: userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : '',
+        email: userProfile?.email || '',
+        contact: userProfile?.phoneNumber || ''
+      },
+      notes: { address: 'Jewelry Store Corporate Office' },
+      theme: { color: '#3B82F6' }
+    };
 
-    setIsProcessing(true);
+    // 3) Open the Razorpay popup
+    // @ts-ignore
+    const razorpayInstance = new window.Razorpay(options);
+    razorpayInstance.open();
 
-    try {
-      // Create order on your backend
+  } catch (error) {
+    console.error('Checkout error:', error);
+    toast.error('Failed to initiate checkout. Please try again.');
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
-      toast.loading('payement Processing')
-      const response = await axios.post(`${API_URL}/orders/create/${userId}`, {
-    
-
-          total:  total, 
-          receipt: `receipt_${Date.now()}`,
-          tax:gst,
-          subtotal,
-          shippingAddress: defaultShippingAddress,
-          billingAddress: defaultBillingAddress || defaultShippingAddress,
-          items: cartItems.map((item:any) => ({
-            productId: item.id,
-            name: item.attributes?.name,
-            quantity: item.quantity,
-            price: getDisplayPrice(item)
-      }))
-
-      });
-
-      const orderData = response.data
-
-      if (response.status != 201) {
-        throw new Error(orderData.message || 'Failed to create order');
-      }
-
-      // Initialize Razorpay
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: Math.round(total * 100),
-        currency: 'INR',
-        name: 'Jewelry Store',
-        description: 'Purchase of fine jewelry',
-        order_id: orderData.orderId,
-        image: '/logo.png', // Your company logo
-        handler: function (response: any) {
-          // Handle successful payment
-          handlePaymentSuccess(response);
-        },
-        prefill: {
-          name: userProfile ? `${userProfile.firstName} ${userProfile.lastName || ''}` : '',
-          email: userProfile?.email || '',
-          contact: userProfile?.phoneNumber || ''
-        },
-        notes: {
-          address: 'Jewelry Store Corporate Office'
-        },
-        theme: {
-          color: '#3B82F6'
-        }
-      };
-
-      // @ts-ignore - Razorpay is loaded via script in _document.tsx or layout.tsx
-      const razorpayInstance = new window.Razorpay(options);
-      razorpayInstance.open();
-
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error('Failed to initiate checkout. Please try again.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   // Handle payment success
-  const handlePaymentSuccess = async (response: any) => {
-    try {
-      // Verify payment on your backend
-      const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
-      
-      const verifyResponse = await fetch('/api/verify-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          paymentId: razorpay_payment_id,
-          orderId: razorpay_order_id,
-          signature: razorpay_signature
-        }),
-      });
+// snippet from CartPage
+const handlePaymentSuccess = async (response: any) => {
+  try {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
 
-      const verifyData = await verifyResponse.json();
+    const verifyResponse = await axios.post(`${API_URL}/orders/capturePayment`, {
+      body: JSON.stringify({
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        signature: razorpay_signature
+      }),
+    });
 
-      if (verifyData.success) {
-        // Clear cart after successful payment
-        // dispatch(clearCart());
-        
-        // Redirect to success page or show success message
-        toast.success('Payment successful! Order confirmed.');
-        
-        // Optional: Redirect to order confirmation page
-        // router.push(`/order/confirmation/${verifyData.orderId}`);
-      } else {
-        toast.error('Payment verification failed. Please contact support.');
-      }
-    } catch (error) {
-      console.error('Payment verification error:', error);
-      toast.error('An error occurred while verifying your payment.');
+    const verifyData = verifyResponse.data
+
+    if (verifyData.success) {
+      toast.success('Payment successful! Order confirmed.');
+      // Optionally clear cart, redirect, etc.
+    } else {
+      toast.error('Payment verification failed. Please contact support.');
     }
-  };
+  } catch (error) {
+    console.error('Payment verification error:', error);
+    toast.error('An error occurred while verifying your payment.');
+  }
+};
+
 
   // Navigate to profile page to add address
   const handleAddAddress = () => {
@@ -346,7 +325,7 @@ const CartPage = () => {
             {/* Cart Items */}
             <div className="space-y-6">
               {cartItems.map((item:any) => {
-                const displayPrice = getDisplayPrice(item);
+                const displayPrice = item.price;
                 const isOnSale = item.attributes?.salePrice && item.attributes.salePrice < item.attributes.price;
                 
                 return (

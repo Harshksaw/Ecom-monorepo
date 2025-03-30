@@ -1,18 +1,18 @@
 const mongoose = require("mongoose");
 
-// Order Schema
 const orderSchema = new mongoose.Schema({
   orderNumber: { type: String, required: true, unique: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   items: [{
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
     quantity: { type: Number, required: true },
-    price: { type: Number, required: true } // Price at time of purchase
+    price: { type: Number, required: true }
   }],
   subtotal: { type: Number, required: true },
   tax: { type: Number, required: true },
   shipping: { type: Number, required: false },
   total: { type: Number, required: true },
+
   shippingAddress: {
     addressLine1: { type: String, required: true },
     addressLine2: { type: String },
@@ -21,14 +21,8 @@ const orderSchema = new mongoose.Schema({
     postalCode: { type: String, required: true },
     country: { type: String, required: true }
   },
-  billingAddress: {
-    addressLine1: { type: String, required: true },
-    addressLine2: { type: String },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    postalCode: { type: String, required: true },
-    country: { type: String, required: true }
-  },
+
+  
   paymentMethod: { type: String, required: false },
   paymentStatus: { 
     type: String, 
@@ -40,14 +34,18 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'], 
     default: 'pending' 
   },
+  
+  // Razorpay-specific fields
+  razorpayOrderId: { type: String },
+  razorpayPaymentId: { type: String },
+  razorpaySignature: { type: String },
+
   trackingNumber: { type: String },
   notes: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
 
-
-// define pre-save middleware to generate the invoice number
 orderSchema.pre('save', async function (next) {
   const order = this;
   if (!order.invoice) {
@@ -59,7 +57,9 @@ orderSchema.pre('save', async function (next) {
         .limit(1)
         .select({ invoice: 1 });
       
-      const startingInvoice = highestInvoice.length === 0 ? 1000 : highestInvoice[0].invoice + 1;
+      const startingInvoice = highestInvoice.length === 0 
+        ? 1000 
+        : highestInvoice[0].invoice + 1;
       order.invoice = startingInvoice;
       next();
     } catch (error) {

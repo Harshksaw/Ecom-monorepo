@@ -6,6 +6,8 @@ const { authenticate, isAdmin } = require('../middleware/authorization');
 // Create a new order
 router.post('/create/:id',  orderController.createOrder);
 
+router.post('/capturePayment',  orderController.capturePayment);
+
 // Get all orders (admin only)
 router.get('/', orderController.getAllOrders);
 
