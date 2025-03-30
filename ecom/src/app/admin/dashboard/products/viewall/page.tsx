@@ -30,7 +30,10 @@ interface Product {
   description: string;
   price: number;
   salePrice?: number;
-  categoryId: string;
+  categoryId: {
+    _id: string;
+    name: string;
+  };
   images: string[];
   weight?: number;
   dimensions?: {

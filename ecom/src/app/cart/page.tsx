@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaTrash, FaArrowLeft, FaShieldAlt, FaMapMarkerAlt, FaUser, FaExclamationTriangle } from 'react-icons/fa';
 import { updateCart, removeFromCart } from '../store/slices/cartSlice';
-
+import Script from "next/script";
 import Wrapper from '../components/Wrapper';
 import EmptyCart from './EmptyCart';
 import { toast } from 'react-hot-toast';
@@ -188,112 +188,130 @@ const CartPage = () => {
     toast.success('Item removed from cart');
   };
 
-  // Get the appropriate price for display (sale price if available, otherwise regular price)
 
-  // Handle Razorpay checkout
-// snippet from handleCheckout in CartPage
-const handleCheckout = async () => {
-  if (cartItems.length === 0) {
-    toast.error('Your cart is empty');
-    return;
-  }
-
-  if (!isCheckoutReady()) {
-    setShowAddressRequired(true);
-    toast.error('Please add your shipping address to continue');
-    return;
-  }
-
-  setIsProcessing(true);
-  try {
-    // 1) Create order on your backend
-    toast.loading('Payment Processing...');
-
-    console.log(cartItems)
-
-    const response = await axios.post(`${API_URL}/orders/create/${userId}`, {
-      total,
-      receipt: `receipt_${Date.now()}`,
-      tax: gst,
-      subtotal,
-      shippingAddress: defaultShippingAddress,
-      items: cartItems.map((item:any) => ({
-        productId: item.id || item._id,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.oneQuantityPrice
-        
-      })),
-    });
-
-    const orderData = response.data;
-
-    if (response.status !== 201) {
-      throw new Error(orderData.message || 'Failed to create order');
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) {
+      toast.error('Your cart is empty');
+      return;
     }
+  
+    if (!isCheckoutReady()) {
+      setShowAddressRequired(true);
+      toast.error('Please add your shipping address to continue');
+      return;
+    }
+  
+    setIsProcessing(true);
+    const toastId = toast.loading('Creating your order...');
+  
+    try {
+      // Format cart items for the backend
+      const formattedItems = cartItems.map((item: any) => ({
+        productId: item.id || item._id,
+        name: item.attributes?.name || item.name,
+        quantity: item.quantity || 1,
+        price: item.oneQuantityPrice || (item.attributes?.salePrice || item.attributes?.price),
+        image: item.attributes?.images?.[0] || '/placeholder.png',
+      }));
+  
+      // Create order on backend
+      const response = await axios.post(`${API_URL}/orders/create/${userId}`, {
+        total,
+        receipt: `receipt_${Date.now()}`,
+        tax: gst,
+        subtotal,
+        shippingCost: shipping,
+        shippingAddress: defaultShippingAddress,
+        items: formattedItems,
+      });
+  
+      const orderData = response.data;
+  
+      // Check response
+      if (!orderData.orderId) {
+        throw new Error(orderData.message || 'Failed to create order');
+      }
+  
+      toast.success('Order created successfully!', { id: toastId });
+  
+  
+      // Initialize Razorpay options
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
+        amount: Math.round(total * 100), // in paisa
+        currency: 'INR',
+        name: 'Jewelry Store',
+        description: 'Purchase of fine jewelry',
+        order_id: orderData.orderId,
+        // image: '/logo.png',
+        handler: handlePaymentSuccess,
+        prefill: {
+          name: userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : '',
+          email: userProfile?.email || '',
+          contact: userProfile?.phoneNumber || ''
+        },
+        notes: { 
+          address: 'Jewelry Store Corporate Office',
+          order_id: orderData.orderId 
+        },
+        theme: { color: '#3B82F6' }
+      };
+      console.log("🚀 ~ handleCheckout ~ options:", options)
+  
+      // Create Razorpay instance and open checkout
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.on("payment.failed", function (response: any) {
+        alert("Payment failed");
+        console.error(response.error);
+      });
+      razorpay.open();
 
-    // 2) Initialize Razorpay checkout
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: Math.round(total * 100),
-      currency: 'INR',
-      name: 'Jewelry Store',
-      description: 'Purchase of fine jewelry',
-      order_id: orderData.orderId,  // from your backend
-      image: '/logo.png',
-      handler: (response: any) => {
-        handlePaymentSuccess(response);
-      },
-      prefill: {
-        name: userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : '',
-        email: userProfile?.email || '',
-        contact: userProfile?.phoneNumber || ''
-      },
-      notes: { address: 'Jewelry Store Corporate Office' },
-      theme: { color: '#3B82F6' }
-    };
-
-    // 3) Open the Razorpay popup
-    // @ts-ignore
-    const razorpayInstance = new window.Razorpay(options);
-    razorpayInstance.open();
-
-  } catch (error) {
-    console.error('Checkout error:', error);
-    toast.error('Failed to initiate checkout. Please try again.');
-  } finally {
-    setIsProcessing(false);
-  }
-};
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      toast.error(error.message || 'Failed to initiate checkout. Please try again.', { id: toastId });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
 
-  // Handle payment success
-// snippet from CartPage
 const handlePaymentSuccess = async (response: any) => {
+  const verifyToastId = toast.loading('Verifying your payment...');
+  
   try {
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
-
+    
+    // Fix: The API call format was incorrect - remove the unnecessary JSON.stringify in the body
     const verifyResponse = await axios.post(`${API_URL}/orders/capturePayment`, {
-      body: JSON.stringify({
-        paymentId: razorpay_payment_id,
-        orderId: razorpay_order_id,
-        signature: razorpay_signature
-      }),
+      paymentId: razorpay_payment_id,
+      orderId: razorpay_order_id,
+      signature: razorpay_signature
     });
-
-    const verifyData = verifyResponse.data
-
+    
+    const verifyData = verifyResponse.data;
+    
     if (verifyData.success) {
-      toast.success('Payment successful! Order confirmed.');
-      // Optionally clear cart, redirect, etc.
+      toast.success('Payment successful! Order confirmed.', { id: verifyToastId });
+      
+      // Clear the cart after successful payment
+      // dispatch(removeAllItems());
+      
+      // Redirect to order confirmation page
+      router.push(`/orders/confirmation?orderId=${razorpay_order_id}`);
     } else {
-      toast.error('Payment verification failed. Please contact support.');
+      toast.error(`Payment verification failed: ${verifyData.message || 'Please contact support.'}`, { id: verifyToastId });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Payment verification error:', error);
-    toast.error('An error occurred while verifying your payment.');
+    toast.error('An error occurred while verifying your payment.', { id: verifyToastId });
   }
 };
+
+// 3. Make sure you have the removeAllItems action in your cartSlice
+// Add this to your cartSlice.js file if it doesn't exist:
+
+// In cartSlice.js
+
 
 
   // Navigate to profile page to add address
@@ -307,6 +325,7 @@ const handlePaymentSuccess = async (response: any) => {
   }
 
   return (
+    <>
     <Wrapper>
       <div className="py-10">
         <h1 className="text-3xl font-bold mb-8 text-center md:text-left">Your Shopping Cart</h1>
@@ -559,6 +578,11 @@ const handlePaymentSuccess = async (response: any) => {
         </div>
       </div>
     </Wrapper>
+    <Script
+        id="razorpay-checkout-js"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+      />
+    </>
   );
 };
 

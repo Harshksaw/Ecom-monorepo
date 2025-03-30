@@ -22,6 +22,7 @@ interface AuthContextType {
   signup: (email: string, password: string, firstName: string, lastName: string, phoneNumber?: string) => Promise<{ success: boolean, message: string }>;
   logout: () => void;
   error: string | null;
+  adminLogin: (email: string, password: string) => Promise<{ success: boolean, message: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
