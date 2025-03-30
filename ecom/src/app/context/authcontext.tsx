@@ -18,7 +18,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean, message: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean, message: string, email: string, password: string, id:string, firstName:string, lastName: string , role:string, phoneNumber: string }>;
   signup: (email: string, password: string, firstName: string, lastName: string, phoneNumber?: string) => Promise<{ success: boolean, message: string }>;
   logout: () => void;
   error: string | null;
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push(callbackUrl);
       }
       
-      return { success: true, message };
+      return { success: true, message, user };
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Login failed. Please check your credentials.';
       setError(errorMessage);

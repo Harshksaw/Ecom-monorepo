@@ -180,13 +180,16 @@ exports.getAllOrders = async (req, res) => {
 // Get customer orders
 exports.getCustomerOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
-      .populate('items.productId', 'name sku images');
+    const orders = await Order.find({ userId: req.params.id })
+    .sort({ createdAt: -1 })
+    .populate('items.productId', 'name sku images');
+
     
-    res.status(200).json({ orders });
+    return  res.status(200).json({ orders });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.log(error.message
+    );
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -202,9 +205,9 @@ exports.getOrderById = async (req, res) => {
     }
     
     // Only allow admin or the order owner to view
-    if (req.user.role !== 'admin' && order.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
+    // if (req.user.role !== 'admin' && order.userId.toString() !== req.user.id) {
+    //   return res.status(403).json({ message: 'Unauthorized' });
+    // }
     
     res.status(200).json({ order });
   } catch (error) {

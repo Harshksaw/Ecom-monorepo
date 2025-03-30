@@ -69,29 +69,29 @@ interface Order {
 export default function OrderDetailPage({ params }:any) {
   const router = useRouter();
   const { token } = useAuth();
-  const { id } = params;
+
   
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+
+  // const id =JSON.parse( localStorage.getItem('user')).id;
+  // console.log(id,"-------------------");
   
   // Fetch order details
   useEffect(() => {
     const fetchOrderDetails = async () => {
-      if (!token || !id) return;
+
       
       try {
         setIsLoading(true);
         setError(null);
         
-        const response = await axios.get(`${API_URL}/orders/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await axios.get(`${API_URL}/orders/my-orders/${id}`);
         
-        if (response.data.success) {
-          setOrder(response.data.order);
+        if (response.status == 200) {
+          setOrder(response.data.orders);
         } else {
           setError(response.data.message || 'Failed to fetch order details');
         }

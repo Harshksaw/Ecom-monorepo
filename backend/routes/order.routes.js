@@ -12,7 +12,7 @@ router.post('/capturePayment',  orderController.capturePayment);
 router.get('/', orderController.getAllOrders);
 
 // Get customer orders
-router.get('/my-orders', orderController.getCustomerOrders);
+router.get('/my-orders/:id', orderController.getCustomerOrders);
 
 // Get order by ID
 router.get('/:id', orderController.getOrderById);
