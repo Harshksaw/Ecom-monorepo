@@ -22,6 +22,7 @@ import { loadRazorpay } from '../utils/razorpay';
 // Types
 import { CartItem, UserProfile, Address } from './types';
 import axios from 'axios';
+import { clearCart } from '../store/slices/cartSlice';
 
 const CartPage = () => {
   const router = useRouter();
@@ -244,13 +245,15 @@ const CartPage = () => {
       const verifyData = verifyResponse.data;
       
       if (verifyResponse.status === 200) {
-        toast.success('Payment successful! Order confirmed.', { id: verifyToastId });
-        console.log('Payment verification success:', verifyData);
+        toast.success('Payment successful! Order confirmed.');
+        // console.log('Payment verification success:', verifyData);
         // Clear the cart after successful payment
-        // dispatch(removeAllItems());
+        dispatch(clearCart());
+
+
         
         // Redirect to order confirmation page
-        // router.push(`/orders/confirmation?orderId=${razorpay_order_id}`);
+        router.push(`/orders`);
       } else {
         toast.error(`Payment verification failed: ${verifyData.message || 'Please contact support.'}`, { id: verifyToastId });
       }
