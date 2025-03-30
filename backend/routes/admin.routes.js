@@ -10,11 +10,16 @@ const {
 // Register a staff
 router.post("/register", registerAdmin);
 
+
+
 // Login an admin
 router.post("/login", loginAdmin);
 
 // Change password
 router.patch("/change-password", changePassword);
+
+// router.post('/contactus',contactuse )
+// router.get('/contactus',contactuse )
 
 // Export the router - make sure this is a proper export at the end
 module.exports = router;

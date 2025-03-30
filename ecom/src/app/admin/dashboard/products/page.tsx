@@ -260,7 +260,7 @@ export default function CreateProductPage() {
       console.log("🚀 ~ handleSubmit ~ response:", response)
 
 
-      if (!response.status === 201) {
+      if (response.status !== 201) {
         toast.error('Failed to create product');
         return;
       }

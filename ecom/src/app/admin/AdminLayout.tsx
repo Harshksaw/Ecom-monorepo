@@ -38,19 +38,19 @@ const ADMIN_MENU_ITEMS = [
   },
   {
     name: 'Orders',
-    href: '/admin/orders',
+    href: '/admin/dashboard/orders',
     icon: <FaShoppingCart />
   },
-  {
-    name: 'Users',
-    href: '/admin/users',
-    icon: <FaUsers />
-  },
-  {
-    name: 'Settings',
-    href: '/admin/settings',
-    icon: <FaCog />
-  }
+  // {
+  //   name: 'Users',
+  //   href: '/admin/dashboard/users',
+  //   icon: <FaUsers />
+  // },
+  // {
+  //   name: 'Settings',
+  //   href: '/admin/dashboard/settings',
+  //   icon: <FaCog />
+  // }
 ];
 
 interface AdminLayoutProps {

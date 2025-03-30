@@ -26,19 +26,20 @@ const AddToCartButton = ({ product }:any) => {
     setShowError(false);
 
     // Create a payload for the cart
-    const payload = {
-      id: product._id,
-      selectedSize,
-      oneQuantityPrice: product.price,
-      attributes: {
-        ...product,
-        price: product.price // Initial price is for one item
-      }
-    };
+ 
 
     // Dispatch the action to add item to cart
-    // dispatch(addToCart(payload));
-    
+    dispatch(addToCart({
+      id: product._id,
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      selectedSize: null,
+      oneQuantityPrice: product.price,
+      attributes: product.attributes,
+      quantity: 1,                               // Add missing quantity
+                     // Add missing price
+    }));
     // Show success message
     toast.success(`${product.name} added to cart`);
   };
