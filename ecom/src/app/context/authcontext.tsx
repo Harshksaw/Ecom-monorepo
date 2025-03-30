@@ -212,6 +212,8 @@ const logout = () => {
     }
   }
 
+  
+
   const value = {
     user,
     token,

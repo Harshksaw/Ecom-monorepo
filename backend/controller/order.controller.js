@@ -105,7 +105,7 @@ exports.capturePayment = async (req, res) => {
     existingOrder.razorpayPaymentId = paymentId;
     existingOrder.razorpaySignature = signature;
     existingOrder.paymentStatus = 'completed';
-    // existingOrder.orderStatus = 'processing'; // If you track shipping, etc.
+    existingOrder.orderStatus = 'processing'; 
     await existingOrder.save();
 
     return res.status(200).json({
