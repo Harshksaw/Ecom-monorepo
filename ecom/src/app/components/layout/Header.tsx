@@ -26,13 +26,13 @@ const Header = () => {
   
   const { cartItems } = useSelector((state:any) => state.cart)
   const { user, logout } = useAuth()
-  console.log("🚀 ~ Header ~ user:", user)
+  // console.log("🚀 ~ Header ~ user:", user)
   
   const userMenuRef = useRef<HTMLDivElement>(null)
 
 
   const isAdmin = user?.role === 'Admin'
-  console.log("🚀 ~ Header ~ isAdmin:", isAdmin)
+  // console.log("🚀 ~ Header ~ isAdmin:", isAdmin)
   
   // Navbar control based on scroll
   const controlNavbar = () => {

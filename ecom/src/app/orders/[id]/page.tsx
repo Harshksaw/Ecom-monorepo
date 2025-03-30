@@ -54,13 +54,7 @@ interface Order {
     postalCode: string;
     country: string;
   };
-  billingAddress?: {
-    address: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-  };
+
   paymentMethod: string;
   paymentStatus: 'pending' | 'paid' | 'failed';
   createdAt: string;
@@ -405,25 +399,7 @@ export default function OrderDetailPage({ params }: any) {
             </div>
             
             {/* Billing Address (if different) */}
-            {order.billingAddress && (
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="p-6">
-                  <h2 className="text-xl font-bold mb-4">Billing Address</h2>
-                  
-                  <div className="flex items-start">
-                    <FaMapMarkerAlt className="text-gray-400 mt-1 mr-3" />
-                    <div>
-                      <p className="font-medium">Billing Address</p>
-                      <address className="not-italic text-gray-600 mt-1">
-                        {order.billingAddress.address}<br />
-                        {order.billingAddress.city}, {order.billingAddress.state} {order.billingAddress.postalCode}<br />
-                        {order.billingAddress.country}
-                      </address>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+   
             
             {/* Need Help Section */}
             <div className="bg-blue-50 rounded-lg p-6">

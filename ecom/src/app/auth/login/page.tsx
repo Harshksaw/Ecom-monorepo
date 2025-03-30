@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaUserShield } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/authcontext';
+import { useDispatch } from 'react-redux';
+import { setUser } from '@/app/store/slices/userSlice';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -20,13 +22,16 @@ export default function LoginPage() {
   // Get callback URL from search params
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
   const callbackUrl = searchParams.get('callback') || '/';
-
+const dispatch = useDispatch();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       const result = await login(email, password);
+
       if (result.success) {
+        //@ts-ignore
+        dispatch(setUser(result.user));
         toast.success(result.message || 'Login successful!');
         // Router navigation happens in the login function after setting the user state
       }

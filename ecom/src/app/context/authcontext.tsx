@@ -18,10 +18,11 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean, message: string }>;
-  signup: (email: string, password: string, firstName: string, lastName: string, phoneNumber?: string) => Promise<{ success: boolean, message: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message: string; user?: User }>;
+  signup: (email: string, password: string, firstName: string, lastName: string, phoneNumber?: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   error: string | null;
+  adminLogin: (email: string, password: string) => Promise<{ success: boolean; message: string; user?: User }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -90,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push(callbackUrl);
       }
       
-      return { success: true, message };
+      return { success: true, message, user };
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Login failed. Please check your credentials.';
       setError(errorMessage);
@@ -210,6 +211,8 @@ const logout = () => {
       setLoading(false);
     }
   }
+
+  
 
   const value = {
     user,

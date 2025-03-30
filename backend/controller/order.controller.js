@@ -1,95 +1,124 @@
 const Order = require('../model/Order');
 const Product = require('../model/Products');
-
+const Razorpay = require("razorpay");
 // Generate a unique order number
+const crypto = require('crypto');
 const generateOrderNumber = () => {
   return 'JW-' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000);
 };
 
+// Retrieve these from environment variables or your secrets store:
+const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
+const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+  key_id: razorpayKeyId,
+  key_secret: razorpayKeySecret,
+});
 // Create a new order
 exports.createOrder = async (req, res) => {
   try {
     const {
-      items,
-      tax, subtotal,total,
+   
+      total,
+      tax,
+      subtotal,
       shippingAddress,
-      billingAddress,
-      paymentMethod
-    } = req.body;
-    
-    if (!items || !items.length) {
-      return res.status(400).json({ message: 'Order must contain at least one item' });
-    }
-    
-    // // Calculate order totals and validate items
-    // let subtotal = 0;
-    // const orderItems = [];
-    
-    // for (const item of items) {
-    //   const product = await Product.findById(item.productId);
-      
-    //   if (!product) {
-    //     return res.status(400).json({ message: `Product ${item.productId} not found` });
-    //   }
-      
-    //   if (!product.isActive) {
-    //     return res.status(400).json({ message: `Product ${product.name} is not available` });
-    //   }
-      
-    //   if (product.stockQuantity < item.quantity) {
-    //     return res.status(400).json({
-    //       message: `Not enough stock for ${product.name}. Available: ${product?.stockQuantity}`
-    //     });
-    //   }
-      
-    //   const itemPrice = product.salePrice || product.price;
-    //   const itemTotal = itemPrice * item.quantity;
-    //   subtotal += itemTotal;
-      
-    //   orderItems.push({
-    //     productId: product._id,
-    //     quantity: item.quantity,
-    //     price: itemPrice
-    //   });
-      
-    //   // Reduce stock quantity
-    //   product.stockQuantity -= item.quantity;
-    //   await product.save();
-    // }
-    
-    // // Calculate tax and shipping (simplified)
-    // const tax = subtotal * 0.07; // 7% tax
-    // const shipping = subtotal > 100 ? 0 : 10; // Free shipping over $100
-    // const total = subtotal + tax + shipping;
-    
-    // Create order
-    const newOrder = new Order({
-      orderNumber: generateOrderNumber(),
-      userId: req.params.id,
-      items: items,
+      items,
 
+
+
+    } = req.body;
+    console.log("🚀 ~ exports.createOrder= ~ req.body:", req.body)
+
+    const userId = req.params.id;
+
+    // 1) Create the Order in Mongo first (status = pending).
+    let newOrder = new Order({
+      orderNumber: generateOrderNumber(),
+
+      userId,
+      items,
       subtotal,
       tax,
 
-      total: total,
+      total,
       shippingAddress,
-      billingAddress,
-      paymentMethod,
+
+
       paymentStatus: 'pending',
       orderStatus: 'pending'
     });
-    
+
+    // Save to DB so we get an _id we can reference
+    newOrder = await newOrder.save();
+
+    // 2) Create a Razorpay order
+    const options = {
+      amount: Math.round(total * 100),       // amount in paise (for INR)
+      currency: "INR",
+      receipt: `receipt_${newOrder._id}` // can be any unique reference
+    };
+
+    const razorpayOrder = await razorpay.orders.create(options);
+
+    // 3) Attach Razorpay order ID to our local Order doc
+    newOrder.razorpayOrderId = razorpayOrder.id;  
     await newOrder.save();
-    
-    res.status(201).json({
-      message: 'Order created successfully',
-      order: newOrder
+
+    return res.status(200).json({
+      success: true,
+      orderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      order: newOrder // local Order doc
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("Error creating order", error);
+    res.status(500).json({ success: false, error });
   }
-};
+}
 
+
+exports.capturePayment = async (req, res) => {
+  try {
+    const { paymentId, orderId, signature } = req.body;
+
+    // 1) Recompute the expected signature using secret
+    const shasum = crypto.createHmac('sha256', razorpayKeySecret);
+    shasum.update(`${orderId}|${paymentId}`);
+    const digest = shasum.digest('hex');
+
+    // 2) Compare with the signature from Razorpay
+    if (digest !== signature) {
+      return res.status(400).json({ success: false, message: 'Invalid signature' });
+    }
+
+    // 3) If valid, find the local order in DB
+    const existingOrder = await Order.findOne({ razorpayOrderId: orderId });
+    if (!existingOrder) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // 4) Mark payment as completed (or processing)
+    existingOrder.razorpayPaymentId = paymentId;
+    existingOrder.razorpaySignature = signature;
+    existingOrder.paymentStatus = 'completed';
+    existingOrder.orderStatus = 'processing'; 
+    await existingOrder.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Payment verified successfully',
+      orderId: existingOrder._id
+    });
+  } catch (error) {
+    console.error('Error verifying payment:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+
+}
 // Get all orders (admin)
 exports.getAllOrders = async (req, res) => {
   try {
@@ -151,13 +180,16 @@ exports.getAllOrders = async (req, res) => {
 // Get customer orders
 exports.getCustomerOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
-      .populate('items.productId', 'name sku images');
+    const orders = await Order.find({ userId: req.params.id })
+    .sort({ createdAt: -1 })
+    .populate('items.productId', 'name sku images');
+
     
-    res.status(200).json({ orders });
+    return  res.status(200).json({ orders });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.log(error.message
+    );
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -173,9 +205,9 @@ exports.getOrderById = async (req, res) => {
     }
     
     // Only allow admin or the order owner to view
-    if (req.user.role !== 'admin' && order.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
+    // if (req.user.role !== 'admin' && order.userId.toString() !== req.user.id) {
+    //   return res.status(403).json({ message: 'Unauthorized' });
+    // }
     
     res.status(200).json({ order });
   } catch (error) {
