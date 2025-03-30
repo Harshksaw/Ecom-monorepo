@@ -28,8 +28,9 @@ const dispatch = useDispatch();
     
     try {
       const result = await login(email, password);
-      console.log("🚀 ~ handleSubmit ~ result:", result)
+
       if (result.success) {
+        //@ts-ignore
         dispatch(setUser(result.user));
         toast.success(result.message || 'Login successful!');
         // Router navigation happens in the login function after setting the user state

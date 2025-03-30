@@ -316,6 +316,84 @@ const updatedStatus = async (req, res) => {
   }
 };
 
+const getContactMessages = async (req, res) => {
+  try {
+    // Get query parameters for pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    // Count total messages
+    const total = await ContactMessage.countDocuments();
+    
+    // Fetch messages with pagination
+    const messages = await ContactMessage.find()
+      .sort('-createdAt')  // Sort by newest first
+      .skip(skip)
+      .limit(limit);
+    
+    res.status(200).json({
+      success: true,
+      count: messages.length,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      data: messages
+    });
+  } catch (error) {
+    console.error('Error fetching contact messages:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+const createContactMessage = async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+    
+    // Simple validation
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields'
+      });
+    }
+    
+    // Create new message
+    const contactMessage = await ContactMessage.create({
+      name,
+      email,
+      phone: req.body.phone || '',
+      subject,
+      message,
+      status: 'new'
+    });
+    
+    res.status(201).json({
+      success: true,
+      message: 'Message sent successfully',
+      data: contactMessage
+    });
+  } catch (error) {
+    console.error('Error creating contact message:', error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', ')
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
 module.exports = {
   registerAdmin,
   loginAdmin,
@@ -329,4 +407,6 @@ module.exports = {
   updatedStatus,
   changePassword,
   confirmAdminForgetPass,
+  createContactMessage,
+  getContactMessages  
 };
