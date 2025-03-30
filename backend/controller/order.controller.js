@@ -2,6 +2,7 @@ const Order = require('../model/Order');
 const Product = require('../model/Products');
 const Razorpay = require("razorpay");
 // Generate a unique order number
+const crypto = require('crypto');
 const generateOrderNumber = () => {
   return 'JW-' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000);
 };

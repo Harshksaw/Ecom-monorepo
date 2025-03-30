@@ -232,29 +232,25 @@ const CartPage = () => {
     try {
       const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
       
-      const verifyResponse = await fetch(`${API_URL}/orders/capturePayment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
+      const verifyResponse = await axios.post(`${API_URL}/orders/capturePayment`, {
+      
+      
           paymentId: razorpay_payment_id,
           orderId: razorpay_order_id,
           signature: razorpay_signature
-        })
-      });
+        }
+      );
       
-      const verifyData = await verifyResponse.json();
+      const verifyData = verifyResponse.data;
       
-      if (verifyData.success) {
+      if (verifyResponse.status === 200) {
         toast.success('Payment successful! Order confirmed.', { id: verifyToastId });
-        
+        console.log('Payment verification success:', verifyData);
         // Clear the cart after successful payment
         // dispatch(removeAllItems());
         
         // Redirect to order confirmation page
-        router.push(`/orders/confirmation?orderId=${razorpay_order_id}`);
+        // router.push(`/orders/confirmation?orderId=${razorpay_order_id}`);
       } else {
         toast.error(`Payment verification failed: ${verifyData.message || 'Please contact support.'}`, { id: verifyToastId });
       }
