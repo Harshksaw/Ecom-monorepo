@@ -18,6 +18,8 @@ const MobileMenu = ({
   setMobileMenu,
   categories 
 }: MobileMenuProps) => {
+  console.log("🚀 ~ categories:", categories)
+
   const data = [
     { id: 1, name: "Home", url: "/" },
     { id: 2, name: "About", url: "/about" },
@@ -41,20 +43,20 @@ const MobileMenu = ({
               
               {showCatMenu && (
                 <ul className="bg-black/[0.05] -mx-5 mt-4 -mb-4">
-                  {categories?.map((category) => (
+                  {categories?.categories.map((category) => (
                     <Link
                       key={category.id}
-                      href={`/category/${category.attributes.slug}`}
+                      href={`/category/${category?.slug}`}
                       onClick={() => {
                         setShowCatMenu(false)
                         setMobileMenu(false)
                       }}
                     >
                       <li className="h-12 flex justify-between items-center px-3 hover:bg-black/[0.03] rounded-md">
-                        {category.attributes.name}
-                        <span className="opacity-50 text-sm">
-                          {`(${category.attributes.products.data.length})`}
-                        </span>
+                        {category.name}
+                        {/* <span className="opacity-50 text-sm">
+                          {`(${category.products.data.length})`}
+                        </span> */}
                       </li>
                     </Link>
                   ))}

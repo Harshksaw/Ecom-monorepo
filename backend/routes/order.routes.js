@@ -21,6 +21,6 @@ router.get('/:id', orderController.getOrderById);
 router.put('/:id/status',  orderController.updateOrderStatus);
 
 // Cancel order
-router.put('/:id/cancel', authenticate, orderController.cancelOrder);
+router.put('/:id/cancel', orderController.cancelOrder);
 
 module.exports = router;
