@@ -9,8 +9,9 @@ interface MobileMenuProps {
   showCatMenu: boolean
   setShowCatMenu: (show: boolean) => void
   setMobileMenu: (show: boolean) => void
-  categories: Category[]
+  categories:  any
 }
+
 
 const MobileMenu = ({ 
   showCatMenu, 
@@ -43,7 +44,7 @@ const MobileMenu = ({
               
               {showCatMenu && (
                 <ul className="bg-black/[0.05] -mx-5 mt-4 -mb-4">
-                  {categories?.categories.map((category) => (
+                  {categories?.categories.map((category:any) => (
                     <Link
                       key={category.id}
                       href={`/category/${category?.slug}`}
