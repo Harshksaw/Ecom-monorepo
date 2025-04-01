@@ -14,7 +14,7 @@ exports.createProduct = async (req, res) => {
     const {
       name, sku, description, price, salePrice, categoryId,
        weight, dimensions, materials, gems,
-      stockQuantity, isActive, isFeatured, tags
+   isActive, isFeatured, tags
     } = req.body;
 
    
@@ -52,7 +52,7 @@ exports.createProduct = async (req, res) => {
       dimensions,
       materials,
       gems,
-      stockQuantity,
+
       isActive,
       isFeatured,
       tags

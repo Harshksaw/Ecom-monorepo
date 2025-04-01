@@ -23,7 +23,7 @@ const productSchema = new mongoose.Schema({
     color: { type: String },
     clarity: { type: String }
   }],
-  stockQuantity: { type: Number, required: true, default: 0 },
+  stockQuantity: { type: Number, required: false, default: 0 },
   isActive: { type: Boolean, default: true },
   isFeatured: { type: Boolean, default: false },
   tags: [{ type: String }],

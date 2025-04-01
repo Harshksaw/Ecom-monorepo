@@ -3,6 +3,7 @@ import Link from "next/link";
 import React from "react";
 
 const ProductCard = ({ data: { attributes: p, id } }) => {
+console.log("🚀 ~ ProductCard ~ data:", data)
 
 
 
@@ -18,7 +19,7 @@ const ProductCard = ({ data: { attributes: p, id } }) => {
                 loading="lazy"
                 width={500}
                 height={500}
-                src={p.thumbnail.data.attributes.url}
+                src={data.images[0]}
                 alt={p.name}
             />
             <div className="p-4 text-black/[0.9]">

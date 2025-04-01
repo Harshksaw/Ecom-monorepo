@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { FaCloudUploadAlt, FaTimes } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import AdminLayout from '../../AdminLayout';
+import { API_URL } from '@/app/lib/api';
+import axios from 'axios';
 
 export default function CreateCategoryPage() {
   const [categoryName, setCategoryName] = useState('');
@@ -33,28 +35,25 @@ export default function CreateCategoryPage() {
 
     // Create form data for file upload
     const formData = new FormData();
-    formData.append('name', categoryName);
-    formData.append('description', description);
-    formData.append('isActive', isActive.toString());
+    // formData.append('name', categoryName);
+    // formData.append('slug', categoryName);
+
     
-    if (image) {
-      formData.append('image', image);
-    }
-
+    
     try {
-      const response = await fetch('/api/categories', {
-        method: 'POST',
-        body: formData
-      });
+const response = await axios.post(`${API_URL}/categories`, {
+      name: categoryName,
+      slug: categoryName,
 
-      const result = await response.json();
+} )
+     const result = response.data;
 
-      if (!response.ok) {
+      if (response.status !== 201) {
         throw new Error(result.message || 'Failed to create category');
       }
 
       toast.success('Category created successfully');
-      router.push('/admin/categories');
+      router.push('/admin/dashboard/category');
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -89,7 +88,7 @@ export default function CreateCategoryPage() {
         </div>
 
         {/* Description */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <label 
             htmlFor="description" 
             className="block text-gray-700 font-bold mb-2"
@@ -104,7 +103,7 @@ export default function CreateCategoryPage() {
             placeholder="Enter category description"
             rows={4}
           />
-        </div>
+        </div> */}
 
         {/* Image Upload */}
         {/* <div className="mb-6">

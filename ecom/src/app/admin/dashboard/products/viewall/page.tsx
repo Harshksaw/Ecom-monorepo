@@ -9,13 +9,13 @@ import {
   FaSearch, 
   FaFilter, 
   FaSort, 
-  FaEye, 
+
   FaPlus
 } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { API_URL } from '@/app/lib/api';
-import AdminLayout from '@/app/admin/AdminLayout';
+
 
 // Interfaces for type safety
 interface Category {
@@ -269,7 +269,7 @@ export default function ProductsListPage() {
           </div>
           
           {/* Sort By */}
-          <div>
+          {/* <div>
             <label className="block text-gray-700 text-sm font-bold mb-2">
               Sort By
             </label>
@@ -291,7 +291,7 @@ export default function ProductsListPage() {
               <option value="createdAt-desc">Newest First</option>
               <option value="createdAt-asc">Oldest First</option>
             </select>
-          </div>
+          </div> */}
           
           {/* Checkbox Filters */}
           {/* <div className="flex items-center space-x-6">

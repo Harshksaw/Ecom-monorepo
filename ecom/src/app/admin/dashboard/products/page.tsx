@@ -266,6 +266,24 @@ export default function CreateProductPage() {
       }
 
       toast.success('Product created successfully');
+      //reset state 
+      setName('');
+      setSku('');
+      setDescription('');
+      setPrice('');
+      setSalePrice('');
+      setCategory('');
+      setStock('');
+      setImages([]);
+      setImagePreviews([]);
+      setMaterials(['']);
+      setGems([{ type: '', carat: '', color: '', clarity: '' }]);
+      setIsFeatured(false);
+      setIsActive(true);
+      setTags(['']);
+      setWeight('');
+      setDimensions({ length: '', width: '', height: '' });
+      
       router.push('/admin/dashboard/products');
     } catch (error: any) {
       toast.error(error.message);
@@ -392,7 +410,7 @@ export default function CreateProductPage() {
         {/* Stock, Status, and Featured */}
         <div className="grid md:grid-cols-3 gap-6 mt-6">
           {/* Stock */}
-          <div>
+          {/* <div>
             <label htmlFor="stock" className="block text-gray-700 font-bold mb-2">
               Stock Quantity*
             </label>
@@ -406,7 +424,7 @@ export default function CreateProductPage() {
               min="0"
               required
             />
-          </div>
+          </div> */}
 
           {/* Product Weight */}
           <div>

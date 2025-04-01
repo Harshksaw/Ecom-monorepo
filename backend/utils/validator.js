@@ -26,7 +26,7 @@ exports.validateCategoryInput = (data) => {
     else if (isNaN(data.price) || data.price <= 0) errors.price = 'Price must be a positive number';
     
     if (!data.categoryId) errors.categoryId = 'Category is required';
-    if (!data.stockQuantity && data.stockQuantity !== 0) errors.stockQuantity = 'Stock quantity is required';
+    // if (!data.stockQuantity && data.stockQuantity !== 0) errors.stockQuantity = 'Stock quantity is required';
     else if (isNaN(data.stockQuantity) || data.stockQuantity < 0) errors.stockQuantity = 'Stock quantity must be a non-negative number';
     
     return {
