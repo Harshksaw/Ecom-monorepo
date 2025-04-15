@@ -15,7 +15,7 @@ export default async function Home() {
       <HeroBanner />
 
       {/* Feature Banner */}
-      <div className="bg-pink-600 text-white py-4">
+      <div className="bg-pink-600 text-white py-2 relative top-5">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="flex flex-col items-center">

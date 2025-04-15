@@ -12,6 +12,7 @@ import { FaUser, FaSignOutAlt, FaUserCog, FaShoppingBag, FaSearch } from 'react-
 
 import { CategoryService } from '../../lib/api'
 import { useAuth } from '../../context/authcontext'
+import CategoryTabs from './CategoryTabs'
 
 
 const Header = () => {
@@ -72,17 +73,6 @@ const Header = () => {
     logout()
     setShowUserMenu(false)
   }
-
-  // Categories based on the sketch
-  const categories = [
-    { id: 1, name: "Rings", slug: "rings" },
-    { id: 2, name: "Earrings", slug: "earrings" },
-    { id: 3, name: "Pendant", slug: "pendant" },
-    { id: 4, name: "Bracelet", slug: "bracelet" },
-    { id: 5, name: "Necklace", slug: "necklace" },
-    { id: 6, name: "Gifts", slug: "gifts" },
-    { id: 7, name: "Watches", slug: "watches" },
-  ]
   
   return (
     <header className={`w-full transition-transform duration-300 ${show}`}>
@@ -95,9 +85,9 @@ const Header = () => {
       <div className="bg-white shadow-sm">
         <div className="container mx-auto px-4">
           {/* Logo and search bar */}
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between py-3">
             <Link href="/" className="flex items-center">
-              <h1 className="text-2xl font-bold text-pink-700">
+              <h1 className="text-xl md:text-2xl font-bold text-pink-700">
                 SHRI NANU GEMS & JEWELERS
               </h1>
             </Link>
@@ -128,7 +118,7 @@ const Header = () => {
                   
                   {/* User Dropdown Menu */}
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30">
                       <div className="px-4 py-2 text-sm text-gray-500 border-b">
                         <p className="font-medium">Signed in as</p>
                         <p className="truncate">{user.email}</p>
@@ -220,43 +210,15 @@ const Header = () => {
               )}
             </div>
           </div>
-          
-          {/* Navigation menu */}
-          <nav className="hidden md:flex py-3">
-            <ul className="flex items-center space-x-8 mx-auto">
-              <li className="relative group">
-                <Link href="/new-arrivals" className="text-gray-700 hover:text-pink-700 font-medium">
-                  New Arrivals
-                </Link>
-                <div className="absolute hidden group-hover:block bg-white border border-gray-200 shadow-md p-3 z-10 w-48 rounded-md top-full left-0">
-                  <ul className="space-y-2">
-                    <li>• Gold</li>
-                    <li>• Silver</li>
-                  </ul>
-                </div>
-              </li>
-              
-              {categories.map((category) => (
-                <li key={category.id} className="relative group">
-                  <Link href={`/category/${category.slug}`} className="text-gray-700 hover:text-pink-700 font-medium">
-                    {category.name}
-                  </Link>
-                  <div className="absolute hidden group-hover:block bg-white border border-gray-200 shadow-md p-3 z-10 w-48 rounded-md top-full left-0">
-                    <ul className="space-y-2">
-                      <li>• Gold</li>
-                      <li>• Silver</li>
-                    </ul>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </nav>
         </div>
       </div>
       
+      {/* Category Tabs */}
+      <CategoryTabs />
+      
       {/* Mobile menu */}
       {mobileMenu && (
-        <div className="md:hidden bg-white shadow-md">
+        <div className="md:hidden bg-white shadow-md fixed top-[125px] left-0 right-0 h-[calc(100vh-125px)] z-20 overflow-y-auto">
           <div className="px-4 py-2 border-b">
             <input
               type="text"
@@ -276,17 +238,70 @@ const Header = () => {
               </Link>
             </li>
             
-            {categories.map((category) => (
-              <li key={category.id}>
-                <Link 
-                  href={`/category/${category.slug}`} 
-                  className="block px-4 py-3 text-gray-700"
-                  onClick={() => setMobileMenu(false)}
-                >
-                  {category.name}
-                </Link>
-              </li>
-            ))}
+            {/* Mobile Menu Categories */}
+            <li>
+              <Link 
+                href="/category/rings" 
+                className="block px-4 py-3 text-gray-700"
+                onClick={() => setMobileMenu(false)}
+              >
+                Rings
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/category/earrings" 
+                className="block px-4 py-3 text-gray-700"
+                onClick={() => setMobileMenu(false)}
+              >
+                Earrings
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/category/pendant" 
+                className="block px-4 py-3 text-gray-700"
+                onClick={() => setMobileMenu(false)}
+              >
+                Pendant
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/category/bracelet" 
+                className="block px-4 py-3 text-gray-700"
+                onClick={() => setMobileMenu(false)}
+              >
+                Bracelet
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/category/necklace" 
+                className="block px-4 py-3 text-gray-700"
+                onClick={() => setMobileMenu(false)}
+              >
+                Necklace
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/category/gifts" 
+                className="block px-4 py-3 text-gray-700"
+                onClick={() => setMobileMenu(false)}
+              >
+                Gifts
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/category/watches" 
+                className="block px-4 py-3 text-gray-700"
+                onClick={() => setMobileMenu(false)}
+              >
+                Watches
+              </Link>
+            </li>
             
             {!user && (
               <li>

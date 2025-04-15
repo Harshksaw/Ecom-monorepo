@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig = {
   images: {
+    domains: [
+      'plus.unsplash.com',
+      'images.unsplash.com'  // Add this if you're using regular unsplash URLs too
+    ],
     remotePatterns: [
       {
         protocol: 'https',
