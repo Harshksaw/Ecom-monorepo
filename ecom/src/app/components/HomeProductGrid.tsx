@@ -54,6 +54,7 @@ interface ProductGridProps {
 
 const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
+  console.log("🚀 ~ categoryGroups:", categoryGroups)
   
   useEffect(() => {
     // Group products by category

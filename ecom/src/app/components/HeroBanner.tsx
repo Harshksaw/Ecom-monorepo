@@ -26,7 +26,7 @@ export const HeroBanner = () => {
       try {
         setIsLoading(true);
         const data = await axios.get(`${API_URL}/images`);
-        console.log("🚀 ~ fetchImages ~ data:", data.data.images)
+        // console.log("🚀 ~ fetchImages ~ data:", data.data.images)
         setImages(data.data.images);
       } catch (err) {
         console.error('Error fetching banner images:', err);
@@ -57,7 +57,7 @@ export const HeroBanner = () => {
   }
 
   return (
-    <div className="relative w-full max-w-[1360px] mx-auto">
+    <div className="relative w-full max-w-[1360px] mx-auto -z-10">
       <Carousel
         autoPlay={true}
         infiniteLoop={true}

@@ -6,6 +6,8 @@ const Product = require('../model/Products');
 exports.createCategory = async (req, res) => {
   try {
     const { name, slug } = req.body;
+
+    const file = req.file
     
     // Check if category with same name or slug exists
     const existingCategory = await Category.findOne({ $or: [{ name }, { slug }] });
@@ -15,7 +17,7 @@ exports.createCategory = async (req, res) => {
     
     const newCategory = new Category({
       name,
-
+      imageUrl: file ? file.path : null,
       slug,
 
     });

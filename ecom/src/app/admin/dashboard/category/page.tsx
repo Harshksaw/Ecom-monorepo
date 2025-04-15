@@ -1,191 +1,265 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { FaCloudUploadAlt, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
-import AdminLayout from '../../AdminLayout';
-import { API_URL } from '@/app/lib/api';
 import axios from 'axios';
+import { API_URL } from '@/app/lib/api';
 
-export default function CreateCategoryPage() {
-  const [categoryName, setCategoryName] = useState('');
-  const [description, setDescription] = useState('');
-  const [image, setImage] = useState<File | null>(null);
+// Simple interface for category data
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  imageUrl?: string;
+  isActive: boolean;
+}
 
-  const [isActive, setIsActive] = useState(true);
+const CreateCategoryPage = () => {
+  // Category list state
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  const router = useRouter();
-
-
-
+  
+  // Form state
+  const [categoryName, setCategoryName] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  
+  // Refs
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Fetch categories on mount
  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Fetch all categories
+  const fetchCategories = async () => {
     setIsLoading(true);
-
-    // Validate inputs
-    if (!categoryName.trim()) {
-      toast.error('Category name is required');
-      setIsLoading(false);
-      return;
-    }
-
-    // Create form data for file upload
-    const formData = new FormData();
-    // formData.append('name', categoryName);
-    // formData.append('slug', categoryName);
-
-    
-    
     try {
-const response = await axios.post(`${API_URL}/categories`, {
-      name: categoryName,
-      slug: categoryName,
-
-} )
-     const result = response.data;
-
-      if (response.status !== 201) {
-        throw new Error(result.message || 'Failed to create category');
-      }
-
-      toast.success('Category created successfully');
-      router.push('/admin/dashboard/category');
-    } catch (error: any) {
-      toast.error(error.message);
+      const response = await axios.get(`${API_URL}/categories`);
+      setCategories(response.data.categories || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      toast.error('Failed to load categories');
     } finally {
       setIsLoading(false);
     }
   };
 
+  useState(() => {
+    fetchCategories();
+  });
+  
+  
+  // Handle image selection
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    setImageFile(file);
+  };
+  
+  // Clear form
+  const clearForm = () => {
+    setCategoryName('');
+    setImageFile(null);
+    setImagePreview(null);
+    setEditingId(null);
+  };
+  
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!categoryName.trim()) {
+      toast.error('Category name is required');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      let imageUrl = '';
+      
+      // Upload image if one is selected
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        
+        const uploadResponse = await axios.post(`${API_URL}/upload`, formData);
+        imageUrl = uploadResponse.data.url;
+      }
+      
+      // Create or update category
+      if (editingId) {
+        // Update existing category
+        await axios.patch(`${API_URL}/categories/${editingId}`, {
+          name: categoryName,
+          ...(imageUrl && { imageUrl })
+        });
+        toast.success('Category updated');
+      } else {
+        // Create new category
+        await axios.post(`${API_URL}/categories`, {
+          name: categoryName,
+          slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
+          ...(imageUrl && { imageUrl })
+        });
+        toast.success('Category created');
+      }
+      
+      // Refresh categories and clear form
+      fetchCategories();
+      clearForm();
+    } catch (error) {
+      console.error('Error saving category:', error);
+      toast.error('Failed to save category');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Delete a category
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this category?')) return;
+    
+    setIsLoading(true);
+    try {
+      await axios.delete(`${API_URL}/categories/${id}`);
+      toast.success('Category deleted');
+      fetchCategories();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      toast.error('Failed to delete category');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Edit a category
+  const handleEdit = (category: Category) => {
+    setCategoryName(category.name);
+    setEditingId(category._id);
+    setImagePreview(category.imageUrl || null);
+  };
+  
   return (
-
-
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Create New Category</h1>
-
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-8">
-        {/* Category Name */}
-        <div className="mb-6">
-          <label 
-            htmlFor="categoryName" 
-            className="block text-gray-700 font-bold mb-2"
-          >
-            Category Name
-          </label>
-          <input
-            type="text"
-            id="categoryName"
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter category name"
-            required
-          />
-        </div>
-
-        {/* Description */}
-        {/* <div className="mb-6">
-          <label 
-            htmlFor="description" 
-            className="block text-gray-700 font-bold mb-2"
-          >
-            Description
-          </label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter category description"
-            rows={4}
-          />
-        </div> */}
-
-        {/* Image Upload */}
-        {/* <div className="mb-6">
-          <label className="block text-gray-700 font-bold mb-2">
-            Category Image
-          </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            {imagePreview ? (
-              <div className="relative mx-auto" style={{ maxWidth: '300px', maxHeight: '300px' }}>
-                <Image 
-                  src={imagePreview} 
-                  alt="Category Preview" 
-                  layout="responsive"
-                  width={300}
-                  height={300}
-                  className="rounded-lg"
-                />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
-                >
-                  <FaTimes />
-                </button>
-              </div>
-            ) : (
-              <>
-                <FaCloudUploadAlt className="mx-auto text-6xl text-gray-400 mb-4" />
-                <p className="text-gray-600 mb-4">
-                  Drag and drop an image or click to select
-                </p>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  id="imageUpload"
-                />
-                <label 
-                  htmlFor="imageUpload" 
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-600"
-                >
-                  Choose Image
-                </label>
-              </>
-            )}
+    <div className="container max-w-4xl mx-auto p-4">
+      {/* Form Section */}
+      <form onSubmit={handleSubmit} className="bg-white p-4 rounded-lg shadow mb-6">
+        <div className="flex gap-3 items-start">
+          {/* Image Preview/Upload */}
+          <div onClick={() => fileInputRef.current?.click()} className="cursor-pointer">
+            <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200">
+              {imagePreview ? (
+                <Image src={imagePreview} alt="Preview" width={80} height={80} className="object-cover" />
+              ) : (
+                <FaPlus className="text-gray-400" />
+              )}
+            </div>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImageChange} 
+              className="hidden" 
+              accept="image/*"
+            />
           </div>
-        </div> */}
-
-        {/* Active Toggle */}
-        <div className="mb-6 flex items-center">
-          <input
-            type="checkbox"
-            id="isActive"
-            checked={isActive}
-            onChange={(e) => setIsActive(e.target.checked)}
-            className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <label 
-            htmlFor="isActive" 
-            className="text-gray-700"
-          >
-            Active Category
-          </label>
-        </div>
-
-        {/* Submit Button */}
-        <div>
+          
+          {/* Name Input */}
+          <div className="flex-grow">
+            <input
+              type="text"
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
+              placeholder="Category Name"
+              className="w-full px-3 py-2 border rounded-lg"
+              required
+            />
+          </div>
+          
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-3 rounded-lg text-white font-bold 
-              ${isLoading 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-blue-500 hover:bg-blue-600'
-              }`}
+            className={`px-4 py-2 rounded-lg text-white ${
+              isLoading ? 'bg-gray-400' : 'bg-pink-600 hover:bg-pink-700'
+            }`}
           >
-            {isLoading ? 'Creating...' : 'Create Category'}
+            {editingId ? 'Update' : 'Create'}
           </button>
         </div>
       </form>
+      
+      {/* Categories Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {isLoading && !categories.length ? (
+          <div className="col-span-full flex justify-center py-12">
+            <div className="w-6 h-6 border-2 border-pink-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : categories.length === 0 ? (
+          <div className="col-span-full text-center py-12 text-gray-500">
+            No categories found
+          </div>
+        ) : (
+          categories.map((category) => (
+            <div key={category._id} className="bg-white rounded-lg shadow overflow-hidden">
+              {/* Category Image */}
+              <div className="relative aspect-square bg-gray-100">
+                {category.imageUrl ? (
+                  <Image 
+                    src={category.imageUrl} 
+                    alt={category.name} 
+                    fill 
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-2xl font-bold text-gray-300">
+                      {category.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Action buttons */}
+                <div className="absolute bottom-2 right-2 flex gap-1">
+                  <button 
+                    onClick={() => handleEdit(category)}
+                    className="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-gray-600 hover:text-pink-600"
+                  >
+                    <FaEdit size={14} />
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(category._id)}
+                    className="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-gray-600 hover:text-red-600"
+                  >
+                    <FaTrash size={14} />
+                  </button>
+                </div>
+                
+                {/* Status indicator */}
+                <div className="absolute top-2 left-2">
+                  <div className={`w-3 h-3 rounded-full ${category.isActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                </div>
+              </div>
+              
+              {/* Category Name */}
+              <div className="px-3 py-2">
+                <h3 className="font-medium truncate">{category.name}</h3>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
-
   );
-}
+};
+
+export default CreateCategoryPage;

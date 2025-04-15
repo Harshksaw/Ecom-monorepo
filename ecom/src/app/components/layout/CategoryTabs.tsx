@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-// Sample category images - replace with your actual images
+
+
 const CATEGORY_IMAGES = {
   "rings": "https://plus.unsplash.com/premium_photo-1709033404514-c3953af680b4?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8amV3ZWxyeXxlbnwwfHwwfHx8MA%3D%3D",
   "earrings": "https://images.unsplash.com/photo-1543294001-f7cd5d7fb516?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8amV3ZWxyeXxlbnwwfHwwfHx8MA%3D%3D",
   "pendant": "https://plus.unsplash.com/premium_photo-1709033404514-c3953af680b4?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8amV3ZWxyeXxlbnwwfHwwfHx8MA%3D%3D",
   "bracelet": "https://images.unsplash.com/photo-1543294001-f7cd5d7fb516?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8amV3ZWxyeXxlbnwwfHwwfHx8MA%3D%3D",
-  "necklace": "https://images.unsplash.com/photo-1543294001-f7cd5d7fb516?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8amV3ZWxyeXxlbnwwfHwwfHx8MA%3D%3D",
 
   "watches": "https://images.unsplash.com/photo-1543294001-f7cd5d7fb516?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8amV3ZWxyeXxlbnwwfHwwfHx8MA%3D%3D",
 
@@ -25,7 +25,7 @@ const CATEGORY_DESCRIPTIONS = {
   "necklace": "Gorgeous necklaces to enhance your look",
   "gifts": "Perfect jewelry gifts for your loved ones",
   "watches": "Luxury watches for men and women",
-  "new-arrivals": "Our latest collection of fine jewelry"
+
 };
 
 // Function to get placeholder color based on category
@@ -38,7 +38,7 @@ const getCategoryColor = (category: string) => {
     "necklace": "bg-purple-100",
     "gifts": "bg-red-100",
     "watches": "bg-gray-100",
-    "new-arrivals": "bg-orange-100"
+
   };
   
   return colors[category as keyof typeof colors] || "bg-pink-50";
@@ -51,14 +51,14 @@ interface CategoryTabsProps {
 const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
   // Add New Arrivals to the categories
   const categories = [
-    { id: 0, name: "New Arrivals", slug: "new-arrivals" },
-    { id: 1, name: "Rings", slug: "rings" },
-    { id: 2, name: "Earrings", slug: "earrings" },
-    { id: 3, name: "Pendant", slug: "pendant" },
-    { id: 4, name: "Bracelet", slug: "bracelet" },
-    { id: 5, name: "Necklace", slug: "necklace" },
-    { id: 6, name: "Gifts", slug: "gifts" },
-    { id: 7, name: "Watches", slug: "watches" },
+
+    { id: 1, name: "Rings", slug: "Rings",  },
+    { id: 2, name: "Earrings", slug: "Earrings" },
+    { id: 3, name: "Pendant", slug: "Pendant" },
+    { id: 4, name: "Bracelet", slug: "Bracelet" },
+    { id: 5, name: "Necklace", slug: "Necklace" },
+
+    { id: 6, name: "Watches", slug: "Watches" },
   ];
   
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
@@ -73,6 +73,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
               <Link 
                 key={category.id} 
                 href={`/category/${category.slug}`}
+
                 className={`flex-shrink-0 inline-block rounded-lg p-2 transition-colors ${
                   activeCategory === category.slug 
                     ? 'bg-pink-100 text-pink-800 shadow-sm' 

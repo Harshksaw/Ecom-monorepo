@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
+
 import Image from 'next/image'
 import { useSelector } from 'react-redux'
 
@@ -13,6 +13,7 @@ import { FaUser, FaSignOutAlt, FaUserCog, FaShoppingBag, FaSearch } from 'react-
 import { CategoryService } from '../../lib/api'
 import { useAuth } from '../../context/authcontext'
 import CategoryTabs from './CategoryTabs'
+import Link from 'next/link'
 
 
 const Header = () => {
@@ -105,7 +106,7 @@ const Header = () => {
               
               {/* User Account */}
               {user ? (
-                <div className="relative" ref={userMenuRef}>
+                <div className="relative z-50" ref={userMenuRef}>
                   <button 
                     className="flex items-center gap-2 px-3 py-2 hover:bg-pink-50 rounded-full"
                     onClick={() => setShowUserMenu(!showUserMenu)}
@@ -118,7 +119,7 @@ const Header = () => {
                   
                   {/* User Dropdown Menu */}
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30">
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-auto">
                       <div className="px-4 py-2 text-sm text-gray-500 border-b">
                         <p className="font-medium">Signed in as</p>
                         <p className="truncate">{user.email}</p>
