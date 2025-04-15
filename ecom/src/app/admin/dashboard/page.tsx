@@ -1,79 +1,82 @@
-// app/admin/dashboard/page.tsx
-import { Metadata } from 'next';
-import { 
-  FaUsers, 
-  FaShoppingCart, 
-  FaBox, 
-  FaChartLine 
-} from 'react-icons/fa';
-import AdminLayout from '../AdminLayout';
-import StatCard from '../StatCard';
+"use client";
+import React, { useState, ChangeEvent } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { API_URL } from "@/app/lib/api";
 
-// import AdminLayout from '../../../components/admin/AdminLayout';
-// import StatCard from '../../../components/admin/StatCard';
-// import RecentOrdersTable from '../../../components/admin/RecentOrdersTable';
-// import ProductService from '../../../services/product.service';
-// import OrderService from '../../../services/order.service';
-// import UserService from '../../../services/user.service';
-// import { OrderService } from '../services/order.service';
-// import { UserService } from '../../../services/user.service';
+export default function AdminDashboardPage() {
+  const [files, setFiles] = useState<FileList | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
-export const metadata: Metadata = {
-  title: 'Admin Dashboard',
-  description: 'Manage your store and view key metrics'
-};
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFiles(e.target.files);
+    }
+  };
 
-export default async function AdminDashboardPage() {
-  // Fetch dashboard data
-  // const [
-  //   totalProducts,
-  //   totalOrders,
-  //   totalUsers,
-  //   recentOrders,
-  //   totalRevenue
-  // ] = await Promise.all([
-  //   // ProductService.getTotalProductCount(),
-  //   OrderService.getTotalOrderCount(),
-  //   UserService.getTotalUserCount(),
-  //   OrderService.getRecentOrders(5),
-  //   OrderService.getTotalRevenue()
-  // ]);
+  const handleUpload = async () => {
+    if (!files || files.length === 0) {
+      toast.error("Please select files to upload");
+      return;
+    }
+
+    const formData = new FormData();
+    // Append each file to a form field named "files"
+    Array.from(files).forEach((file) => {
+      formData.append("images", file);
+    });
+
+    setIsUploading(true);
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/upload-carousel`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      toast.success(
+        response.data.message || "Images uploaded successfully!"
+      );
+    } catch (error: any) {
+      console.error("Upload failed", error);
+
+      toast.error(
+        error.response?.data?.message || "An error occurred during upload"
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      {/* You can add other dashboard elements like stats grid here */}
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          {/* <StatCard
-            title="Total Products"
-            value={totalProducts}
-            icon={<FaBox className="text-blue-500" />}
-          />
-          <StatCard 
-            title="Total Orders"
-            value={totalOrders}
-            icon={<FaShoppingCart className="text-green-500" />}
-          />
-          <StatCard 
-            title="Total Users"
-            value={totalUsers}
-            icon={<FaUsers className="text-purple-500" />}
-          />
-          <StatCard 
-            title="Total Revenue"
-            value={`$${totalRevenue.toFixed(2)}`}
-            icon={<FaChartLine className="text-red-500" />}
-          /> */}
-        </div>
-
-        {/* Recent Orders */}
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">Recent Orders</h2>
-          {/* <RecentOrdersTable orders={recentOrders} /> */}
-        </div>
+      {/* Carousel/Hero Images Upload Section */}
+      <div className="p-4 border rounded shadow bg-white">
+        <h2 className="mb-4 text-xl font-bold">
+          Upload Carousel Hero Images
+        </h2>
+        <input
+          type="file"
+          multiple
+          onChange={handleFileChange}
+          className="mb-4"
+        />
+        <button
+          onClick={handleUpload}
+          disabled={isUploading}
+          className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isUploading ? "Uploading..." : "Upload Images"}
+        </button>
       </div>
-
+    </div>
   );
 }
