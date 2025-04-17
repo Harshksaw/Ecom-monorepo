@@ -7,7 +7,8 @@ exports.createCategory = async (req, res) => {
   try {
     const { name, slug } = req.body;
 
-    const file = req.file
+    const file = req.files && req.files.length > 0 ? req.files[0].path : null;
+    console.log("🚀 ~ exports.createCategory= ~ file:", file)
     
     // Check if category with same name or slug exists
     const existingCategory = await Category.findOne({ $or: [{ name }, { slug }] });
@@ -17,7 +18,7 @@ exports.createCategory = async (req, res) => {
     
     const newCategory = new Category({
       name,
-      imageUrl: file ? file.path : null,
+      imageUrl: file ? file : null,
       slug,
 
     });

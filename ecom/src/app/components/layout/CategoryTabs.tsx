@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { CategoryService } from '@/app/lib/api';
 
 
 
@@ -49,17 +50,25 @@ interface CategoryTabsProps {
 }
 
 const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
-  // Add New Arrivals to the categories
-  const categories = [
 
-    { id: 1, name: "Rings", slug: "Rings",  },
-    { id: 2, name: "Earrings", slug: "Earrings" },
-    { id: 3, name: "Pendant", slug: "Pendant" },
-    { id: 4, name: "Bracelet", slug: "Bracelet" },
-    { id: 5, name: "Necklace", slug: "Necklace" },
 
-    { id: 6, name: "Watches", slug: "Watches" },
-  ];
+  const [categories, setCategories] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categories = await CategoryService.getAllCategories();
+        console.log("🚀 ~ fetchCategories ~ categories:", categories)
+        setCategories(categories.categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+
+
   
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   
@@ -69,7 +78,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
         {/* Scrollable tabs for mobile */}
         <div className="md:hidden overflow-x-auto pb-2">
           <div className="flex space-x-2 min-w-max">
-            {categories.map((category) => (
+            { categories && categories?.map((category) => (
               <Link 
                 key={category.id} 
                 href={`/category/${category.slug}`}
@@ -117,9 +126,9 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
               onMouseLeave={() => setHoveredCategory(null)}
             >
               <div className="relative aspect-[4/3]">
-                {CATEGORY_IMAGES[category.slug as keyof typeof CATEGORY_IMAGES] ? (
+                {category.imageUrl ? (
                   <Image 
-                    src={CATEGORY_IMAGES[category.slug as keyof typeof CATEGORY_IMAGES]} 
+                    src={category.imageUrl} 
                     alt={category.name} 
                     fill 
                     className="object-cover transition-transform duration-300 group-hover:scale-110"

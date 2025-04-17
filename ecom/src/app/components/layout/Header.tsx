@@ -127,7 +127,7 @@ const Header = () => {
                       
                       <Link 
                         href="/profile" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
+                        className=" px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
                         onClick={() => setShowUserMenu(false)}
                       >
                         <FaUser className="mr-2 text-pink-700" />
@@ -136,7 +136,7 @@ const Header = () => {
                       
                       <Link 
                         href="/orders" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
+                        className="px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
                         onClick={() => setShowUserMenu(false)}
                       >
                         <FaShoppingBag className="mr-2 text-pink-700" />
@@ -146,7 +146,7 @@ const Header = () => {
                       {user.role === 'Admin' && (
                         <Link 
                           href="/admin/dashboard" 
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
+                          className=" px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FaUserCog className="mr-2 text-pink-700" />

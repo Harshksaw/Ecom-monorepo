@@ -4,7 +4,8 @@ const nextConfig = {
   images: {
     domains: [
       'plus.unsplash.com',
-      'images.unsplash.com'  // Add this if you're using regular unsplash URLs too
+      'images.unsplash.com' ,
+          "res.cloudinary.com"
     ],
     remotePatterns: [
       {

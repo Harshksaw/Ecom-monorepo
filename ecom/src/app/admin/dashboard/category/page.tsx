@@ -91,9 +91,15 @@ const CreateCategoryPage = () => {
       // Upload image if one is selected
       if (imageFile) {
         const formData = new FormData();
-        formData.append('image', imageFile);
+        formData.append('images', imageFile);
+        formData.append('name', categoryName);
+        formData.append('slug', categoryName);
         
-        const uploadResponse = await axios.post(`${API_URL}/upload`, formData);
+        const uploadResponse = await axios.post(`${API_URL}/categories`, formData);
+        if(uploadResponse.status == 201) {
+          toast.success('Category created');
+          window.location.reload();
+        }
         imageUrl = uploadResponse.data.url;
       }
       
