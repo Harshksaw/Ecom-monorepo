@@ -58,7 +58,7 @@ export const HeroBanner = () => {
   }
 
   return (
-    <div className="relative w-full max-w-[1360px] mx-auto">
+    <div className="relative w-full max-w-[1360px] mx-auto z-10">
       <Carousel
         autoPlay={true}
         infiniteLoop={true}

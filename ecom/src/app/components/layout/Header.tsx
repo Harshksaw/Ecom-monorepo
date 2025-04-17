@@ -76,7 +76,7 @@ const Header = () => {
   }
   
   return (
-    <header className={`w-full transition-transform duration-300 ${show}`}>
+    <header className={`w-full transition-transform duration-300 z-50 ${show}`}>
       {/* Top promotional bar */}
       <div className="bg-pink-100 py-1 text-center text-sm">
         New Arrivals: Gold & Silver Collections Now Available!
@@ -119,7 +119,7 @@ const Header = () => {
                   
                   {/* User Dropdown Menu */}
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-auto">
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-auto flex flex-col">
                       <div className="px-4 py-2 text-sm text-gray-500 border-b">
                         <p className="font-medium">Signed in as</p>
                         <p className="truncate">{user.email}</p>
