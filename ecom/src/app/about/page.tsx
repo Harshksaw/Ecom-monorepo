@@ -1,11 +1,9 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import {
     FaGem,
     FaCertificate,
-    FaTruck,
+
     FaHandshake,
     FaHistory,
     FaUsers,
@@ -184,8 +182,6 @@ const ABOUT_INFO = {
             }
         ]
     },
-
-    // CTA Section
     cta: {
         title: 'Visit Our Showroom',
         subtitle: 'Experience our collections in person',

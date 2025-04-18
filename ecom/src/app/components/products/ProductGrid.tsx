@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { FaHeart, FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart } from 'react-icons/fa';
 import ProductPagination from './ProductPagination';
 
 interface Product {
@@ -76,7 +76,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
       {/* Product Details */}
       <div className="p-4">
-        <Link href={`/products/₹{product.slug}`}>
+        <Link href={`/products/${product.slug}`}>
           <h3 className="text-lg font-semibold mb-2 line-clamp-2">
             {product.name}
           </h3>
@@ -118,12 +118,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             <FaShoppingCart className="mr-2" /> Add
           </button>
           
-          <button 
-            className="text-gray-500 hover:text-red-500 transition-colors"
-            title="Add to Wishlist"
-          >
-            <FaHeart size={24} />
-          </button>
+       
         </div>
       </div>
     </div>

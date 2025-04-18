@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaHeart, FaShoppingCart, FaArrowRight } from 'react-icons/fa';
+import {  FaShoppingCart, FaArrowRight } from 'react-icons/fa';
 
 
 interface Gem {
@@ -54,6 +54,7 @@ interface ProductGridProps {
 
 const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
+  console.log("🚀 ~ categoryGroups:", categoryGroups)
   
   useEffect(() => {
     // Group products by category
@@ -97,7 +98,7 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               </Link>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
               {category.products.slice(0, 4).map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
@@ -165,7 +166,8 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   };
 
   return (
-    <div className={`rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group ${cardBgColor}`}>
+    <div className={`rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 
+    group ${cardBgColor}`}>
       {/* Product Image */}
       <Link href={`/product/${product._id}`} className="block relative">
         {discountPercentage && discountPercentage > 0 && (
@@ -181,13 +183,8 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             className="absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-300"
           />
           
-          {/* Favorite Button Overlay */}
-          <button 
-            onClick={toggleFavorite}
-            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center z-10 transition-colors hover:bg-white"
-          >
-            <FaHeart className={isFavorite ? "text-pink-600" : "text-gray-400"} />
-          </button>
+
+    
         </div>
       </Link>
 

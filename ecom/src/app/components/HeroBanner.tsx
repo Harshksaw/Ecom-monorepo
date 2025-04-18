@@ -6,6 +6,7 @@ import { Carousel } from "react-responsive-carousel";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {API_URL} from "../lib/api";
+import Image from "next/image";
 
 // Define interface for image
 interface BannerImage {
@@ -57,7 +58,7 @@ export const HeroBanner = () => {
   }
 
   return (
-    <div className="relative w-full max-w-[1360px] mx-auto">
+    <div className="relative w-full max-w-[1360px] mx-auto z-10">
       <Carousel
         autoPlay={true}
         infiniteLoop={true}
@@ -69,10 +70,12 @@ export const HeroBanner = () => {
         {images.map((image) => (
           <div key={image._id} className="carousel-slide">
             <div className="relative h-[300px] md:h-[400px] overflow-hidden">
-              <img
+            <Image
                 src={image.url}
                 alt={image.legend || "Banner image"}
-                className="w-full h-full object-cover"
+                fill // Replaces layout="fill"
+                style={{ objectFit: "cover" }} // Replaces objectFit="cover"
+                priority // Optional: Ensures the image is loaded eagerly
               />
               {image.legend && (
                 <div

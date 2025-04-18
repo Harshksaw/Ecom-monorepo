@@ -58,7 +58,9 @@ export interface Product {
 
 export interface Category {
   id: string;
+  categories:any;
   attributes: {
+    categories:any;
     name: string;
     slug: string;
     products: {
@@ -69,6 +71,7 @@ export interface Category {
 }
 
 export interface ApiResponse<T> {
+  categories:any,
   data: T;
   meta?: {
     pagination?: {
