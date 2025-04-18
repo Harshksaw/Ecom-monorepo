@@ -5,7 +5,7 @@ import Wrapper from '../../components/Wrapper';
 import ProductDetailsCarousel from '../../components/ProductDetailsCarousel';
 import RelatedProducts from '../../components/RelatedProducts';
 import AddToCartButton from '../../components/AddToCartButton';
-import { FaHeart, FaRuler, FaWeight, FaShippingFast } from 'react-icons/fa';
+import {  FaRuler, FaWeight, FaShippingFast } from 'react-icons/fa';
 
 // Define the props for the page component
 type ProductPageProps = {
@@ -181,9 +181,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <div className="flex-grow">
                   <AddToCartButton product={product} />
                 </div>
-                <button className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-full hover:bg-pink-50 transition-colors">
-                  <FaHeart className="text-pink-600" />
-                </button>
+           
               </div>
 
               {/* Product highlights */}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaHeart, FaShoppingCart, FaArrowRight } from 'react-icons/fa';
+import {  FaShoppingCart, FaArrowRight } from 'react-icons/fa';
 
 
 interface Gem {
@@ -183,13 +183,8 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             className="absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-300"
           />
           
-          {/* Favorite Button Overlay */}
-          <button 
-            onClick={toggleFavorite}
-            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center z-10 transition-colors hover:bg-white"
-          >
-            <FaHeart className={isFavorite ? "text-pink-600" : "text-gray-400"} />
-          </button>
+
+    
         </div>
       </Link>
 
