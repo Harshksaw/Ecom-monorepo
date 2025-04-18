@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 // API base URL
-// export const API_URL = "https://ecom-turborepo.onrender.com/api"
-export const API_URL = "http://localhost:7003/api"
+export const API_URL = "https://ecom-turborepo.onrender.com/api"
+// export const API_URL = "http://localhost:7003/api"
 
 
 // Create an axios instance with default configuration
@@ -58,7 +58,9 @@ export interface Product {
 
 export interface Category {
   id: string;
+  categories:any;
   attributes: {
+    categories:any;
     name: string;
     slug: string;
     products: {
@@ -69,6 +71,7 @@ export interface Category {
 }
 
 export interface ApiResponse<T> {
+  categories:any,
   data: T;
   meta?: {
     pagination?: {

@@ -3,52 +3,61 @@ import { Metadata } from 'next';
 import { ProductService } from '../../lib/api';
 import Wrapper from '../../components/Wrapper';
 import ProductDetailsCarousel from '../../components/ProductDetailsCarousel';
-import RelatedProducts from '../../components/RelatedProducts';
-import AddToCartButton from '../../components/AddToCartButton';
-import {  FaRuler, FaWeight, FaShippingFast } from 'react-icons/fa';
 
-// Define the props for the page component
+import AddToCartButton from '../../components/AddToCartButton';
+import { FaRuler, FaWeight, FaShippingFast } from 'react-icons/fa';
+
+// Define the props for the page component with proper typing
 type ProductPageProps = {
-  params: any;
+  params: {
+    slug: string;
+  };
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
-// Define product interface based on your API response
+// Define interfaces for the API responses
+interface CategoryId {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
+interface Gem {
+  type: string;
+  carat: number;
+  color: string;
+  clarity: string;
+  _id: string;
+}
+
+interface Dimensions {
+  length: number;
+  width: number;
+  height: number;
+}
+
 interface Product {
   _id: string;
   name: string;
   sku: string;
   description: string;
   price: number;
-  categoryId: {
-    _id: string;
-    name: string;
-    slug: string;
-  };
+  categoryId: CategoryId;
   images: string[];
   weight?: number;
   materials?: string[];
-  gems?: Array<{
-    type: string;
-    carat: number;
-    color: string;
-    clarity: string;
-    _id: string;
-  }>;
+  gems?: Gem[];
   stockQuantity: number;
   isActive: boolean;
   isFeatured: boolean;
   tags?: string[];
-  dimensions?: {
-    length: number;
-    width: number;
-    height: number;
-  };
+  dimensions?: Dimensions;
   createdAt: string;
   updatedAt: string;
 }
 
 // Metadata generation for SEO
-export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: any): Promise<Metadata> {
   try {
     const product = await ProductService.getProductBySlug(params.slug);
     
@@ -72,9 +81,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params }: any): Promise<any> {
   try {
-    // Fetch the product data using the slug
     const product = await ProductService.getProductBySlug(params.slug);
     
     if (!product) {
@@ -88,17 +96,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
       );
     }
 
-    // Fetch related products (products from the same category)
-    const relatedProductsData = await ProductService.getRelatedProducts(
-      params.slug,
-      product.categoryId?._id
-    );
 
-    // Determine if product has gems or not for styling
     const hasGems = product.gems && product.gems.length > 0;
     
-    // Get material color for styling
-    const isGold = product.materials?.some(m => m.toLowerCase().includes('gold'));
+    const isGold = product.materials?.some((material: string) => material.toLowerCase().includes('gold'));
     const materialColor = isGold ? 'from-yellow-50 to-yellow-100' : 'from-gray-50 to-gray-100';
 
     return (
@@ -106,7 +107,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <Wrapper>
           {/* Breadcrumbs */}
           <div className="text-sm mb-6 text-gray-500">
-            <span>Home</span> / <span>{product.categoryId?.name}</span> / <span className="text-pink-600">{product.name}</span>
+            <span>Home</span> / <span>{product.categoryId.name}</span> / <span className="text-pink-600">{product.name}</span>
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
@@ -119,7 +120,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div className="w-full lg:w-2/5">
               {/* Category */}
               <div className="uppercase tracking-wider text-sm text-pink-600 mb-2">
-                {product.categoryId?.name}
+                {product.categoryId.name}
               </div>
               
               {/* Product title */}
@@ -130,7 +131,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {/* Materials tags */}
               {product.materials && product.materials.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {product.materials.map((material, index) => (
+                  {product.materials.map((material :any, index:any) => (
                     <span 
                       key={index} 
                       className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
@@ -235,7 +236,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <div className="mb-8">
                   <h3 className="font-semibold mb-3 border-b pb-2">Gemstone Details</h3>
                   <div className="grid grid-cols-1 gap-3">
-                    {product.gems.map((gem, index) => (
+                    {product.gems?.map((gem: Gem, index:number) => (
                       <div key={index} className="bg-white border border-gray-200 p-3 rounded-lg">
                         <div className="font-medium text-gray-800">{gem.type}</div>
                         <div className="grid grid-cols-3 gap-2 text-sm text-gray-600 mt-1">
@@ -253,7 +254,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <div className="mb-8">
                 <h3 className="font-semibold mb-3 border-b pb-2">Description</h3>
                 <div className="text-sm text-gray-700 space-y-2">
-                  {product.description.split('\n').map((paragraph, idx) => (
+                  {product.description.split('\n').map((paragraph : any, idx: number) => (
                     <p key={idx}>{paragraph}</p>
                   ))}
                 </div>
@@ -263,7 +264,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {product.tags && product.tags.length > 0 && (
                 <div className="mt-6">
                   <div className="flex flex-wrap gap-2">
-                    {product.tags.map((tag:any, index:any) => (
+                    {product.tags.map((tag : any, index: any) => (
                       <span 
                         key={index} 
                         className="inline-block bg-gray-100 px-2 py-1 rounded-full text-xs text-gray-600"
@@ -278,12 +279,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           {/* Related products section */}
-          {relatedProductsData && relatedProductsData?.length > 0 && (
-            <div className="mt-16 bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-bold mb-6 text-center">You Might Also Like</h2>
-              <RelatedProducts products={relatedProductsData} />
-            </div>
-          )}
+       
         </Wrapper>
       </div>
     );
