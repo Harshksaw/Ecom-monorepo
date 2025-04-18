@@ -164,32 +164,32 @@ export default function CreateProductPage() {
   //   }
   // };
 
-  // Variant image upload handler
   const handleVariantImageUpload = (e: React.ChangeEvent<HTMLInputElement>, variantIndex: number) => {
     const files = e.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      const validFiles = validateFiles(newFiles);
-      
-      const currentVariant = variants[variantIndex];
-      const currentImages = currentVariant.images || [];
-      const currentPreviews = currentVariant.imagePreviews || [];
-      
-      if (currentImages.length + validFiles.length > 3) {
-        toast.error("Maximum 3 images per variant allowed");
-        return;
-      }
-      
-      const newVariantImages = [...currentImages, ...validFiles];
-      const newVariantPreviews = [...currentPreviews];
-      
-      validFiles.forEach(file => {
-        newVariantPreviews.push(URL.createObjectURL(file));
-      });
-      
-      updateVariant(variantIndex, 'images', newVariantImages);
-      updateVariant(variantIndex, 'imagePreviews', newVariantPreviews);
+    if (!files) return;
+
+    const validFiles = validateFiles(Array.from(files));
+    const updatedVariants = [...variants];
+    const currentVariant = updatedVariants[variantIndex];
+
+    const currentImages = currentVariant.images || [];
+    const currentPreviews = currentVariant.imagePreviews || [];
+
+    if (currentImages.length + validFiles.length > 3) {
+      toast.error("Maximum 3 images per variant allowed");
+      return;
     }
+
+    const newImages = [...currentImages, ...validFiles];
+    const newPreviews = [...currentPreviews, ...validFiles.map(file => URL.createObjectURL(file))];
+
+    updatedVariants[variantIndex] = {
+      ...currentVariant,
+      images: newImages,
+      imagePreviews: newPreviews,
+    };
+
+    setVariants(updatedVariants);
   };
 
   // Validate image files
