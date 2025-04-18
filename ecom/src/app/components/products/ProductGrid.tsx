@@ -52,21 +52,26 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 };
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+console.log("🚀 ~ product:", product)
+
+  const firstVariant = product?.variants[0] || {};
+  
+  // Safely get the first image or use a placeholder
+  const primaryImage = 
+    (product.images && product.images[0]) || 
+    (firstVariant.images && firstVariant.images[0]) || 
+    '/placeholder-image.jpg';
   console.log("🚀 ~ product:", product)
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
       {/* Product Image */}
       <Link href={`/product/${product._id}`} className="block relative">
-        {/* {discountPercentage > 0 && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs z-10">
-            {discountPercentage}% OFF
-          </div>
-        )} */}
+   
         <div className="relative w-full pt-[100%]">
           <Image 
             loading='lazy'
-            src={product.images[1] }
+            src={primaryImage }
             alt={product.name}
             fill
             className="absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-300"
@@ -88,15 +93,15 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             {product.salePrice ? (
               <>
                 <span className="text-red-600 font-bold mr-2">
-                  ₹{product.salePrice.toFixed(2)}
+                ₹{firstVariant.price?.default?.toFixed(2) || 'N/A'}
                 </span>
                 <span className="text-gray-400 line-through">
-                  ₹{product.price.toFixed(2)}
+                ₹{firstVariant.price?.default?.toFixed(2) || 'N/A'}
                 </span>
               </>
             ) : (
               <span className="text-black font-bold">
-                ₹{product.price.toFixed(2)}
+             ₹{firstVariant.price?.default?.toFixed(2) || 'N/A'}
               </span>
             )}
           </div>
