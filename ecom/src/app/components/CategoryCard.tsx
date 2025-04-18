@@ -1,63 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import axios from 'axios';
+import { API_URL } from '../lib/api';
+import { toast } from 'react-toastify';
 
-// Category data matching the sketch's structure
-const CATEGORIES = [
-  {
-    id: 1,
-    name: 'Rings',
-    slug: 'rings',
-    image: '/images/categories/rings.jpg', // Replace with actual image
-    materials: ['Gold', 'Silver']
-  },
-  {
-    id: 2,
-    name: 'Earrings',
-    slug: 'earrings',
-    image: '/images/categories/earrings.jpg', // Replace with actual image
-    materials: ['Gold', 'Silver']
-  },
-  {
-    id: 3,
-    name: 'Pendant',
-    slug: 'pendant',
-    image: '/images/categories/pendant.jpg', // Replace with actual image
-    materials: ['Gold', 'Silver']
-  },
-  {
-    id: 4,
-    name: 'Bracelet',
-    slug: 'bracelet',
-    image: '/images/categories/bracelet.jpg', // Replace with actual image
-    materials: ['Gold', 'Silver']
-  },
-  {
-    id: 5,
-    name: 'Necklace',
-    slug: 'necklace',
-    image: '/images/categories/necklace.jpg', // Replace with actual image
-    materials: ['Gold', 'Silver']
-  },
-  {
-    id: 6,
-    name: 'Gifts',
-    slug: 'gifts',
-    image: '/images/categories/gifts.jpg', // Replace with actual image
-    materials: ['Gold', 'Silver']
-  },
-  {
-    id: 7,
-    name: 'Watches',
-    slug: 'watches',
-    image: '/images/categories/watches.jpg', // Replace with actual image
-    materials: ['Gold', 'Silver']
-  }
-];
+
 
 const CategorySection = () => {
+  const [categories, setCategories] = React.useState([]);
+
+  const fetchCategories = async () => {
+
+    try {
+      const response = await axios.get(`${API_URL}/categories`);
+      setCategories(response.data.categories || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      toast.error('Failed to load categories');
+    } finally {
+      // setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  });
   return (
     <section className="py-12 bg-pink-50">
       <div className="container mx-auto px-4">
@@ -66,8 +36,8 @@ const CategorySection = () => {
         </h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {CATEGORIES.map((category) => (
-            <CategoryCard key={category.id} category={category} />
+          {categories.map((category) => (
+            <CategoryCard key={category._id} category={category} />
           ))}
         </div>
       </div>
@@ -86,6 +56,7 @@ interface CategoryCardProps {
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
+  console.log("🚀 ~ category:", category)
   // Fallback for image loading
   const [imageError, setImageError] = React.useState(false);
   

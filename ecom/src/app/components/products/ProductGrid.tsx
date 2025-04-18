@@ -76,7 +76,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
       {/* Product Details */}
       <div className="p-4">
-        <Link href={`/products/₹{product.slug}`}>
+        <Link href={`/products/${product.slug}`}>
           <h3 className="text-lg font-semibold mb-2 line-clamp-2">
             {product.name}
           </h3>

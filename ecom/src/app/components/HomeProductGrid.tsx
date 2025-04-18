@@ -54,6 +54,7 @@ interface ProductGridProps {
 
 const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
+  console.log("🚀 ~ categoryGroups:", categoryGroups)
   
   useEffect(() => {
     // Group products by category
@@ -97,7 +98,7 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               </Link>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
               {category.products.slice(0, 4).map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
@@ -165,7 +166,8 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   };
 
   return (
-    <div className={`rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group ${cardBgColor}`}>
+    <div className={`rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 
+    group ${cardBgColor}`}>
       {/* Product Image */}
       <Link href={`/product/${product._id}`} className="block relative">
         {discountPercentage && discountPercentage > 0 && (

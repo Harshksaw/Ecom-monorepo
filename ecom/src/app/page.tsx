@@ -1,7 +1,8 @@
-import CategorySection from './components/CategoryCard';
+import Link from 'next/link';
+
 import { HeroBanner } from './components/HeroBanner';
 import HomeProductGrid from './components/HomeProductGrid';
-import Wrapper from './components/Wrapper';
+
 import { ProductService } from "./lib/api";
 
 
@@ -15,7 +16,7 @@ export default async function Home() {
       <HeroBanner />
 
       {/* Feature Banner */}
-      <div className="bg-pink-600 text-white py-4">
+      <div className="bg-pink-600 text-white py-2 relative top-5">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="flex flex-col items-center">
@@ -36,9 +37,15 @@ export default async function Home() {
 
       {/* Welcome Section */}
       <div className="text-center max-w-[800px] mx-auto my-[50px] md:my-[80px] px-4">
-        <div className="text-3xl md:text-4xl mb-5 font-bold leading-tight text-pink-800">
+        <Link 
+          href="/"
+        
+        >
+          <div className="text-3xl md:text-4xl mb-5 font-bold leading-tight text-pink-800" >
+
           Shri Nanu Gems & Jewelers
-        </div>
+          </div>
+        </Link>
         <div className="text-md md:text-xl text-gray-700">
           Discover exquisite pieces crafted with precision and passion. 
           From timeless classics to contemporary designs, our collection brings elegance to every occasion.

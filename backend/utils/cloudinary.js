@@ -50,7 +50,7 @@ const upload = multer({
 const handleUpload = (req, res, next) => {
   upload(req, res, function(err) {
     if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading
+
       console.error('Multer error:', err);
       return res.status(400).json({
         success: false,
