@@ -6,19 +6,24 @@ const { validateProductInput } = require("../utils/validator");
 
 // Create a new product
 exports.createProduct = async (req, res) => {
-  console.log(
-    "🚀 ~ file: product.controller.js ~ line 10 ~ exports.createProduct= ~ req.files",
-    req.files
-  );
   try {
-    const images = req.files.map((file) => file.path);
-    console.log("🚀 ~ exports.createProduct= ~ images:", images);
+    
+    // Handle both standard multer and multer.fields() configurations
+    let mainImages = [];
+    if (req.files.images) {
+      // If using fields configuration
+      mainImages = req.files.images.map(file => file.path);
+    } else if (Array.isArray(req.files)) {
+      // If using array configuration
+      mainImages = req.files.map(file => file.path);
+    }
+    console.log("🚀 ~ file: product.controller.js ~ exports.createProduct= ~ req.files", req.body);
+    console.log("🚀 ~ exports.createProduct= ~ images:", mainImages);
+    
     const {
       name,
       sku,
       description,
-      price,
-      salePrice,
       categoryId,
       weight,
       dimensions,
@@ -28,6 +33,11 @@ exports.createProduct = async (req, res) => {
       isFeatured,
       tags,
       materialType,
+      purity,
+      shape,
+      color,
+      variants,
+      deliveryOptions
     } = req.body;
 
     // Validate input
@@ -50,22 +60,67 @@ exports.createProduct = async (req, res) => {
       return res.status(400).json({ message: "Invalid category" });
     }
 
+    // Parse JSON strings if they are sent as strings from the frontend
+    const parsedWeight = typeof weight === 'string' ? JSON.parse(weight) : weight;
+    const parsedDimensions = typeof dimensions === 'string' ? JSON.parse(dimensions) : dimensions;
+    const parsedGems = typeof gems === 'string' ? JSON.parse(gems) : gems;
+    const parsedMaterials = typeof materials === 'string' ? JSON.parse(materials) : materials;
+    const parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
+    const parsedDeliveryOptions = typeof deliveryOptions === 'string' ? 
+      JSON.parse(deliveryOptions) : deliveryOptions;
+    const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+
+    // Process variants to ensure they have proper structure and assign variant images
+    const processedVariants = parsedVariants?.map((variant, index) => {
+      const parsedStock = Number(variant.stock);
+      const parsedPrice = {};
+    
+      for (const key in variant.price) {
+        parsedPrice[key] = Number(variant.price[key]);
+      }
+    
+      // Validate after conversion
+      if (!parsedPrice.default || parsedPrice.default <= 0) {
+        throw new Error("Product price is required");
+      }
+      if (isNaN(parsedStock) || parsedStock < 0) {
+        throw new Error("Stock quantity must be a non-negative number");
+      }
+    
+
+        const variantImages = req.files[`variant_${index}_images`] 
+          ? req.files[`variant_${index}_images`].map(file => file.path) 
+          : [];
+      
+        return {
+          ...variant,
+          price: new Map(Object.entries(variant.price)),
+          images: variantImages
+        };
+
+      
+    });
+    
+
     const newProduct = new Product({
       name,
       sku,
       description,
-      price,
-      salePrice,
       categoryId,
-      images,
-      weight,
-      dimensions,
-      materials,
-      gems,
+      images: mainImages,
+      weight: parsedWeight,
+      dimensions: parsedDimensions,
+      materials: parsedMaterials,
+      gems: parsedGems,
       materialType,
+      purity,
+      shape,
+      color,
+      variants: processedVariants,
+      deliveryOptions: parsedDeliveryOptions,
       isActive,
       isFeatured,
-      tags,
+      tags: parsedTags,
     });
 
     await newProduct.save();
@@ -99,22 +154,49 @@ exports.getAllProducts = async (req, res) => {
       materials,
       inStock,
       materialType,
+      purity,
+      shape,
+      color
     } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build filter
     const filter = { isActive: true };
-    if (materialType) {
-      filter.materialType = materialType; // Filter by material materialType (gold/silver)
-    }
-
+    
+    if (materialType) filter.materialType = materialType;
+    if (purity) filter.purity = purity;
+    if (shape) filter.shape = shape;
+    if (color) filter.color = color;
     if (category) filter.categoryId = category;
 
     if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = parseFloat(minPrice);
-      if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+      // For price filtering with variants, we need a more complex query
+      const priceFilter = [];
+      
+      if (minPrice) {
+        priceFilter.push({
+          variants: {
+            $elemMatch: {
+              "price": { $elemMatch: { $gte: parseFloat(minPrice) } }
+            }
+          }
+        });
+      }
+      
+      if (maxPrice) {
+        priceFilter.push({
+          variants: {
+            $elemMatch: {
+              "price": { $elemMatch: { $lte: parseFloat(maxPrice) } }
+            }
+          }
+        });
+      }
+      
+      if (priceFilter.length > 0) {
+        filter.$and = priceFilter;
+      }
     }
 
     if (search) {
@@ -133,7 +215,9 @@ exports.getAllProducts = async (req, res) => {
       filter.materials = { $in: materialsList };
     }
 
-    if (inStock === "true") filter.stockQuantity = { $gt: 0 };
+    if (inStock === "true") {
+      filter["variants.stock"] = { $gt: 0 };
+    }
 
     // Build sort
     const sort = {};
@@ -169,6 +253,9 @@ exports.getAllProductsByCategory = async (req, res) => {
       sortBy = "createdAt",
       sortOrder = "desc",
       materialType,
+      purity,
+      shape,
+      color
     } = req.query;
     const category = req.params.category;
     if (!category) {
@@ -193,9 +280,11 @@ exports.getAllProductsByCategory = async (req, res) => {
       isActive: true,
       categoryId: categoryObj._id, // This is the key relation - we use the _id from the category
     };
-    if (materialType) {
-      filter.materialType = materialType; // Filter by material materialType (gold/silver)
-    }
+    
+    if (materialType) filter.materialType = materialType;
+    if (purity) filter.purity = purity;
+    if (shape) filter.shape = shape;
+    if (color) filter.color = color;
 
     // Build sort
     const sort = {};
@@ -226,6 +315,7 @@ exports.getAllProductsByCategory = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 // Get product by ID
 exports.getProductById = async (req, res) => {
   try {
@@ -270,7 +360,7 @@ exports.getFeaturedProducts = async (req, res) => {
     const products = await Product.find({
       isActive: true,
       isFeatured: true,
-      stockQuantity: { $gt: 0 },
+      "variants.stock": { $gt: 0 } // Check stock in variants
     })
       .sort({ createdAt: -1 })
       .limit(limit)
@@ -335,19 +425,22 @@ exports.updateProduct = async (req, res) => {
       name,
       sku,
       description,
-      price,
-      salePrice,
       categoryId,
       images,
       weight,
       dimensions,
       materials,
       gems,
-      stockQuantity,
       isActive,
       isFeatured,
       tags,
       removedImages,
+      materialType,
+      purity,
+      shape,
+      color,
+      variants,
+      deliveryOptions
     } = req.body;
 
     // Check if updated SKU conflicts with another product
@@ -413,26 +506,55 @@ exports.updateProduct = async (req, res) => {
       ];
     }
 
+    // Parse complex objects if they are strings
+    const parsedWeight = typeof weight === 'string' ? JSON.parse(weight) : weight;
+    const parsedDimensions = typeof dimensions === 'string' ? JSON.parse(dimensions) : dimensions;
+    const parsedGems = typeof gems === 'string' ? JSON.parse(gems) : gems;
+    const parsedMaterials = typeof materials === 'string' ? JSON.parse(materials) : materials;
+    const parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
+    const parsedDeliveryOptions = typeof deliveryOptions === 'string' ? 
+      JSON.parse(deliveryOptions) : deliveryOptions;
+    const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+
+    // Process variants to ensure they have proper structure
+    const processedVariants = parsedVariants?.map(variant => {
+      // Convert price from JSON to Map if needed
+      let priceMap = variant.price;
+      if (!(variant.price instanceof Map) && typeof variant.price === 'object') {
+        priceMap = new Map(Object.entries(variant.price));
+      }
+      
+      return {
+        ...variant,
+        price: priceMap
+      };
+    });
+
+    const updateData = {
+      ...(name && { name }),
+      ...(sku && { sku }),
+      ...(description && { description }),
+      ...(categoryId && { categoryId }),
+      images: updatedImages,
+      ...(parsedWeight !== undefined && { weight: parsedWeight }),
+      ...(parsedDimensions && { dimensions: parsedDimensions }),
+      ...(parsedMaterials && { materials: parsedMaterials }),
+      ...(parsedGems && { gems: parsedGems }),
+      ...(materialType && { materialType }),
+      ...(purity && { purity }),
+      ...(shape && { shape }),
+      ...(color && { color }),
+      ...(processedVariants && { variants: processedVariants }),
+      ...(parsedDeliveryOptions && { deliveryOptions: parsedDeliveryOptions }),
+      ...(typeof isActive === "boolean" && { isActive }),
+      ...(typeof isFeatured === "boolean" && { isFeatured }),
+      ...(parsedTags && { tags: parsedTags }),
+      updatedAt: Date.now(),
+    };
+
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      {
-        ...(name && { name }),
-        ...(sku && { sku }),
-        ...(description && { description }),
-        ...(price && { price }),
-        ...(salePrice !== undefined && { salePrice }),
-        ...(categoryId && { categoryId }),
-        images: updatedImages,
-        ...(weight !== undefined && { weight }),
-        ...(dimensions && { dimensions }),
-        ...(materials && { materials }),
-        ...(gems && { gems }),
-        ...(stockQuantity !== undefined && { stockQuantity }),
-        ...(typeof isActive === "boolean" && { isActive }),
-        ...(typeof isFeatured === "boolean" && { isFeatured }),
-        ...(tags && { tags }),
-        updatedAt: Date.now(),
-      },
+      updateData,
       { new: true }
     );
 
@@ -469,6 +591,24 @@ exports.deleteProduct = async (req, res) => {
       }
     }
 
+    // Delete variant images if they exist
+    if (product.variants && product.variants.length > 0) {
+      for (const variant of product.variants) {
+        if (variant.images && variant.images.length > 0) {
+          for (const imageUrl of variant.images) {
+            try {
+              const publicId = getPublicIdFromUrl(imageUrl);
+              if (publicId) {
+                await deleteImage(publicId);
+              }
+            } catch (err) {
+              console.error(`Error deleting variant image ${imageUrl}:`, err);
+            }
+          }
+        }
+      }
+    }
+
     // Delete the product from database
     await Product.findByIdAndDelete(req.params.id);
 
@@ -478,37 +618,39 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-// Update product stock
+// Update product stock (now working with variants)
 exports.updateStock = async (req, res) => {
   try {
-    const { stockQuantity } = req.body;
+    const { variantId, stock } = req.body;
 
-    if (
-      stockQuantity === undefined ||
-      isNaN(stockQuantity) ||
-      stockQuantity < 0
-    ) {
-      return res
-        .status(400)
-        .json({ message: "Valid stock quantity is required" });
+    if (!variantId) {
+      return res.status(400).json({ message: "Variant ID is required" });
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      {
-        stockQuantity,
-        updatedAt: Date.now(),
-      },
-      { new: true }
-    );
+    if (stock === undefined || isNaN(stock) || stock < 0) {
+      return res.status(400).json({ message: "Valid stock quantity is required" });
+    }
 
-    if (!updatedProduct) {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // Find the variant and update its stock
+    const variantIndex = product.variants.findIndex(v => v._id.toString() === variantId);
+    if (variantIndex === -1) {
+      return res.status(404).json({ message: "Variant not found" });
+    }
+
+    // Update the specific variant's stock
+    product.variants[variantIndex].stock = stock;
+    product.updatedAt = Date.now();
+    
+    await product.save();
+
     res.status(200).json({
       message: "Stock updated successfully",
-      product: updatedProduct,
+      product: product,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -559,6 +701,7 @@ exports.bulkDeleteProducts = async (req, res) => {
 
     // Delete images from Cloudinary
     for (const product of products) {
+      // Delete main product images
       if (product.images && product.images.length > 0) {
         for (const imageUrl of product.images) {
           try {
@@ -568,7 +711,24 @@ exports.bulkDeleteProducts = async (req, res) => {
             }
           } catch (err) {
             console.error(`Error deleting image ${imageUrl}:`, err);
-            // Continue with other images even if one fails
+          }
+        }
+      }
+      
+      // Delete variant images
+      if (product.variants && product.variants.length > 0) {
+        for (const variant of product.variants) {
+          if (variant.images && variant.images.length > 0) {
+            for (const imageUrl of variant.images) {
+              try {
+                const publicId = getPublicIdFromUrl(imageUrl);
+                if (publicId) {
+                  await deleteImage(publicId);
+                }
+              } catch (err) {
+                console.error(`Error deleting variant image ${imageUrl}:`, err);
+              }
+            }
           }
         }
       }

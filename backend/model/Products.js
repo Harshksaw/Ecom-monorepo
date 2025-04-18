@@ -6,15 +6,23 @@ const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   sku: { type: String, required: true, unique: true },
   description: { type: String, required: true },
-  price: { type: Number, required: true },
-  salePrice: { type: Number },
+
+
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
     required: true,
   },
   images: [{ type: String }],
-  weight: { type: Number }, // in grams
+  weight: {
+    value: { type: Number },
+    unit: {
+      type: String,
+      enum: ["grams", "carat", "tola", "oz"],
+      default: "grams"
+    }
+  },
+  
   dimensions: {
     length: { type: Number },
     width: { type: Number },
@@ -35,8 +43,51 @@ const productSchema = new mongoose.Schema({
     enum: ["gold", "silver"],
     required: true,
   },
+  purity: {
+    type: String,
 
-  stockQuantity: { type: Number, required: false, default: 0 },
+  },
+  shape: {
+    type: String,
+    enum: ["round", "oval", "princess", "emerald", "pear", "marquise", "heart", "cushion"],
+  },
+  color: {
+    type: String,
+    enum: ["yellow", "white", "rose", "silver", "multicolor"],
+  }
+,  
+variants: [
+  {
+    metalColor: {
+      type: String,
+      enum: ["gold", "silver", "rosegold", "pinkgold"],
+      required: true,
+    },
+    images: [{ type: String }],
+    price: {
+      type: Map,
+      of: Number,
+      default: {}
+    },
+    stock: { type: Number, default: 0 },
+  }
+],
+
+
+deliveryOptions: [
+  {
+    type: { type: String }, // e.g., "standard", "express"
+    duration: { type: String }, // e.g., "5-7 business days"
+    price: { type: Number }, // e.g., extra cost for faster shipping
+  }
+],
+
+
+
+  
+  
+
+
   isActive: { type: Boolean, default: true },
   isFeatured: { type: Boolean, default: false },
   tags: [{ type: String }],

@@ -9,6 +9,8 @@ import {
   FaPlus,
   FaTrash,
   FaGem,
+  FaTruck,
+  FaTag
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import axios from "axios";
@@ -33,33 +35,80 @@ interface Dimensions {
   height: string;
 }
 
+interface Weight {
+  value: string;
+  unit: string;
+}
+
+
+interface Variant {
+  metalColor: string;
+  price: Record<string, number>;
+  stock: number;
+  images?: File[];
+  imagePreviews?: string[];
+}
+
+interface DeliveryOption {
+  type: string;
+  duration: string;
+  price: string;
+}
+
 export default function CreateProductPage() {
-  // Form state
+  // Basic product info
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
-  const [materialType, setMaterialType] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [salePrice, setSalePrice] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [stock, setStock] = useState("");
-  const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [isFeatured, setIsFeatured] = useState(false);
 
-  // New state fields based on schema
-  const [weight, setWeight] = useState("");
+  // Material properties
+  const [materialType, setMaterialType] = useState("");
+  const [purity, setPurity] = useState("");
+  const [shape, setShape] = useState("");
+  const [color, setColor] = useState("");
+  const [materials, setMaterials] = useState<string[]>([""]);
+
+  // Physical properties
+  const [weight, setWeight] = useState<Weight>({
+    value: "",
+    unit: "grams"
+  });
   const [dimensions, setDimensions] = useState<Dimensions>({
     length: "",
     width: "",
     height: "",
   });
-  const [materials, setMaterials] = useState<string[]>([""]);
+  
+  // Gems
   const [gems, setGems] = useState<Gem[]>([]);
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [isActive, setIsActive] = useState(true);
+  
+  // Variants
+  const [variants, setVariants] = useState<any[]>([{
+    metalColor: "gold",
+    price: { "default": 0 },
+    stock: 0,
+    images: [],
+    imagePreviews: []
+  }]);
+  
+  // Delivery options
+  const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOption[]>([{
+    type: "standard",
+    duration: "5-7 business days",
+    price: "0"
+  }]);
+  
+  // Tags
   const [tags, setTags] = useState<string[]>([""]);
+  
+  // Main product images
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const router = useRouter();
 
@@ -91,52 +140,100 @@ export default function CreateProductPage() {
     }
   }, [name]);
 
-  // Image upload handler
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Main image upload handler
+  // const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = e.target.files;
+  //   if (files) {
+  //     const newFiles = Array.from(files);
+  //     const validFiles = validateFiles(newFiles);
+
+  //     if (images.length + validFiles.length > 5) {
+  //       toast.error("Maximum 5 images allowed");
+  //       return;
+  //     }
+
+  //     const newImageFiles = [...images, ...validFiles];
+  //     const newImagePreviews = [...imagePreviews];
+      
+  //     validFiles.forEach(file => {
+  //       newImagePreviews.push(URL.createObjectURL(file));
+  //     });
+
+  //     setImages(newImageFiles);
+  //     setImagePreviews(newImagePreviews);
+  //   }
+  // };
+
+  // Variant image upload handler
+  const handleVariantImageUpload = (e: React.ChangeEvent<HTMLInputElement>, variantIndex: number) => {
     const files = e.target.files;
     if (files) {
       const newFiles = Array.from(files);
-      const validFiles = newFiles.filter((file) => {
-        const validTypes = ["image/jpeg", "image/png", "image/gif"];
-        const maxSize = 5 * 1024 * 1024; // 5MB
-
-        if (!validTypes.includes(file.type)) {
-          toast.error(
-            `Invalid file type for ${file.name}. Please upload JPEG, PNG, or GIF.`
-          );
-          return false;
-        }
-
-        if (file.size > maxSize) {
-          toast.error(`${file.name} is too large. Maximum size is 5MB.`);
-          return false;
-        }
-
-        return true;
-      });
-
-      if (images.length + validFiles.length > 5) {
-        toast.error("Maximum 5 images allowed");
+      const validFiles = validateFiles(newFiles);
+      
+      const currentVariant = variants[variantIndex];
+      const currentImages = currentVariant.images || [];
+      const currentPreviews = currentVariant.imagePreviews || [];
+      
+      if (currentImages.length + validFiles.length > 3) {
+        toast.error("Maximum 3 images per variant allowed");
         return;
       }
-
-      const newImageFiles = [...images, ...validFiles];
-      const newImagePreviews = newImageFiles.map((file) =>
-        URL.createObjectURL(file)
-      );
-
-      setImages(newImageFiles);
-      setImagePreviews(newImagePreviews);
+      
+      const newVariantImages = [...currentImages, ...validFiles];
+      const newVariantPreviews = [...currentPreviews];
+      
+      validFiles.forEach(file => {
+        newVariantPreviews.push(URL.createObjectURL(file));
+      });
+      
+      updateVariant(variantIndex, 'images', newVariantImages);
+      updateVariant(variantIndex, 'imagePreviews', newVariantPreviews);
     }
   };
 
-  // Remove image
+  // Validate image files
+  const validateFiles = (files: File[]) => {
+    return files.filter((file) => {
+      const validTypes = ["image/jpeg", "image/png", "image/gif"];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!validTypes.includes(file.type)) {
+        toast.error(
+          `Invalid file type for ${file.name}. Please upload JPEG, PNG, or GIF.`
+        );
+        return false;
+      }
+
+      if (file.size > maxSize) {
+        toast.error(`${file.name} is too large. Maximum size is 5MB.`);
+        return false;
+      }
+
+      return true;
+    });
+  };
+
+  // Remove main image
   const removeImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
 
     setImages(newImages);
     setImagePreviews(newPreviews);
+  };
+
+  // Remove variant image
+  const removeVariantImage = (variantIndex: number, imageIndex: number) => {
+    const currentVariant = variants[variantIndex];
+    const currentImages = currentVariant.images || [];
+    const currentPreviews = currentVariant.imagePreviews || [];
+    
+    const newImages = currentImages.filter((_, i) => i !== imageIndex);
+    const newPreviews = currentPreviews.filter((_, i) => i !== imageIndex);
+    
+    updateVariant(variantIndex, 'images', newImages);
+    updateVariant(variantIndex, 'imagePreviews', newPreviews);
   };
 
   // Add/remove material input fields
@@ -171,6 +268,80 @@ export default function CreateProductPage() {
     setGems(newGems);
   };
 
+  // Add/remove variant
+  const addVariant = () => {
+    setVariants([...variants, {
+      metalColor: "gold",
+      price: {"default": ""},
+      stock:0,
+      images: [],
+      imagePreviews: []
+    }]);
+  };
+
+  const removeVariant = (index: number) => {
+    if (variants.length === 1) {
+      toast.error("At least one variant is required");
+      return;
+    }
+    const newVariants = variants.filter((_, i) => i !== index);
+    setVariants(newVariants);
+  };
+
+  const updateVariant = (index: number, field: keyof Variant, value: any) => {
+    const newVariants = [...variants];
+    newVariants[index] = { ...newVariants[index], [field]: value };
+    setVariants(newVariants);
+  };
+  
+  // Update variant price
+  const updateVariantPrice = (variantIndex: number, priceKey: string, value: number) => {
+    const newVariants = [...variants];
+    const currentPrices = newVariants[variantIndex].price || {};
+    newVariants[variantIndex].price = { ...currentPrices, [priceKey]: value };
+    setVariants(newVariants);
+  };
+  
+  // Add variant price option
+  const addVariantPriceOption = (variantIndex: number) => {
+    const newPriceKey = `option_${Object.keys(variants[variantIndex].price).length}`;
+    updateVariantPrice(variantIndex, newPriceKey, "");
+  };
+  
+  // Remove variant price option
+  const removeVariantPriceOption = (variantIndex: number, priceKey: string) => {
+    if (Object.keys(variants[variantIndex].price).length === 1) {
+      toast.error("At least one price option is required");
+      return;
+    }
+    
+    const newVariants = [...variants];
+    const newPrices = { ...newVariants[variantIndex].price };
+    delete newPrices[priceKey];
+    newVariants[variantIndex].price = newPrices;
+    setVariants(newVariants);
+  };
+
+  // Add/remove delivery option
+  const addDeliveryOption = () => {
+    setDeliveryOptions([...deliveryOptions, {
+      type: "",
+      duration: "",
+      price: "0"
+    }]);
+  };
+
+  const removeDeliveryOption = (index: number) => {
+    const newDeliveryOptions = deliveryOptions.filter((_, i) => i !== index);
+    setDeliveryOptions(newDeliveryOptions);
+  };
+
+  const updateDeliveryOption = (index: number, field: keyof DeliveryOption, value: string) => {
+    const newDeliveryOptions = [...deliveryOptions];
+    newDeliveryOptions[index] = { ...newDeliveryOptions[index], [field]: value };
+    setDeliveryOptions(newDeliveryOptions);
+  };
+
   // Add/remove tag input fields
   const addTag = () => {
     setTags([...tags, ""]);
@@ -192,7 +363,7 @@ export default function CreateProductPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validate inputs
+    // Validate required inputs
     if (!name.trim()) {
       toast.error("Product name is required");
       setIsLoading(false);
@@ -204,33 +375,46 @@ export default function CreateProductPage() {
       setIsLoading(false);
       return;
     }
+    
+    if (!materialType) {
+      toast.error("Material type is required");
+      setIsLoading(false);
+      return;
+    }
+    
+    if (!purity) {
+      toast.error("Purity is required");
+      setIsLoading(false);
+      return;
+    }
+    const defaultPrice = variants[0]?.price?.default || "";
 
     // Create form data
     const formData = new FormData();
     formData.append("name", name);
     formData.append("sku", sku);
     formData.append("description", description);
-    formData.append("price", price);
-
-    if (salePrice) {
-      formData.append("salePrice", salePrice);
-    }
-
     formData.append("categoryId", category);
-    formData.append("stockQuantity", stock);
     formData.append("isActive", isActive.toString());
     formData.append("isFeatured", isFeatured.toString());
-
+    formData.append("price", defaultPrice);
+    // Add material properties
+    formData.append("materialType", materialType);
+    formData.append("purity", purity);
+    if (shape) formData.append("shape", shape);
+    if (color) formData.append("color", color);
+    
     // Add weight
-    if (weight) {
-      formData.append("weight", weight);
+    if (weight.value) {
+      formData.append("weight[value]", weight.value);
+      formData.append("weight[unit]", weight.unit);
     }
 
     // Add dimensions
     if (dimensions.length || dimensions.width || dimensions.height) {
-      formData.append("dimensions[length]", dimensions.length);
-      formData.append("dimensions[width]", dimensions.width);
-      formData.append("dimensions[height]", dimensions.height);
+      if (dimensions.length) formData.append("dimensions[length]", dimensions.length);
+      if (dimensions.width) formData.append("dimensions[width]", dimensions.width);
+      if (dimensions.height) formData.append("dimensions[height]", dimensions.height);
     }
 
     // Add materials
@@ -249,6 +433,27 @@ export default function CreateProductPage() {
         formData.append(`gems[${index}][clarity]`, gem.clarity);
       }
     });
+    
+    // Add variants
+    const variantsToSend = variants.map(variant => {
+      const variantData = {
+        metalColor: variant.metalColor,
+        price: variant.price,
+        stock: variant.stock
+      };
+      return variantData;
+    });
+    formData.append("variants", JSON.stringify(variantsToSend));
+    
+    // Add variant images separately
+    variants.forEach((variant, variantIndex) => {
+      variant.images?.forEach((image, imageIndex) => {
+        formData.append(`variant_${variantIndex}_images`, image);
+      });
+    });
+    
+    // Add delivery options
+    formData.append("deliveryOptions", JSON.stringify(deliveryOptions));
 
     // Add tags
     tags.forEach((tag, index) => {
@@ -257,15 +462,15 @@ export default function CreateProductPage() {
       }
     });
 
-    // Add images
+    // Add main product images
     images.forEach((image) => {
       formData.append("images", image);
     });
 
+    console.log("32233", formData)
     try {
+      console.log("32233", formData)
       const response = await axios.post(`${API_URL}/products`, formData);
-
-      console.log("🚀 ~ handleSubmit ~ response:", response);
 
       if (response.status !== 201) {
         toast.error("Failed to create product");
@@ -273,27 +478,40 @@ export default function CreateProductPage() {
       }
 
       toast.success("Product created successfully");
-      //reset state
+      // Reset form
       setName("");
       setSku("");
       setDescription("");
-      setPrice("");
-      setSalePrice("");
       setCategory("");
-      setStock("");
+      setMaterialType("");
+      setPurity("");
+      setShape("");
+      setColor("");
       setImages([]);
       setImagePreviews([]);
       setMaterials([""]);
-      setGems([{ type: "", carat: "", color: "", clarity: "" }]);
+      setGems([]);
+      setWeight({ value: "", unit: "grams" });
+      setDimensions({ length: "", width: "", height: "" });
+      setVariants([{
+        metalColor: "gold",
+        price: {"default": ""},
+        stock: "0",
+        images: [],
+        imagePreviews: []
+      }]);
+      setDeliveryOptions([{
+        type: "standard",
+        duration: "5-7 business days",
+        price: "0"
+      }]);
       setIsFeatured(false);
       setIsActive(true);
       setTags([""]);
-      setWeight("");
-      setDimensions({ length: "", width: "", height: "" });
 
       router.push("/admin/dashboard/products");
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || "Failed to create product");
     } finally {
       setIsLoading(false);
     }
@@ -307,108 +525,67 @@ export default function CreateProductPage() {
         onSubmit={handleSubmit}
         className="mx-auto bg-white shadow-md rounded-lg p-8"
       >
-        {/* Basic Information */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Product Name */}
-          <div>
+        {/* Basic Information Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Basic Information</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Product Name */}
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-gray-700 font-bold mb-2"
+              >
+                Product Name*
+              </label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter product name"
+                required
+              />
+            </div>
+
+            {/* SKU */}
+            <div>
+              <label htmlFor="sku" className="block text-gray-700 font-bold mb-2">
+                SKU*
+              </label>
+              <input
+                type="text"
+                id="sku"
+                value={sku}
+                onChange={(e) => setSku(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                placeholder="Auto-generated SKU"
+                readOnly
+              />
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="mt-6">
             <label
-              htmlFor="name"
+              htmlFor="description"
               className="block text-gray-700 font-bold mb-2"
             >
-              Product Name*
+              Description*
             </label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter product name"
+              placeholder="Enter product description"
+              rows={4}
               required
-            />
-          </div>
-
-          {/* SKU */}
-          <div>
-            <label htmlFor="sku" className="block text-gray-700 font-bold mb-2">
-              SKU*
-            </label>
-            <input
-              type="text"
-              id="sku"
-              value={sku}
-              onChange={(e) => setSku(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
-              placeholder="Auto-generated SKU"
-              readOnly
-            />
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className="mt-6">
-          <label
-            htmlFor="description"
-            className="block text-gray-700 font-bold mb-2"
-          >
-            Description*
-          </label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter product description"
-            rows={4}
-            required
-          />
-        </div>
-
-        {/* Pricing and Category */}
-        <div className="grid md:grid-cols-3 gap-6 mt-6">
-          {/* Price */}
-          <div>
-            <label
-              htmlFor="price"
-              className="block text-gray-700 font-bold mb-2"
-            >
-              Price*
-            </label>
-            <input
-              type="number"
-              id="price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter price"
-              min="0"
-              step="0.01"
-              required
-            />
-          </div>
-
-          {/* Sale Price */}
-          <div>
-            <label
-              htmlFor="salePrice"
-              className="block text-gray-700 font-bold mb-2"
-            >
-              Sale Price (Optional)
-            </label>
-            <input
-              type="number"
-              id="salePrice"
-              value={salePrice}
-              onChange={(e) => setSalePrice(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter sale price"
-              min="0"
-              step="0.01"
             />
           </div>
 
           {/* Category */}
-          <div>
+          <div className="mt-6">
             <label
               htmlFor="category"
               className="block text-gray-700 font-bold mb-2"
@@ -430,50 +607,10 @@ export default function CreateProductPage() {
               ))}
             </select>
           </div>
-        </div>
-
-        {/* Stock, Status, and Featured */}
-        <div className="grid md:grid-cols-3 gap-6 mt-6">
-          {/* Stock */}
-          {/* <div>
-            <label htmlFor="stock" className="block text-gray-700 font-bold mb-2">
-              Stock Quantity*
-            </label>
-            <input
-              type="number"
-              id="stock"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter stock quantity"
-              min="0"
-              required
-            />
-          </div> */}
-
-          {/* Product Weight */}
-          <div>
-            <label
-              htmlFor="weight"
-              className="block text-gray-700 font-bold mb-2"
-            >
-              Weight (g)
-            </label>
-            <input
-              type="number"
-              id="weight"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Weight in grams"
-              min="0"
-              step="0.01"
-            />
-          </div>
-
+          
           {/* Status and Featured Toggles */}
-          {/* <div className="flex flex-col justify-center">
-            <div className="flex items-center mb-2">
+          <div className="mt-6 grid md:grid-cols-2 gap-6">
+            <div className="flex items-center">
               <input
                 type="checkbox"
                 id="isActive"
@@ -485,6 +622,7 @@ export default function CreateProductPage() {
                 Active Product
               </label>
             </div>
+            
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -497,114 +635,224 @@ export default function CreateProductPage() {
                 Featured Product
               </label>
             </div>
-          </div> */}
+          </div>
         </div>
 
-        {/* Dimensions */}
-        <div className="mt-6">
-          <label className="block text-gray-700 font-bold mb-2">
-            Dimensions (cm)
-          </label>
-          <div className="grid md:grid-cols-3 gap-6">
+        {/* Material Properties Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Material Properties</h2>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Material Type */}
             <div>
+              <label
+                htmlFor="materialType"
+                className="block text-gray-700 font-bold mb-2"
+              >
+                Material Type*
+              </label>
+              <select
+                id="materialType"
+                value={materialType}
+                onChange={(e) => setMaterialType(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select Material Type</option>
+                <option value="gold">Gold</option>
+                <option value="silver">Silver</option>
+              </select>
+            </div>
+            
+            {/* Purity */}
+            <div>
+              <label
+                htmlFor="purity"
+                className="block text-gray-700 font-bold mb-2"
+              >
+                Purity*
+              </label>
+              <select
+                id="purity"
+                value={purity}
+                onChange={(e) => setPurity(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select Purity</option>
+                <option value="8K">8K</option>
+                <option value="10K">10K</option>
+                <option value="12K">12K</option>
+                <option value="14K">14K</option>
+                <option value="18K">18K</option>
+                <option value="22K">22K</option>
+                <option value="24K">24K</option>
+              </select>
+            </div>
+            
+            {/* Shape */}
+            <div>
+              <label
+                htmlFor="shape"
+                className="block text-gray-700 font-bold mb-2"
+              >
+                Shape
+              </label>
+              <select
+                id="shape"
+                value={shape}
+                onChange={(e) => setShape(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Shape</option>
+                <option value="round">Round</option>
+                <option value="oval">Oval</option>
+                <option value="princess">Princess</option>
+                <option value="emerald">Emerald</option>
+                <option value="pear">Pear</option>
+                <option value="marquise">Marquise</option>
+                <option value="heart">Heart</option>
+                <option value="cushion">Cushion</option>
+              </select>
+            </div>
+            
+            {/* Color */}
+          
+          </div>
+          
+          {/* Materials */}
+          <div className="mt-6">
+            <label className="block text-gray-700 font-bold mb-2">
+              Materials
+            </label>
+            {materials.map((material, index) => (
+              <div key={index} className="flex items-center space-x-2 mb-2">
+                <input
+                  type="text"
+                  value={material}
+                  onChange={(e) => updateMaterial(index, e.target.value)}
+                  className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter material (e.g., Gold, Silver, Diamond)"
+                />
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => removeMaterial(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <FaTrash />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addMaterial}
+              className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
+            >
+              <FaPlus className="mr-2" /> Add Material
+            </button>
+          </div>
+        </div>
+
+        {/* Physical Properties Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Physical Properties</h2>
+          
+          {/* Weight */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="col-span-2">
+              <label
+                htmlFor="weight"
+                className="block text-gray-700 font-bold mb-2"
+              >
+                Weight
+              </label>
               <input
                 type="number"
-                value={dimensions.length}
-                onChange={(e) =>
-                  setDimensions({ ...dimensions, length: e.target.value })
-                }
+                id="weight"
+                value={weight.value}
+                onChange={(e) => setWeight({...weight, value: e.target.value})}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Length"
+                placeholder="Weight value"
                 min="0"
-                step="0.1"
+                step="0.01"
               />
             </div>
+            
             <div>
-              <input
-                type="number"
-                value={dimensions.width}
-                onChange={(e) =>
-                  setDimensions({ ...dimensions, width: e.target.value })
-                }
+              <label
+                htmlFor="weightUnit"
+                className="block text-gray-700 font-bold mb-2"
+              >
+                Unit
+              </label>
+              <select
+                id="weightUnit"
+                value={weight.unit}
+                onChange={(e) => setWeight({...weight, unit: e.target.value})}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Width"
-                min="0"
-                step="0.1"
-              />
+              >
+                <option value="grams">Grams</option>
+                <option value="carat">Carat</option>
+                <option value="tola">Tola</option>
+                <option value="oz">Oz</option>
+              </select>
             </div>
-            <div>
-              <input
-                type="number"
-                value={dimensions.height}
-                onChange={(e) =>
-                  setDimensions({ ...dimensions, height: e.target.value })
-                }
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Height"
-                min="0"
-                step="0.1"
-              />
+          </div>
+
+          {/* Dimensions */}
+          <div>
+            <label className="block text-gray-700 font-bold mb-2">
+              Dimensions (cm)
+            </label>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div>
+                <input
+                  type="number"
+                  value={dimensions.length}
+                  onChange={(e) =>
+                    setDimensions({ ...dimensions, length: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Length"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+              <div>
+                <input
+                  type="number"
+                  value={dimensions.width}
+                  onChange={(e) =>
+                    setDimensions({ ...dimensions, width: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Width"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+              <div>
+                <input
+                  type="number"
+                  value={dimensions.height}
+                  onChange={(e) =>
+                    setDimensions({ ...dimensions, height: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Height"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Materials */}
-        <div className="mt-6">
-          <label className="block text-gray-700 font-bold mb-2">
-            Materials
-          </label>
-          {materials.map((material, index) => (
-            <div key={index} className="flex items-center space-x-2 mb-2">
-              <input
-                type="text"
-                value={material}
-                onChange={(e) => updateMaterial(index, e.target.value)}
-                className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter material"
-              />
-              {index > 0 && (
-                <button
-                  type="button"
-                  onClick={() => removeMaterial(index)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <FaTrash />
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={addMaterial}
-            className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
-          >
-            <FaPlus className="mr-2" /> Add Material
-          </button>
-        </div>
-        {/* Material Type */}
-        <div className="mt-6">
-          <label
-            htmlFor="materialType"
-            className="block text-gray-700 font-bold mb-2"
-          >
-            Material Type*
-          </label>
-          <select
-            id="materialType"
-            value={materialType}
-            onChange={(e) => setMaterialType(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="">Select Material Type</option>
-            <option value="gold">Gold</option>
-            <option value="silver">Silver</option>
-          </select>
-        </div>
-
-        {/* Gems */}
-        <div className="mt-6">
-          <label className="block text-gray-700 font-bold mb-2">Gems</label>
+        {/* Gems Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Gems</h2>
           {gems.map((gem, index) => (
             <div key={index} className="p-4 border rounded-lg mb-4 bg-gray-50">
               <div className="flex justify-between items-center mb-3">
@@ -688,6 +936,183 @@ export default function CreateProductPage() {
           </button>
         </div>
 
+        {/* Variants Section */}
+<div className="mb-8">
+  <h2 className="text-xl font-bold mb-4 pb-2 border-b">Product Variants</h2>
+  
+  {variants.map((variant, variantIndex) => (
+    <div key={variantIndex} className="p-4 border rounded-lg mb-4 bg-gray-50">
+      <div className="flex justify-between items-center mb-3">
+        <h4 className="text-lg font-medium">Variant {variantIndex + 1}</h4>
+        <button
+          type="button"
+          onClick={() => removeVariant(variantIndex)}
+          className="text-red-500 hover:text-red-700"
+        >
+          <FaTrash />
+        </button>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4 mb-4">
+        {/* Metal Color */}
+        <div>
+          <label className="block text-gray-700 text-sm font-bold mb-1">
+            Metal Color*
+          </label>
+          <select
+            value={variant.metalColor}
+            onChange={(e) => updateVariant(variantIndex, "metalColor", e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+            <option value="rosegold">Rose Gold</option>
+            <option value="pinkgold">Pink Gold</option>
+          </select>
+        </div>
+        
+        {/* Stock */}
+        <div>
+          <label className="block text-gray-700 text-sm font-bold mb-1">
+            Stock Quantity*
+          </label>
+          <input
+            type="number"
+            value={variant.stock}
+            onChange={(e) => updateVariant(variantIndex, "stock",Number(e.target.value))}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Available stock"
+
+            required
+          />
+        </div>
+      </div>
+
+      {/* Pricing */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Pricing*
+        </label>
+        {Object.entries(variant.price).map(([priceKey, priceValue]) => (
+          <div key={priceKey} className="flex items-center space-x-2 mb-2">
+            <input
+              type="text"
+              value={priceKey === "default" ? "Default Price" : priceKey}
+              className="w-1/3 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+              readOnly={priceKey === "default"}
+              onChange={(e) => {
+                if (priceKey !== "default") {
+                  const newVariants = [...variants];
+                  const oldPrice = {...newVariants[variantIndex].price};
+                  delete oldPrice[priceKey];
+                  oldPrice[e.target.value] = priceValue as string;
+                  newVariants[variantIndex].price = oldPrice;
+                  setVariants(newVariants);
+                }
+              }}
+            />
+            <input
+              type="number"
+              value={priceValue}
+              onChange={(e) => updateVariantPrice(variantIndex, priceKey, Number(e.target.value))}
+              className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Price"
+              min="0"
+              step="0.01"
+              required={priceKey === "default"}
+            />
+            {priceKey !== "default" && (
+              <button
+                type="button"
+                onClick={() => removeVariantPriceOption(variantIndex, priceKey)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <FaTrash />
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => addVariantPriceOption(variantIndex)}
+          className="mt-2 flex items-center text-blue-500 hover:text-blue-700 text-sm"
+        >
+          <FaPlus className="mr-1" /> Add Price Option
+        </button>
+      </div>
+
+      {/* Variant Images - THIS IS THE KEY PART FOR METAL COLOR ASSOCIATION */}
+      <div>
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          {variant.metalColor.charAt(0).toUpperCase() + variant.metalColor.slice(1)} Images
+        </label>
+        <div className={`border-2 border-dashed rounded-lg p-4 ${
+          variant.metalColor === 'gold' ? 'bg-yellow-50 border-yellow-300' :
+          variant.metalColor === 'silver' ? 'bg-gray-50 border-gray-300' :
+          variant.metalColor === 'rosegold' ? 'bg-pink-50 border-pink-300' :
+          'bg-pink-100 border-pink-400'
+        }`}>
+          <div className="grid grid-cols-3 gap-3">
+            {variant.imagePreviews?.map((preview, imgIndex) => (
+              <div key={imgIndex} className="relative">
+                <Image
+                  src={preview}
+                  alt={`${variant.metalColor} variant image ${imgIndex + 1}`}
+                  width={100}
+                  height={100}
+                  className="rounded-lg object-cover h-24 w-24"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeVariantImage(variantIndex, imgIndex)}
+                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 text-xs"
+                >
+                  <FaTimes />
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 rounded-b-lg text-center capitalize">
+                  {variant.metalColor}
+                </div>
+              </div>
+            ))}
+
+            {(!variant.images || variant.images.length < 3) && (
+              <div className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-24 w-24">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif"
+                  multiple
+                  onChange={(e) => handleVariantImageUpload(e, variantIndex)}
+                  className="hidden"
+                  id={`variantImageUpload-${variantIndex}`}
+                />
+                <label
+                  htmlFor={`variantImageUpload-${variantIndex}`}
+                  className="cursor-pointer flex flex-col items-center"
+                >
+                  <FaCloudUploadAlt className="text-2xl text-gray-400 mb-1" />
+                  <span className="text-gray-600 text-xs capitalize">{variant.metalColor}</span>
+                </label>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            Upload images showing this product in <span className="font-medium capitalize">{variant.metalColor}</span> color
+          </p>
+        </div>
+      </div>
+    </div>
+  ))}
+  
+  <button
+    type="button"
+    onClick={addVariant}
+    className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
+  >
+    <FaPlus className="mr-2" /> Add Variant
+  </button>
+</div>
+
         {/* Tags */}
         <div className="mt-6">
           <label className="block text-gray-700 font-bold mb-2">Tags</label>
@@ -748,7 +1173,7 @@ export default function CreateProductPage() {
               ))}
 
               {/* Upload Button */}
-              {images.length < 5 && (
+              {/* {images.length < 5 && (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-36">
                   <input
                     type="file"
@@ -766,7 +1191,9 @@ export default function CreateProductPage() {
                     <span className="text-gray-600">Upload</span>
                   </label>
                 </div>
-              )}
+              )} */}
+
+              
             </div>
             <p className="text-sm text-gray-500 mt-2 text-center">
               Upload up to 5 images (JPEG, PNG, GIF)

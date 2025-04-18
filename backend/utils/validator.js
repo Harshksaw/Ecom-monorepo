@@ -22,12 +22,11 @@ exports.validateCategoryInput = (data) => {
     if (!data.name) errors.name = 'Product name is required';
     if (!data.sku) errors.sku = 'Product SKU is required';
     if (!data.description) errors.description = 'Product description is required';
-    if (!data.price) errors.price = 'Product price is required';
-    else if (isNaN(data.price) || data.price <= 0) errors.price = 'Price must be a positive number';
+
+
     
     if (!data.categoryId) errors.categoryId = 'Category is required';
     // if (!data.stockQuantity && data.stockQuantity !== 0) errors.stockQuantity = 'Stock quantity is required';
-    else if (isNaN(data.stockQuantity) || data.stockQuantity < 0) errors.stockQuantity = 'Stock quantity must be a non-negative number';
     
     return {
       errors,
