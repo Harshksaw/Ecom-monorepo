@@ -106,24 +106,19 @@ export const ProductService = {
     category?: string;
     page?: number;
     pageSize?: number;
+    material?: string;
   }) {
     try {
-      const { category, page = 1, pageSize = 12 } = options;
+      const { category, page = 1, pageSize = 12 , material} = options;
       
       // Make sure category is provided
-      if (!category) {
+      if (!category ) {
         throw new Error('Category is required');
       }
       
-      // Build the query parameters
-      // const queryString = new URLSearchParams({
-      //   category,
-      //   page: page.toString(),
-      //   limit: pageSize.toString()
-      // }).toString();
-      
+    
       // Make the request with proper parameters
-      const response = await axios.get(`${API_URL}/products/categories/${category}`);
+      const response = await axios.get(`${API_URL}/products/categories/${category}?material=${material}`);
       
       // Return the data from the response
       return response.data.data;
