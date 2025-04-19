@@ -16,7 +16,7 @@ import CategoryTabs from './CategoryTabs'
 import Link from 'next/link'
 
 
-const Header = () => {
+const Header = ({categories}:any) => {
   const [mobileMenu, setMobileMenu] = useState(false)
   const [showCatMenu, setShowCatMenu] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -215,7 +215,7 @@ const Header = () => {
       </div>
       
       {/* Category Tabs */}
-      <CategoryTabs />
+      <CategoryTabs  />
       
       {/* Mobile menu */}
       {mobileMenu && (

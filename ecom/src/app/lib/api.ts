@@ -204,7 +204,7 @@ export const CategoryService = {
    */
   async getAllCategories() {
     try {
-      const response = await apiClient.get<ApiResponse<Category[]>>('/categories?populate=*');
+      const response = await apiClient.get<ApiResponse<Category[]>>('/categories');
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -321,6 +321,7 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 // Export services
 export default {
