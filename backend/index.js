@@ -7,6 +7,7 @@ const connectDB = require("./config/db");
 const { secret } = require("./config/secret");
 const PORT = process.env.PORT || secret.port || 7003; // Added process.env.PORT first
 const morgan = require('morgan');
+const currencyRoutes = require('./routes/currencyRoutes');
 
 // error handler
 const globalErrorHandler = require("./middleware/global-error-handler");
@@ -44,7 +45,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use("/api/admin", adminRoutes);
-
+app.use('/api/currency', currencyRoutes);
 app.post("/api/upload-carousel", upload, uploadCarouselImages);
 
 app.get("/api/images", getAllImages);
@@ -64,4 +65,15 @@ process.on('unhandledRejection', (err) => {
   server.close(() => process.exit(1));
 });
 
+
+// const currencyService = require('./services/currencyService');
+// async function initializeCurrencyRates() {
+//   try {
+//     await currencyService.createOrUpdateRates();
+//     console.log('Default currency rates initialized successfully');
+//   } catch (error) {
+//     console.error('Failed to initialize default currency rates:', error.message);
+//   }
+// }
+// initializeCurrencyRates();
 module.exports = app;
