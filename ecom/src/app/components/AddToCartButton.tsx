@@ -6,7 +6,7 @@ import { addToCart } from '../store/slices/cartSlice';
 import { toast } from 'react-hot-toast';
 
 const AddToCartButton = ({ product }:any) => {
-  console.log("🚀 ~ AddToCartButton ~ product:", product)
+  // console.log("🚀 ~ AddToCartButton ~ product:", product)
   const [selectedSize, setSelectedSize] = useState(null);
   const [showError, setShowError] = useState(false);
   const dispatch = useDispatch();

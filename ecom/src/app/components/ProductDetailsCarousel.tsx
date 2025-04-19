@@ -18,7 +18,7 @@ interface ProductDetailsCarouselProps {
 }
 
 const ProductDetailsCarousel: React.FC<ProductDetailsCarouselProps> = ({ images }:any) => {
-  console.log("🚀 ~ images:", images)
+  // console.log("🚀 ~ images:", images)
   // If no images are provided, show a placeholder
   if (!images || images.length === 0) {
     return (
