@@ -89,7 +89,7 @@ deliveryOptions: [
 
 
   isActive: { type: Boolean, default: true },
-  isFeatured: { type: Boolean, default: false },
+
   tags: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
