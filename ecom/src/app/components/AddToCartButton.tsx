@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../store/slices/cartSlice';
 import { FaShoppingCart, FaCheck } from 'react-icons/fa';
+import { useCurrency } from '../../hooks/useCurrency';
 
 // Interfaces for the component props
 interface ProductVariant {
@@ -49,6 +50,9 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Use the currency hook for price formatting
+  const { formatPrice } = useCurrency();
 
   // Handle quantity increase/decrease
   const handleIncreaseQuantity = () => {
@@ -141,7 +145,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
           ) : (
             <>
               <FaShoppingCart />
-              Add to Cart
+              Add to Cart {formatPrice(variant?.price?.default || 0)}
             </>
           )}
         </button>

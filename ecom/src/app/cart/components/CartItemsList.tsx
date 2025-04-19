@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { FaTrash } from 'react-icons/fa';
 import { updateCartItemQuantity, removeFromCart } from '../../store/slices/cartSlice';
 import { toast } from 'react-hot-toast';
+import { useCurrency } from '../../../hooks/useCurrency';
 
 // CartItem interface matching our Redux store
 export interface CartItem {
@@ -13,7 +14,7 @@ export interface CartItem {
   name: string;
   metalColor: string;
   image: string;
-  price: number;
+  price: number; // Price in INR
   quantity: number;
   sku: string;
   stock: number;
@@ -25,6 +26,9 @@ interface CartItemsListProps {
 }
 
 const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
+  // Use the currency hook for price formatting
+  const { formatPrice } = useCurrency();
+  
   // Handle quantity change
   const updateQuantity = (productId: string, variantId: string, quantity: number) => {
     // Get the item to update
@@ -111,7 +115,7 @@ const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
                 <span className="md:hidden text-gray-600">Price:</span>
                 <div>
                   <span className="font-medium">
-                    ₹{item.price.toLocaleString()}
+                    {formatPrice(item.price)}
                   </span>
                 </div>
               </div>
@@ -142,7 +146,7 @@ const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
               <div className="md:text-center flex justify-between md:block">
                 <span className="md:hidden text-gray-600">Total:</span>
                 <span className="font-medium">
-                  ₹{(item.price * item.quantity).toLocaleString()}
+                  {formatPrice(item.price * item.quantity)}
                 </span>
               </div>
             </div>

@@ -11,6 +11,7 @@ import { toast } from 'react-hot-toast';
 import Script from "next/script";
 import { useAuth } from '../context/authcontext';
 import { API_URL } from '../lib/api';
+import { useCurrency } from '../../hooks/useCurrency';
 
 // Import our new components
 import CartItemsList from './components/CartItemsList';
@@ -28,7 +29,9 @@ const CartPage = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
   const { token } = useAuth();
+  const { selectedCurrency, formatPrice } = useCurrency();
   
+  // Core INR values (base currency)
   const [subtotal, setSubtotal] = useState(0);
   const [gst, setGst] = useState(0);
   const [shipping, setShipping] = useState(0);
@@ -56,9 +59,7 @@ const CartPage = () => {
             setUserId(parsedUser.id);
             
             // Use your API to get user profile
-            const response = await axios.get(`${API_URL}/auth/profile/${parsedUser.id}`, {
-       
-            });
+            const response = await axios.get(`${API_URL}/auth/profile/${parsedUser.id}`);
             
             if (response.status === 200) {
               const userData = response.data;
@@ -97,7 +98,7 @@ const CartPage = () => {
 
   // Calculate totals whenever cart items change
   useEffect(() => {
-    // Calculate subtotal
+    // Calculate subtotal - always in INR (base currency)
     const subtotalValue = cartItems.reduce((total: number, item: CartItem) => {
       return total + (item.price * (item.quantity || 1));
     }, 0);
@@ -157,11 +158,11 @@ const CartPage = () => {
         variantId: item.variantId,
         name: item.name,
         quantity: item.quantity,
-        price: item.price,
+        price: item.price, // Always use INR price in the backend
         image: item.image,
       }));
   
-      // Create order on backend
+      // Create order on backend (always using INR price)
       const response = await fetch(`${API_URL}/orders/create/${userId}`, {
         method: 'POST',
         headers: {
@@ -169,11 +170,11 @@ const CartPage = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          total,
+          total, // Always in INR
           receipt: `receipt_${Date.now()}`,
-          tax: gst,
-          subtotal,
-          shippingCost: shipping,
+          tax: gst, // Always in INR
+          subtotal, // Always in INR
+          shippingCost: shipping, // Always in INR
           shippingAddress: defaultShippingAddress,
           items: formattedItems,
         })
@@ -191,11 +192,18 @@ const CartPage = () => {
       // Load Razorpay
       const Razorpay = await loadRazorpay();
       
-      // Initialize Razorpay options
+      // Add currency conversion notice for international customers
+      if (selectedCurrency !== 'INR') {
+        toast.info(`Your card will be charged in INR (${formatPrice(total)} converts to approximately ₹${total.toLocaleString()}).`, {
+          duration: 6000,
+        });
+      }
+      
+      // Initialize Razorpay options (always in INR)
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
-        amount: Math.round(total * 100), // in paisa
-        currency: 'INR',
+        amount: Math.round(total * 100), // in paisa (INR)
+        currency: 'INR', // Razorpay requires INR for Indian merchants
         name: 'Jewelry Store',
         description: 'Purchase of fine jewelry',
         order_id: orderData.orderId,

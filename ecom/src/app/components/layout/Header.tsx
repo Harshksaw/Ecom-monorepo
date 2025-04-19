@@ -15,6 +15,7 @@ import { useAuth } from '../../context/authcontext'
 import CategoryTabs from './CategoryTabs'
 import Link from 'next/link'
 import { selectCartItemsCount } from '@/app/store/slices/cartSlice'
+import CurrencySelector from '../CurrencySelector'
 
 
 const Header = ({categories}:any) => {
@@ -97,14 +98,8 @@ const Header = ({categories}:any) => {
             
             <div className="hidden md:flex items-center space-x-4">
               {/* Search bar */}
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search for jewelry..."
-                  className={`border border-gray-300 rounded-full pl-10 pr-4 py-2 transition-all duration-300 w-64 focus:border-pink-500 focus:outline-none`}
-                />
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              </div>
+              <CurrencySelector />
+
               
               {/* User Account */}
               {user ? (
