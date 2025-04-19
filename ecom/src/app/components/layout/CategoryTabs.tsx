@@ -4,7 +4,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CategoryService } from '@/app/lib/api';
-import { FaChevronLeft, FaChevronRight, FaAngleDown } from 'react-icons/fa';
+import { 
+  FaChevronLeft, 
+  FaChevronRight, 
+  FaAngleDown, 
+  FaGem, 
+  FaRegGem 
+} from 'react-icons/fa';
 
 // Sample category descriptions
 const CATEGORY_DESCRIPTIONS = {
@@ -41,6 +47,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [showMaterialOptions, setShowMaterialOptions] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   
   useEffect(() => {
     const fetchCategories = async () => {
@@ -55,6 +62,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
     fetchCategories();
   }, []);
 
+  // Handle scroll buttons
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: -250, behavior: 'smooth' });
@@ -67,13 +75,28 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
     }
   };
   
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showMaterialOptions) {
+        const dropdown = dropdownRefs.current[showMaterialOptions];
+        if (dropdown && !dropdown.contains(event.target as Node)) {
+          setShowMaterialOptions(null);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMaterialOptions]);
+  
   return (
-    <div className="w-full py-6 bg-white shadow-sm relative">
+    <div className="w-full bg-white shadow-sm relative z-40">
       <div className="container mx-auto px-4 relative">
         {/* Left scrolling button */}
         <button 
           onClick={scrollLeft}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 shadow-md flex items-center justify-center text-pink-600"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full w-10 h-10 shadow-md flex items-center justify-center text-pink-600 transition-all hover:shadow-lg"
           aria-label="Scroll left"
         >
           <FaChevronLeft />
@@ -82,54 +105,56 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
         {/* Scrollable container */}
         <div 
           ref={scrollContainerRef} 
-          className="flex space-x-4 overflow-x-auto scrollbar-hide py-2 px-8"
+          className="flex space-x-6 overflow-x-auto py-4 px-12 scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {categories.map((category) => (
             <div 
               key={category._id}
+              id={`category-${category.slug}`}
               className="relative flex-shrink-0"
               onMouseEnter={() => setHoveredCategory(category.slug)}
               onMouseLeave={() => {
                 setHoveredCategory(null);
-                setShowMaterialOptions(null);
               }}
             >
               <Link 
                 href={`/category/${category.slug}`}
-                className={`block rounded-lg overflow-hidden transition-all w-48 ${
+                className={`block rounded-full overflow-hidden transition-all h-28 w-28 transform hover:scale-105 ${
                   activeCategory === category.slug 
-                    ? 'ring-2 ring-pink-500 shadow-md' 
-                    : 'hover:shadow-md'
+                    ? 'ring-2 ring-pink-500 shadow-lg' 
+                    : 'hover:shadow-lg'
                 }`}
               >
-                <div className="relative aspect-[4/3]">
+                <div className="relative aspect-square">
                   {category.imageUrl ? (
                     <Image 
                       src={category.imageUrl} 
                       alt={category.name} 
                       fill 
-                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="object-cover transition-transform duration-300"
+                      sizes="112px"
                     />
                   ) : (
-                    <div className={`w-full h-full flex items-center justify-center ${getCategoryColor(category.slug)}`}>
+                    <div className={`w-full h-full flex items-center justify-center ${getCategoryColor(category.slug)} rounded-full`}>
                       <span className="text-2xl font-medium">{category.name.charAt(0)}</span>
                     </div>
                   )}
                   
                   {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent rounded-full"></div>
                   
                   {/* Category name at bottom */}
                   <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <h3 className="text-white text-sm font-medium">{category.name}</h3>
+                    <h3 className="text-white text-sm font-medium text-center">{category.name}</h3>
                   </div>
                   
                   {/* Hover description */}
                   {hoveredCategory === category.slug && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-3 transition-opacity duration-300">
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-3 transition-opacity duration-300 rounded-full">
                       <p className="text-white text-xs text-center">
-                        {CATEGORY_DESCRIPTIONS[category.slug as keyof typeof CATEGORY_DESCRIPTIONS] || `Shop our ${category.name} collection`}
+                        {CATEGORY_DESCRIPTIONS[category.slug as keyof typeof CATEGORY_DESCRIPTIONS] ||
+                          `Shop our ${category.name} collection`}
                       </p>
                     </div>
                   )}
@@ -137,34 +162,65 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
               </Link>
               
               {/* Material options dropdown button */}
-              {hoveredCategory === category.slug && (
-                <button
-                  className="absolute top-2 right-2 z-20 w-8 h-8 rounded-full bg-white/90 shadow-md text-pink-600 flex items-center justify-center transition-colors hover:bg-white"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowMaterialOptions(showMaterialOptions === category.slug ? null : category.slug);
-                  }}
-                >
-                  <FaAngleDown className={`transform transition-transform ${showMaterialOptions === category.slug ? 'rotate-180' : ''}`} />
-                </button>
-              )}
+              <button
+                className={`absolute -bottom-3 left-1/2 transform -translate-x-1/2 z-30 w-8 h-8 rounded-full bg-white shadow-md text-pink-600 flex items-center justify-center transition-all 
+                  ${hoveredCategory === category.slug || showMaterialOptions === category.slug 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-2 pointer-events-none'} 
+                  hover:bg-pink-100 hover:text-pink-700 hover:shadow-lg`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowMaterialOptions(
+                    showMaterialOptions === category.slug ? null : category.slug
+                  );
+                }}
+                aria-label="Show material options"
+              >
+                <FaAngleDown className={`transform transition-transform ${
+                  showMaterialOptions === category.slug ? 'rotate-180' : ''
+                }`} />
+              </button>
               
               {/* Material options dropdown */}
               {showMaterialOptions === category.slug && (
-                <div className="absolute top-12 right-2 z-30 bg-white rounded-md shadow-lg p-2 min-w-32 text-sm">
-                  <div className="absolute top-0 right-3 -mt-2 w-4 h-4 bg-white transform rotate-45"></div>
-                  <div className="relative z-10">
+                <div 
+                  ref={(el) => dropdownRefs.current[category.slug] = el}
+                  className="absolute z-50 bg-white rounded-lg shadow-xl p-1 w-48 mt-3 transform transition-all duration-200 ease-out origin-top"
+                  style={{
+                    top: '100%',
+                    left: '50%',
+                    transform: 'translateX(-50%)'
+                  }}
+                >
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
+                  <div className="relative z-10 overflow-hidden rounded-lg">
                     <Link 
                       href={`/category/${category.slug}?material=gold`}
-                      className="block px-4 py-2 hover:bg-pink-50 rounded text-gray-800 hover:text-pink-600 transition-colors"
+                      className="flex items-center gap-2 px-4 py-3 hover:bg-yellow-50 text-yellow-800 hover:text-yellow-900 transition-colors group"
                     >
-                      Gold
+                      <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 group-hover:bg-yellow-200">
+                        <FaGem size={12} />
+                      </div>
+                      <span className="font-medium">Gold</span>
                     </Link>
                     <Link 
                       href={`/category/${category.slug}?material=silver`}
-                      className="block px-4 py-2 hover:bg-pink-50 rounded text-gray-800 hover:text-pink-600 transition-colors"
+                      className="flex items-center gap-2 px-4 py-3 hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-colors group"
                     >
-                      Silver
+                      <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 group-hover:bg-gray-200">
+                        <FaRegGem size={12} />
+                      </div>
+                      <span className="font-medium">Silver</span>
+                    </Link>
+                    <Link 
+                      href={`/category/${category.slug}?material=platinum`}
+                      className="flex items-center gap-2 px-4 py-3 hover:bg-blue-50 text-blue-700 hover:text-blue-900 transition-colors group"
+                    >
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:bg-blue-200">
+                        <FaRegGem size={12} />
+                      </div>
+                      <span className="font-medium">Platinum</span>
                     </Link>
                   </div>
                 </div>
@@ -176,7 +232,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
         {/* Right scrolling button */}
         <button 
           onClick={scrollRight}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 shadow-md flex items-center justify-center text-pink-600"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full w-10 h-10 shadow-md flex items-center justify-center text-pink-600 transition-all hover:shadow-lg"
           aria-label="Scroll right"
         >
           <FaChevronRight />

@@ -33,7 +33,7 @@ const CartPage = () => {
   
   // Core INR values (base currency)
   const [subtotal, setSubtotal] = useState(0);
-  const [gst, setGst] = useState(0);
+
   const [shipping, setShipping] = useState(0);
   const [total, setTotal] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -103,12 +103,12 @@ const CartPage = () => {
       return total + (item.price * (item.quantity || 1));
     }, 0);
     
-    const gstValue = subtotalValue * 0.18; // 18% GST
+
     const shippingValue = subtotalValue > 2000 ? 0 : 150; // Free shipping over ₹2000
-    const totalValue = subtotalValue + gstValue + shippingValue;
+    const totalValue = subtotalValue  + shippingValue;
     
     setSubtotal(subtotalValue);
-    setGst(gstValue);
+
     setShipping(shippingValue);
     setTotal(totalValue);
   }, [cartItems]);
@@ -172,7 +172,7 @@ const CartPage = () => {
         body: JSON.stringify({
           total, // Always in INR
           receipt: `receipt_${Date.now()}`,
-          tax: gst, // Always in INR
+
           subtotal, // Always in INR
           shippingCost: shipping, // Always in INR
           shippingAddress: defaultShippingAddress,
@@ -314,7 +314,7 @@ const CartPage = () => {
               {/* Order Summary */}
               <OrderSummary 
                 subtotal={subtotal}
-                gst={gst}
+
                 shipping={shipping}
                 total={total}
                 isProcessing={isProcessing}
