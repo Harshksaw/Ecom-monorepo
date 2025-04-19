@@ -17,6 +17,8 @@ import {
 } from 'react-icons/fa';
 import ProductDetailsCarousel from './ProductDetailsCarousel';
 import AddToCartButton from './AddToCartButton';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../store/slices/cartSlice';
 
 // Interfaces (can be moved to a shared types file)
 interface ProductVariant {
@@ -72,6 +74,7 @@ type ProductDetailsProps = { product: Product };
 export default function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [selectedCurrency, setSelectedCurrency] = useState<'INR' | 'USD'>('INR');
+  const dispatch = useDispatch();
   
   const selectedVariant = product?.variants?.[selectedVariantIndex] || product?.variants?.[0];
 
@@ -108,6 +111,31 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     return clarityMap[clarity] || clarity;
   };
 
+  const handleBuyNow = () => {
+    if (!selectedVariant) return;
+    
+    // Create cart item and add to cart first
+    const cartItem = {
+      productId: product._id,
+      variantId: selectedVariant._id,
+      name: product.name,
+      metalColor: selectedVariant.metalColor,
+      image: selectedVariant.images[0] || product.images[0] || '',
+      price: selectedVariant.price.default,
+      quantity: 1,
+      sku: product.sku,
+      stock: selectedVariant.stock
+    };
+    
+    // Dispatch to add to cart first
+    dispatch(addToCart(cartItem));
+    
+    // This would typically navigate to checkout page
+    alert('Proceeding to checkout with ' + product?.name);
+    
+    // In a real implementation, you would use router to navigate:
+    // router.push('/checkout');
+  };
   return (
     <div className="w-full py-8 px-20 md:py-16 bg-gradient-to-b from-pink-50 to-white">
       <div className="text-sm mb-6 text-gray-500">
@@ -310,16 +338,14 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               <AddToCartButton product={product} variant={selectedVariant} />
             </div>
             <button 
-              className="px-4 py-3 mx-10 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium rounded-4xl hover:shadow-md transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+              className="px-4 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium rounded-xl hover:shadow-md transition-all disabled:opacity-70 disabled:cursor-not-allowed"
               disabled={!selectedVariant?.stock || selectedVariant.stock <= 0}
-              onClick={() => {
-                // This would typically navigate to checkout with the product
-                alert('Proceeding to checkout with ' + product?.name);
-              }}
+              onClick={handleBuyNow}
             >
               Buy Now
             </button>
           </div>
+
 
           {/* Product highlights */}
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-5 rounded-xl mb-8 hover:shadow-sm transition-all">
