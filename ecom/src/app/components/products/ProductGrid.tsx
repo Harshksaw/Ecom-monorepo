@@ -16,6 +16,11 @@ interface Product {
     category: string;
     rating?: number;
     stock: number;
+    variants: any;
+    createdAt: string;
+    updatedAt: string;
+    [key: string]: any; // Allow for additional properties
+    // This is a catch-all for any other properties that might be present
   }
 interface ProductGridProps {
   products: Product[];

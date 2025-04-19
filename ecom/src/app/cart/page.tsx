@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Wrapper from '../components/Wrapper';
 import EmptyCart from './EmptyCart';
-import { toast } from 'react-hot-toast';
+
 import Script from "next/script";
 import { useAuth } from '../context/authcontext';
 import { API_URL } from '../lib/api';
@@ -23,6 +23,7 @@ import { loadRazorpay } from '../utils/razorpay';
 import { CartItem, UserProfile, Address } from './types';
 import axios from 'axios';
 import { clearCart, selectCartItems } from '../store/slices/cartSlice';
+import toast from 'react-hot-toast';
 
 const CartPage = () => {
   const router = useRouter();
@@ -99,7 +100,7 @@ const CartPage = () => {
   // Calculate totals whenever cart items change
   useEffect(() => {
     // Calculate subtotal - always in INR (base currency)
-    const subtotalValue = cartItems.reduce((total: number, item: CartItem) => {
+    const subtotalValue = cartItems.reduce((total: number, item: any) => {
       return total + (item.price * (item.quantity || 1));
     }, 0);
     
@@ -152,8 +153,8 @@ const CartPage = () => {
     const toastId = toast.loading('Creating your order...');
   
     try {
-      // Format cart items for the backend
-      const formattedItems = cartItems.map((item: CartItem) => ({
+
+      const formattedItems = cartItems.map((item: any) => ({
         productId: item.productId,
         variantId: item.variantId,
         name: item.name,
@@ -194,7 +195,7 @@ const CartPage = () => {
       
       // Add currency conversion notice for international customers
       if (selectedCurrency !== 'INR') {
-        toast.info(`Your card will be charged in INR (${formatPrice(total)} converts to approximately ₹${total.toLocaleString()}).`, {
+        toast.success(`Your card will be charged in INR (${formatPrice(total)} converts to approximately ₹${total.toLocaleString()}).`, {
           duration: 6000,
         });
       }

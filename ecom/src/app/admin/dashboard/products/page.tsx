@@ -228,8 +228,8 @@ export default function CreateProductPage() {
     const currentImages = currentVariant.images || [];
     const currentPreviews = currentVariant.imagePreviews || [];
     
-    const newImages = currentImages.filter((_, i) => i !== imageIndex);
-    const newPreviews = currentPreviews.filter((_, i) => i !== imageIndex);
+    const newImages = currentImages.filter((_:any, i:any)  => i !== imageIndex);
+    const newPreviews = currentPreviews.filter((_:any, i:any) => i !== imageIndex);
     
     updateVariant(variantIndex, 'images', newImages);
     updateVariant(variantIndex, 'imagePreviews', newPreviews);
@@ -304,7 +304,7 @@ export default function CreateProductPage() {
   // Add variant price option
   const addVariantPriceOption = (variantIndex: number) => {
     const newPriceKey = `option_${Object.keys(variants[variantIndex].price).length}`;
-    updateVariantPrice(variantIndex, newPriceKey, "");
+    updateVariantPrice(variantIndex, newPriceKey, 0);
   };
   
   // Remove variant price option
@@ -446,7 +446,7 @@ export default function CreateProductPage() {
     
     // Add variant images separately
     variants.forEach((variant, variantIndex) => {
-      variant.images?.forEach((image, imageIndex) => {
+      variant.images?.forEach((image:any, imageIndex:any) => {
         formData.append(`variant_${variantIndex}_images`, image);
       });
     });
@@ -1013,7 +1013,7 @@ export default function CreateProductPage() {
             />
             <input
               type="number"
-              value={priceValue}
+              value={priceValue as string | number}
               onChange={(e) => updateVariantPrice(variantIndex, priceKey, Number(e.target.value))}
               className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Price"
@@ -1053,7 +1053,7 @@ export default function CreateProductPage() {
           'bg-pink-100 border-pink-400'
         }`}>
           <div className="grid grid-cols-3 gap-3">
-            {variant.imagePreviews?.map((preview, imgIndex) => (
+            {variant.imagePreviews?.map((preview:any, imgIndex:any) => (
               <div key={imgIndex} className="relative">
                 <Image
                   src={preview}
@@ -1171,26 +1171,7 @@ export default function CreateProductPage() {
                 </div>
               ))}
 
-              {/* Upload Button */}
-              {/* {images.length < 5 && (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-36">
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif"
-                    multiple
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="imageUpload"
-                  />
-                  <label
-                    htmlFor="imageUpload"
-                    className="cursor-pointer flex flex-col items-center"
-                  >
-                    <FaCloudUploadAlt className="text-4xl text-gray-400 mb-2" />
-                    <span className="text-gray-600">Upload</span>
-                  </label>
-                </div>
-              )} */}
+          
 
               
             </div>

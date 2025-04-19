@@ -7,7 +7,7 @@ import { ProductService } from "@/app/lib/api";
 
 type Params = { params: { slug: string } };
 
-export default async function ProductPage({ params }: Params) {
+export default async function ProductPage({ params }: any) {
   try {
     const product = await ProductService.getProductBySlug(params.slug);
 

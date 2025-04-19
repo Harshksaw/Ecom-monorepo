@@ -46,10 +46,7 @@ const OrderSummary = ({
           <span>{formatPrice(subtotal)}</span>
         </div>
         
-        <div className="flex justify-between">
-          <span className="text-gray-600">Tax</span>
-          <span>{formatPrice(gst)}</span>
-        </div>
+   
         
         <div className="flex justify-between">
           <span className="text-gray-600">Shipping</span>

@@ -37,7 +37,7 @@ export const useCurrency = () => {
     
     if (needsUpdate) {
       dispatch(fetchExchangeRates())
-        .then((action) => {
+        .then((action:any) => {
           if (fetchExchangeRates.fulfilled.match(action)) {
             // Save last updated timestamp
             localStorage.setItem('currencyRatesLastUpdated', Date.now().toString());
