@@ -252,12 +252,14 @@ exports.getAllProductsByCategory = async (req, res) => {
       limit = 12,
       sortBy = "createdAt",
       sortOrder = "desc",
-      materialType,
+material: materialType,
       purity,
       shape,
       color
     } = req.query;
+
     const category = req.params.category;
+
     if (!category) {
       return res
         .status(400)
@@ -278,7 +280,8 @@ exports.getAllProductsByCategory = async (req, res) => {
     // Build filter using the category's _id
     const filter = {
       isActive: true,
-      categoryId: categoryObj._id, // This is the key relation - we use the _id from the category
+      categoryId: categoryObj._id, 
+
     };
     
     if (materialType) filter.materialType = materialType;

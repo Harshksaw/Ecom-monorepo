@@ -14,7 +14,7 @@ interface ProductImage {
 }
 
 interface ProductDetailsCarouselProps {
-  images: ProductImage[];
+  images: any[] | ProductImage[];
 }
 
 const ProductDetailsCarousel: React.FC<ProductDetailsCarouselProps> = ({ images }:any) => {

@@ -1,5 +1,5 @@
 // src/app/category/[slug]/page.tsx
-import { Metadata } from 'next';
+
 import { notFound } from 'next/navigation';
 import { ProductService } from '../../lib/api';
 import ProductGrid from '../../components/products/ProductGrid';
@@ -10,22 +10,7 @@ type Props = {
   searchParams: any;
 };
 
-// Generate metadata for the page
-// export async function generateMetadata({ params }: Props): Promise<Metadata> {
-//   try {
-//     const category = params.slug;
-    
-//     return {
-//       title: `${category.charAt(0).toUpperCase() + category.slice(1)} Collection | Jewelry Store`,
-//       description: `Explore our exclusive collection of ${category.toLowerCase()} jewelry at great prices.`
-//     };
-//   } catch (error) {
-//     return {
-//       title: 'Category | Jewelry Store',
-//       description: 'Explore our jewelry collections'
-//     };
-//   }
-// }
+
 
 // Main page component
 export default async function CategoryDetailPage({ 
@@ -35,19 +20,22 @@ export default async function CategoryDetailPage({
 
 
 
+
   
   const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
   const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'default';
   
   try {
     const category = params.slug;
-    console.log("🚀 ~ category:", category);
+    console.log("🚀 ~ params:", await searchParams)
+    // console.log("🚀 ~ category:", category);
 
     // Fetch products for this category
     const productResponse = await ProductService.getAllProductByCategory({
       page,
       pageSize: 12,
-      category: category
+      category: category,
+      material: searchParams?.material,
     });
 
     // Check if products array is empty

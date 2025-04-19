@@ -13,12 +13,16 @@ import {
   FaTags, 
   FaPalette, 
   FaCut, 
-  FaBox
+  FaBox,
+  FaEuroSign,
+  FaPoundSign
 } from 'react-icons/fa';
 import ProductDetailsCarousel from './ProductDetailsCarousel';
 import AddToCartButton from './AddToCartButton';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../store/slices/cartSlice';
+import { useCurrency } from '../../hooks/useCurrency';
+import { CurrencyCode } from '../store/slices/currencySlice';
 
 // Interfaces (can be moved to a shared types file)
 interface ProductVariant {
@@ -73,9 +77,9 @@ type ProductDetailsProps = { product: Product };
 
 export default function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
-  const [selectedCurrency, setSelectedCurrency] = useState<'INR' | 'USD'>('INR');
+
   const dispatch = useDispatch();
-  
+  const { selectedCurrency, changeCurrency, formatPrice, currencySymbol } = useCurrency();
   const selectedVariant = product?.variants?.[selectedVariantIndex] || product?.variants?.[0];
 
   const displayImages = [
@@ -83,14 +87,14 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     ...(product?.images || [])
   ].filter((img): img is string => img !== null);
 
-  // Get the current price based on selected currency
-  const getCurrentPrice = () => {
-    if (!selectedVariant?.price) return 'N/A';
-    
-    if (selectedCurrency === 'USD' && selectedVariant.price?.USD) {
-      return `$${selectedVariant.price.USD.toLocaleString()}`;
-    } else {
-      return `₹${selectedVariant.price.default.toLocaleString()}`;
+  // Helper to get currency icon based on currency code
+  const getCurrencyIcon = (currency: CurrencyCode) => {
+    switch (currency) {
+      case 'INR': return <FaRupeeSign className="mr-1" />;
+      case 'USD': return <FaDollarSign className="mr-1" />;
+      case 'EUR': return <FaEuroSign className="mr-1" />;
+      case 'GBP': return <FaPoundSign className="mr-1" />;
+      default: return <FaRupeeSign className="mr-1" />;
     }
   };
 
@@ -136,6 +140,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     // In a real implementation, you would use router to navigate:
     // router.push('/checkout');
   };
+  
   return (
     <div className="w-full py-8 px-20 md:py-16 bg-gradient-to-b from-pink-50 to-white">
       <div className="text-sm mb-6 text-gray-500">
@@ -178,7 +183,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               <div className="space-y-4">
                 {product.gems.map((gem, index) => (
                   <div key={`gem-${index}`} className="border border-gray-100 rounded-xl p-4 bg-blue-50/30">
-                    <div className="flex  flex-row items-center mb-3">
+                    <div className="flex flex-row items-center mb-3">
                       <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
                         <FaGem />
                       </div>
@@ -225,8 +230,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           </h1>
 
           {/* Materials and shape */}
-          <div className="flex  flex-row flex-wrap gap-2 mb-4">
-            <span className={` px-3 py-1 rounded-full text-xs font-medium flex  flex-row items-center ${
+          <div className="flex flex-row flex-wrap gap-2 mb-4">
+            <span className={`px-3 py-1 rounded-full text-xs font-medium flex flex-row items-center ${
               product?.materialType?.toLowerCase().includes('gold')
                 ? 'bg-yellow-100 text-yellow-800'
                 : product?.materialType?.toLowerCase().includes('silver')
@@ -255,7 +260,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           {/* Currency selector */}
           <div className="mb-4 flex">
             <button
-              onClick={() => setSelectedCurrency('INR')}
+              onClick={() => changeCurrency('INR')}
               className={`flex items-center justify-center px-3 py-1 rounded-l-md text-sm font-medium transition-colors border ${
                 selectedCurrency === 'INR' 
                   ? 'bg-pink-600 text-white border-pink-600' 
@@ -266,8 +271,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               INR
             </button>
             <button
-              onClick={() => setSelectedCurrency('USD')}
-              className={`flex items-center justify-center px-3 py-1 rounded-r-md text-sm font-medium transition-colors border ${
+              onClick={() => changeCurrency('USD')}
+              className={`flex items-center justify-center px-3 py-1 border-l-0 border-r-0 text-sm font-medium transition-colors border ${
                 selectedCurrency === 'USD' 
                   ? 'bg-pink-600 text-white border-pink-600' 
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -276,13 +281,35 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               <FaDollarSign className="mr-1" />
               USD
             </button>
+            <button
+              onClick={() => changeCurrency('EUR')}
+              className={`flex items-center justify-center px-3 py-1 border-l-0 border-r-0 text-sm font-medium transition-colors border ${
+                selectedCurrency === 'EUR' 
+                  ? 'bg-pink-600 text-white border-pink-600' 
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              <FaEuroSign className="mr-1" />
+              EUR
+            </button>
+            <button
+              onClick={() => changeCurrency('GBP')}
+              className={`flex items-center justify-center px-3 py-1 rounded-r-md text-sm font-medium transition-colors border ${
+                selectedCurrency === 'GBP' 
+                  ? 'bg-pink-600 text-white border-pink-600' 
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              <FaPoundSign className="mr-1" />
+              GBP
+            </button>
           </div>
 
           {/* Price information */}
           <div className="mb-6">
             <div className="flex items-center">
               <span className="text-3xl font-bold text-gray-900">
-                {getCurrentPrice()}
+                {formatPrice(selectedVariant?.price?.default || 0)}
               </span>
               <span className="text-sm text-gray-500 ml-2">incl. taxes</span>
             </div>
@@ -300,9 +327,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                   : 'Out of Stock'}
             </div>
           </div>
-
-          {/* Shipping notice */}
-        
 
           {/* Variant Selection */}
           {product?.variants?.length > 1 && (
@@ -331,8 +355,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           )}
 
           {/* Add to cart button */}
-       
-
           <div className="flex flex-col gap-3 mb-8">
             <div className="flex-grow">
               <AddToCartButton product={product} variant={selectedVariant} />
@@ -345,7 +367,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               Buy Now
             </button>
           </div>
-
 
           {/* Product highlights */}
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-5 rounded-xl mb-8 hover:shadow-sm transition-all">
@@ -404,7 +425,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                       </div>
                     </div>
                     <div className="text-sm font-medium">
-                      {option.price > 0 ? `₹${option.price}` : 'Free'}
+                      {option.price > 0 ? formatPrice(option.price) : 'Free'}
                     </div>
                   </div>
                 ))}
@@ -451,12 +472,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     </div>
                     <div className="flex justify-between text-sm text-gray-600 mt-1">
                       <div>
-                        {selectedCurrency === 'INR' && (
-                          <span>₹{variant.price.default.toLocaleString()}</span>
-                        )}
-                        {selectedCurrency === 'USD' && variant.price.USD !== undefined && (
-                          <span>${variant.price.USD.toLocaleString()}</span>
-                        )}
+                        {formatPrice(variant.price.default)}
                       </div>
                       {idx === selectedVariantIndex && (
                         <span className="text-pink-600 font-medium">Selected</span>
