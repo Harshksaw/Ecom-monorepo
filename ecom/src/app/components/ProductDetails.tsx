@@ -109,7 +109,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   };
 
   return (
-    <div className="w-full py-8 md:py-16 bg-gradient-to-b from-pink-50 to-white">
+    <div className="w-full py-8 px-20 md:py-16 bg-gradient-to-b from-pink-50 to-white">
       <div className="text-sm mb-6 text-gray-500">
         <span>Home</span> / <span>{product?.categoryId?.name}</span> / <span className="text-pink-600">{product?.name}</span>
       </div>
@@ -303,10 +303,22 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           )}
 
           {/* Add to cart button */}
-          <div className="flex gap-3 mb-8">
+       
+
+          <div className="flex flex-col gap-3 mb-8">
             <div className="flex-grow">
               <AddToCartButton product={product} variant={selectedVariant} />
             </div>
+            <button 
+              className="px-4 py-3 mx-10 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium rounded-4xl hover:shadow-md transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={!selectedVariant?.stock || selectedVariant.stock <= 0}
+              onClick={() => {
+                // This would typically navigate to checkout with the product
+                alert('Proceeding to checkout with ' + product?.name);
+              }}
+            >
+              Buy Now
+            </button>
           </div>
 
           {/* Product highlights */}
