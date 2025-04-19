@@ -1,4 +1,3 @@
-// 1. First, let's create the main page component with imports and structure
 // src/app/cart/page.tsx
 'use client';
 
@@ -22,12 +21,12 @@ import { loadRazorpay } from '../utils/razorpay';
 // Types
 import { CartItem, UserProfile, Address } from './types';
 import axios from 'axios';
-import { clearCart } from '../store/slices/cartSlice';
+import { clearCart, selectCartItems } from '../store/slices/cartSlice';
 
 const CartPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { cartItems } = useSelector((state: any) => state.cart);
+  const cartItems = useSelector(selectCartItems);
   const { token } = useAuth();
   
   const [subtotal, setSubtotal] = useState(0);
@@ -100,8 +99,7 @@ const CartPage = () => {
   useEffect(() => {
     // Calculate subtotal
     const subtotalValue = cartItems.reduce((total: number, item: CartItem) => {
-      const itemPrice = item.attributes?.salePrice || item.attributes?.price || item.oneQuantityPrice;
-      return total + (itemPrice * (item.quantity || 1));
+      return total + (item.price * (item.quantity || 1));
     }, 0);
     
     const gstValue = subtotalValue * 0.18; // 18% GST
@@ -155,11 +153,12 @@ const CartPage = () => {
     try {
       // Format cart items for the backend
       const formattedItems = cartItems.map((item: CartItem) => ({
-        productId: item.id || item._id,
-        name: item.attributes?.name || item.name,
-        quantity: item.quantity || 1,
-        price: item.oneQuantityPrice || (item.attributes?.salePrice || item.attributes?.price),
-        image: item.attributes?.images?.[0] || '/placeholder.png',
+        productId: item.productId,
+        variantId: item.variantId,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
       }));
   
       // Create order on backend
@@ -234,23 +233,17 @@ const CartPage = () => {
       const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
       
       const verifyResponse = await axios.post(`${API_URL}/orders/capturePayment`, {
-      
-      
-          paymentId: razorpay_payment_id,
-          orderId: razorpay_order_id,
-          signature: razorpay_signature
-        }
-      );
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        signature: razorpay_signature
+      });
       
       const verifyData = verifyResponse.data;
       
       if (verifyResponse.status === 200) {
         toast.success('Payment successful! Order confirmed.');
-        // console.log('Payment verification success:', verifyData);
         // Clear the cart after successful payment
         dispatch(clearCart());
-
-
         
         // Redirect to order confirmation page
         router.push(`/orders`);

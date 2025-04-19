@@ -11,21 +11,21 @@ type Props = {
 };
 
 // Generate metadata for the page
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  try {
-    const category = params.slug;
+// export async function generateMetadata({ params }: Props): Promise<Metadata> {
+//   try {
+//     const category = params.slug;
     
-    return {
-      title: `${category.charAt(0).toUpperCase() + category.slice(1)} Collection | Jewelry Store`,
-      description: `Explore our exclusive collection of ${category.toLowerCase()} jewelry at great prices.`
-    };
-  } catch (error) {
-    return {
-      title: 'Category | Jewelry Store',
-      description: 'Explore our jewelry collections'
-    };
-  }
-}
+//     return {
+//       title: `${category.charAt(0).toUpperCase() + category.slice(1)} Collection | Jewelry Store`,
+//       description: `Explore our exclusive collection of ${category.toLowerCase()} jewelry at great prices.`
+//     };
+//   } catch (error) {
+//     return {
+//       title: 'Category | Jewelry Store',
+//       description: 'Explore our jewelry collections'
+//     };
+//   }
+// }
 
 // Main page component
 export default async function CategoryDetailPage({ 

@@ -1,4 +1,4 @@
-// src/app/auth/login/page.tsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -209,11 +209,7 @@ const dispatch = useDispatch();
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-50 text-gray-500">
-                Or continue with
-              </span>
-            </div>
+         
           </div>
 
           {/* Social Login Buttons can be added here */}

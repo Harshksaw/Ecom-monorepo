@@ -14,9 +14,10 @@ import { CategoryService } from '../../lib/api'
 import { useAuth } from '../../context/authcontext'
 import CategoryTabs from './CategoryTabs'
 import Link from 'next/link'
+import { selectCartItemsCount } from '@/app/store/slices/cartSlice'
 
 
-const Header = () => {
+const Header = ({categories}:any) => {
   const [mobileMenu, setMobileMenu] = useState(false)
   const [showCatMenu, setShowCatMenu] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -24,7 +25,8 @@ const Header = () => {
   const [lastScrollY, setLastScrollY] = useState(0)
   const [showSearchBar, setShowSearchBar] = useState(false)
   
-  const { cartItems } = useSelector((state:any) => state.cart)
+  const  cartItems  = useSelector(selectCartItemsCount);
+  console.log("🚀 ~ Header ~ cartItems:", cartItems)
   const { user, logout } = useAuth()
   
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -176,9 +178,9 @@ const Header = () => {
               <Link href="/cart">
                 <div className="relative">
                   <BsCart className="text-[20px] text-gray-700" />
-                  {cartItems.length > 0 && (
+                  {cartItems > 0 && (
                     <div className="h-[18px] min-w-[18px] rounded-full bg-pink-600 absolute -top-2 -right-2 text-white text-[12px] flex justify-center items-center px-[5px]">
-                      {cartItems.length}
+                      {cartItems}
                     </div>
                   )}
                 </div>
@@ -190,9 +192,9 @@ const Header = () => {
               <Link href="/cart">
                 <div className="relative">
                   <BsCart className="text-[20px] text-gray-700" />
-                  {cartItems.length > 0 && (
+                  {cartItems > 0 && (
                     <div className="h-[14px] min-w-[14px] rounded-full bg-pink-600 absolute -top-1 -right-1 text-white text-[10px] flex justify-center items-center px-[2px]">
-                      {cartItems.length}
+                      {cartItems}
                     </div>
                   )}
                 </div>
@@ -215,7 +217,7 @@ const Header = () => {
       </div>
       
       {/* Category Tabs */}
-      <CategoryTabs />
+      <CategoryTabs  />
       
       {/* Mobile menu */}
       {mobileMenu && (

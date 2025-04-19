@@ -2,6 +2,17 @@
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+function saveFileFromBuffer(file, destinationDir = './uploads') {
+  const filename = Date.now() + '-' + file.originalname;
+  const fullPath = path.join(destinationDir, filename);
+
+  fs.writeFileSync(fullPath, file.buffer); // Write buffer to file
+
+  return fullPath; // Return path to save in DB
+}
 
 // Configure Cloudinary
 cloudinary.config({
@@ -23,53 +34,31 @@ const storage = new CloudinaryStorage({
 
 // Setup multer with Cloudinary storage
 // Setup multer with Cloudinary storage with better error handling
-const upload = multer({ 
-  storage: storage,
-  limits: { fileSize: 15000000 }, // 5MB limit
-  
-  // Add custom error handling
-  fileFilter: (req, file, cb) => {
-    // Check file type
-    if (!file.mimetype.startsWith('image/')) {
-      return cb(new Error('Only image files are allowed!'), false);
-    }
-    
-    // Check if file extension is allowed
-    const allowedFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    const extension = file.originalname.split('.').pop().toLowerCase();
-    
-    if (!allowedFormats.includes(extension)) {
-      return cb(new Error(`File extension .${extension} is not allowed!`), false);
-    }
-    
-    cb(null, true);
-  }
-}).array('images', 10); // Limit to 10 images
-
+const upload = multer({
+  storage,
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+}).fields([
+  { name: 'images', maxCount: 5 },
+  { name: 'variant_0_images', maxCount: 3 },
+  { name: 'variant_1_images', maxCount: 3 },
+  { name: 'variant_2_images', maxCount: 3 },
+  { name: 'variant_3_images', maxCount: 3 },
+  { name: 'variant_4_images', maxCount: 3 }
+]);
 // Create an error-handling wrapper for the upload middleware
 const handleUpload = (req, res, next) => {
-  upload(req, res, function(err) {
+  upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
-
-      console.error('Multer error:', err);
-      return res.status(400).json({
-        success: false,
-        message: `Upload error: ${err.message}`,
-        error: err.code
-      });
+      console.error("Multer error:", err);
+      return res.status(400).json({ success: false, message: err.message });
     } else if (err) {
-      // An unknown error occurred
-      console.error('Unknown upload error:', err);
-      return res.status(500).json({
-        success: false,
-        message: `Upload failed: ${err.message}`
-      });
+      console.error("Unknown upload error:", err);
+      return res.status(500).json({ success: false, message: err.message });
     }
-    
-    // Everything went fine
     next();
   });
 };
+
 
 // Function to delete image from Cloudinary
 const deleteImage = async (publicId) => {

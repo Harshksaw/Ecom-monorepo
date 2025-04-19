@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 // API base URL
-export const API_URL = "https://ecom-turborepo.onrender.com/api"
-// export const API_URL = "http://localhost:7003/api"
+// export const API_URL = "https://ecom-turborepo.onrender.com/api"
+export const API_URL = "http://localhost:7003/api"
 
 
 // Create an axios instance with default configuration
@@ -140,6 +140,7 @@ export const ProductService = {
       const response = await axios.get(`${API_URL}/products/${slug}`);
       
       // Return the product data
+      console.log("🚀 ~ getProductBySlug ~ response.data.product:", response.data.product)
       return response.data.product
     } catch (error) {
       console.error(`Error fetching product with slug ${slug}:`, error);
@@ -203,7 +204,7 @@ export const CategoryService = {
    */
   async getAllCategories() {
     try {
-      const response = await apiClient.get<ApiResponse<Category[]>>('/categories?populate=*');
+      const response = await apiClient.get<ApiResponse<Category[]>>('/categories');
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -320,6 +321,7 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 // Export services
 export default {
