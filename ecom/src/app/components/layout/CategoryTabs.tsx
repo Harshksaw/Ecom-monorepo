@@ -43,6 +43,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
     (async () => {
       try {
         const res = await CategoryService.getAllCategories();
+        //@ts-ignore
         setCategories(res.categories);
       } catch (e) {
         console.error('Error fetching categories', e);

@@ -188,7 +188,7 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               
               {/* Slider Container */}
               <div 
-                ref={el => sliderRefs.current[category._id] = el}
+                // ref={el => sliderRefs.current[category._id] = el}
                 className="flex overflow-x-auto scrollbar-hide snap-x scroll-smooth gap-6 pb-4"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
