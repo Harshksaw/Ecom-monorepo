@@ -39,13 +39,13 @@ const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
     if (!item) return;
     
     // Make sure quantity doesn't exceed stock
-    const newQuantity = Math.min(quantity, item.stock);
+    // const newQuantity = Math.min(quantity, item.stock);
     
     // Update cart with new quantity
     dispatch(updateCartItemQuantity({ 
       productId, 
       variantId, 
-      quantity: newQuantity 
+      quantity: quantity 
     }));
     
     toast.success('Cart updated');
@@ -124,21 +124,21 @@ const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
               <div className="md:text-center flex justify-between md:block">
                 <span className="md:hidden text-gray-600">Quantity:</span>
                 <div className="inline-block">
-                  <select 
-                    value={item.quantity}
-                    onChange={(e) => updateQuantity(
-                      item.productId, 
-                      item.variantId, 
-                      parseInt(e.target.value)
-                    )}
-                    className="border rounded p-1 w-16 text-center"
-                  >
-                    {Array.from({ length: Math.min(10, item.stock) }, (_, i) => (
-                      <option key={i} value={i + 1}>
-                        {i + 1}
-                      </option>
-                    ))}
-                  </select>
+                <select 
+  value={item.quantity}
+  onChange={(e) => updateQuantity(
+    item.productId, 
+    item.variantId, 
+    parseInt(e.target.value)
+  )}
+  className="border rounded p-1 w-16 text-center"
+>
+  {Array.from({ length: 10 }, (_, i) => (
+    <option key={i} value={i + 1}>
+      {i + 1}
+    </option>
+  ))}
+</select>
                 </div>
               </div>
               

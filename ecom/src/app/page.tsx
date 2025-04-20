@@ -29,8 +29,10 @@ export default async function Home() {
           </div>
         </Link>
         <div className="text-md md:text-xl text-gray-700">
-          Discover exquisite pieces crafted with precision and passion. 
-          From timeless classics to contemporary designs, our collection brings elegance to every occasion.
+          Shri Nanu Gems creates high-quality, handcrafted jewelry blending timeless elegance with modern design. 
+          Each piece is crafted with care using premium materials for lasting beauty. 
+          Whether for a gift or personal use, their unique collection offers something special for every occasion, 
+          designed to complement your individual style.
         </div>
       </div>
 

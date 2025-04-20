@@ -664,56 +664,43 @@ export default function CreateProductPage() {
             </div>
             
             {/* Purity */}
-            <div>
-              <label
-                htmlFor="purity"
-                className="block text-gray-700 font-bold mb-2"
-              >
-                Purity*
-              </label>
-              <select
-                id="purity"
-                value={purity}
-                onChange={(e) => setPurity(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">Select Purity</option>
-                <option value="8K">8K</option>
-                <option value="10K">10K</option>
-                <option value="12K">12K</option>
-                <option value="14K">14K</option>
-                <option value="18K">18K</option>
-                <option value="22K">22K</option>
-                <option value="24K">24K</option>
-              </select>
-            </div>
-            
-            {/* Shape */}
-            <div>
-              <label
-                htmlFor="shape"
-                className="block text-gray-700 font-bold mb-2"
-              >
-                Shape
-              </label>
-              <select
-                id="shape"
-                value={shape}
-                onChange={(e) => setShape(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Shape</option>
-                <option value="round">Round</option>
-                <option value="oval">Oval</option>
-                <option value="princess">Princess</option>
-                <option value="emerald">Emerald</option>
-                <option value="pear">Pear</option>
-                <option value="marquise">Marquise</option>
-                <option value="heart">Heart</option>
-                <option value="cushion">Cushion</option>
-              </select>
-            </div>
+        {/* Purity */}
+<div>
+  <label
+    htmlFor="purity"
+    className="block text-gray-700 font-bold mb-2"
+  >
+    Purity*
+  </label>
+  <input
+    type="text"
+    id="purity"
+    value={purity}
+    onChange={(e) => setPurity(e.target.value)}
+    placeholder="e.g., 22K, 18K"
+    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    required
+  />
+</div>
+
+{/* Shape */}
+<div>
+  <label
+    htmlFor="shape"
+    className="block text-gray-700 font-bold mb-2"
+  >
+    Shape
+  </label>
+  <input
+    type="text"
+    id="shape"
+    value={shape}
+    onChange={(e) => setShape(e.target.value)}
+    placeholder="e.g., Round, Oval"
+    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+</div>
+
             
             {/* Color */}
           

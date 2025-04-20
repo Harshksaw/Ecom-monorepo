@@ -2,11 +2,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticate } = require('../middleware/authorization');
+
 const { register, login } = require('../controller/user.controller');
 
 const userController = require('../controller/user.controller');
 const User = require('../model/User');
+const { default: mongoose } = require('mongoose');
 
 router.post('/register',register)
 router.post('/login',login)
@@ -147,9 +148,17 @@ router.get('/profile/:id', async (req, res) => {
   });
   
   // Delete address
-  router.delete('/address/:addressId', authenticate, async (req, res) => {
+  router.delete('/address/:addressId',  async (req, res) => {
     try {
-      const user = await User.findById(req.user.id);
+      const { addressId } = req.params;
+      console.log("🚀 ~ router.delete ~ addressId:", addressId)
+  // Validate addressId
+  if (!mongoose.Types.ObjectId.isValid(addressId)) {
+    return res.status(400).json({ message: "Invalid address ID" });
+  }
+
+  // Find the user by address ID
+  const user = await User.findOne({ "addresses._id": addressId });
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }

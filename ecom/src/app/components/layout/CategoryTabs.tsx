@@ -73,7 +73,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
                   </div>
 
                   {/* On hover: show gold and silver icons */}
-                  {hoveredCategory === cat.slug && (
+                  {hoveredCategory === cat.slug && cat.slug !== 'Gemstone' && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center space-x-3 rounded-full">
                       <Link
                         href={`/category/${cat.slug}?material=gold`}

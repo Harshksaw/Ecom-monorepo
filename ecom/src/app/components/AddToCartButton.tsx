@@ -46,6 +46,8 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ product, variant }: AddToCartButtonProps) {
+  // console.log("🚀 ~ AddToCartButton ~ variant:", variant)
+  // console.log("🚀 ~ AddToCartButton ~ product:", product)
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -86,7 +88,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
       stock: variant.stock
     };
     
-    // Dispatch the addToCart action
+    console.log("🚀 Dispatching addToCart with:", cartItem);
     dispatch(addToCart(cartItem));
     
     // Show success feedback
@@ -132,7 +134,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
               ? 'bg-green-600 text-white' 
               : 'bg-pink-600 hover:bg-pink-700 text-white'
           } disabled:opacity-70 disabled:cursor-not-allowed`}
-          onClick={handleAddToCart}
+          onClick={() => handleAddToCart()}
           disabled={isDisabled}
         >
           {isLoading ? (
@@ -152,7 +154,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
       </div>
       
       {/* Stock status message */}
-      {variant?.stock <= 5 && variant.stock > 0 && (
+      {/* {variant?.stock <= 5 && variant.stock > 0 && (
         <div className="text-xs text-yellow-600 mt-2">
           Only {variant.stock} left in stock - order soon
         </div>
@@ -161,7 +163,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
         <div className="text-xs text-red-600 mt-2">
           Out of stock - please check back later
         </div>
-      )}
+      )} */}
     </div>
   );
 }

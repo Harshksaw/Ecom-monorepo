@@ -7,6 +7,7 @@ import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaPlus, FaEdit, FaTrash } 
 import axios from 'axios';
 import { API_URL } from '../lib/api';
 import Wrapper from '../components/Wrapper';
+import { AnyMxRecord } from 'node:dns';
 
 // Address interface matching your schema
 interface Address {
@@ -29,6 +30,14 @@ interface UserProfile {
   phoneNumber?: string;
   addresses?: Address[];
 }
+
+const COUNTRIES = [
+  'India', 'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany',
+  'France', 'Italy', 'China', 'Japan', 'Singapore', 'UAE',
+
+  // Add more as needed or use a package like `country-list`
+];
+
 
 // Indian states list
 const INDIAN_STATES = [
@@ -79,6 +88,7 @@ export default function ProfilePage() {
     isDefault: false
   });
 
+  
   // Get userId from localStorage on client-side only
   useEffect(() => {
     const storedUser = getFromLocalStorage('user');
@@ -112,6 +122,7 @@ export default function ProfilePage() {
     
     fetchProfile();
   }, [token, userId?.id]);
+  
   
   // Handle address form changes
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -189,10 +200,12 @@ export default function ProfilePage() {
         data: payload,
       });
       
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         setProfile(response.data.user);
         setShowAddressModal(false);
         toast.success(editingAddressIndex !== null ? 'Address updated' : 'Address added');
+        setShowAddressModal(false);
+        window.location.reload();
       } else {
         toast.error(response.data.message || 'Failed to save address');
       }
@@ -205,7 +218,7 @@ export default function ProfilePage() {
   };
   
   // Delete address
-  const handleDeleteAddress = async (index: number) => {
+  const handleDeleteAddress = async (index: AnyMxRecord) => {
     if (!token || !userId?.id) {
       toast.error('You need to be logged in to delete addresses');
       return;
@@ -218,14 +231,16 @@ export default function ProfilePage() {
     try {
       setIsLoading(true);
       
-      const response = await axios.delete(`${API_URL}/auth/address/${index}/${userId.id}`);
+      const response = await axios.delete(`${API_URL}/auth/address/${index}`);
       
-      if (response.status === 200) {
+      if (response.status === 200 ) {
         setProfile(response.data.user);
         toast.success('Address deleted');
       } else {
         toast.error(response.data.message || 'Failed to delete address');
       }
+
+      window.location.reload();
     } catch (error: any) {
       console.error('Error deleting address:', error);
       toast.error(error.response?.data?.message || 'An error occurred');
@@ -403,7 +418,7 @@ export default function ProfilePage() {
                       </button>
                       
                       <button
-                        onClick={() => handleDeleteAddress(index)}
+                        onClick={() => handleDeleteAddress(address._id)}
                         className="text-red-600 hover:text-red-800 flex items-center text-sm"
                       >
                         <FaTrash className="mr-1" /> Delete
@@ -511,20 +526,18 @@ export default function ProfilePage() {
                   <label className="block text-gray-700 text-sm font-bold mb-2">
                     State
                   </label>
-                  <select
-                    name="state"
-                    value={addressForm.state}
-                    onChange={handleAddressChange}
-                    className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="">Select State</option>
-                    {INDIAN_STATES.map((state) => (
-                      <option key={state} value={state}>
-                        {state}
-                      </option>
-                    ))}
-                  </select>
+           
+                    <input
+  type="text"
+  name="state"
+  value={addressForm.state}
+  onChange={handleAddressChange}
+  placeholder="State / Province / Region"
+  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+  required
+/>
+
+
                 </div>
               </div>
               
@@ -535,22 +548,15 @@ export default function ProfilePage() {
                     PIN Code
                   </label>
                   <input
-                    type="text"
-                    name="postalCode"
-                    value={addressForm.postalCode}
-                    onChange={(e) => {
-                      const formattedValue = formatPinCode(e.target.value);
-                      setAddressForm(prev => ({
-                        ...prev,
-                        postalCode: formattedValue
-                      }));
-                    }}
-                    pattern="[0-9]{6}"
-                    maxLength={6}
-                    placeholder="6-digit PIN code"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
+  type="text"
+  name="postalCode"
+  value={addressForm.postalCode}
+  onChange={handleAddressChange}
+  placeholder="ZIP / Postal Code"
+  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+  required
+/>
+
                   <p className="text-xs text-gray-500 mt-1">
                     Indian PIN codes are 6 digits
                   </p>
@@ -559,13 +565,19 @@ export default function ProfilePage() {
                   <label className="block text-gray-700 text-sm font-bold mb-2">
                     Country
                   </label>
-                  <input
-                    type="text"
-                    name="country"
-                    value="India"
-                    readOnly
-                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-100 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
+                  <select
+  name="country"
+  value={addressForm.country}
+  onChange={handleAddressChange}
+  className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+  required
+>
+  <option value="">Select Country</option>
+  {COUNTRIES.map((country) => (
+    <option key={country} value={country}>{country}</option>
+  ))}
+</select>
+
                 </div>
               </div>
               

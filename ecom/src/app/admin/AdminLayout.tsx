@@ -41,11 +41,11 @@ const ADMIN_MENU_ITEMS = [
     href: '/admin/dashboard/orders',
     icon: <FaShoppingCart />
   },
-  // {
-  //   name: 'Users',
-  //   href: '/admin/dashboard/users',
-  //   icon: <FaUsers />
-  // },
+  {
+    name: 'Currency',
+    href: '/admin/dashboard/currency',
+    icon: <FaUsers />
+  },
   // {
   //   name: 'Settings',
   //   href: '/admin/dashboard/settings',

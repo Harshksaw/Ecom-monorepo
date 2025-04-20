@@ -69,7 +69,7 @@ variants: [
       of: Number,
       default: {}
     },
-    stock: { type: Number, default: 0 },
+    stock: { type: Number, default: 100 },
   }
 ],
 

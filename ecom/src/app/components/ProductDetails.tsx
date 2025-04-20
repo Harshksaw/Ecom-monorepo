@@ -313,7 +313,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               </span>
               <span className="text-sm text-gray-500 ml-2">incl. taxes</span>
             </div>
-            <div className={`text-sm font-medium mt-1 ${
+            {/* <div className={`text-sm font-medium mt-1 ${
               selectedVariant?.stock > 5
                 ? 'text-green-600'
                 : selectedVariant?.stock > 0
@@ -325,7 +325,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 : selectedVariant?.stock > 0
                   ? `Only ${selectedVariant.stock} left in stock`
                   : 'Out of Stock'}
-            </div>
+            </div> */}
           </div>
 
           {/* Variant Selection */}
@@ -360,12 +360,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               <AddToCartButton product={product} variant={selectedVariant} />
             </div>
             <button 
-              className="px-4 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium rounded-xl hover:shadow-md transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-              disabled={!selectedVariant?.stock || selectedVariant.stock <= 0}
-              onClick={handleBuyNow}
-            >
-              Buy Now
-            </button>
+  className="px-4 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium rounded-xl hover:shadow-md transition-all"
+  onClick={handleBuyNow}
+>
+  Buy Now
+</button>
           </div>
 
           {/* Product highlights */}
@@ -460,7 +459,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                           {variant.metalColor.charAt(0).toUpperCase() + variant.metalColor.slice(1)}
                         </div>
                       </div>
-                      <div className={`text-sm font-medium ${
+                      {/* <div className={`text-sm font-medium ${
                         variant.stock > 5
                           ? 'text-green-600'
                           : variant.stock > 0
@@ -468,7 +467,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                             : 'text-red-600'
                       }`}>
                         {variant.stock > 0 ? `In Stock (${variant.stock})` : 'Out of Stock'}
-                      </div>
+                      </div> */}
                     </div>
                     <div className="flex justify-between text-sm text-gray-600 mt-1">
                       <div>

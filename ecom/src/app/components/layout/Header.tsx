@@ -65,23 +65,20 @@ const Header = ({categories}:any) => {
         <div className="bg-white shadow-sm">
           <div className="container mx-auto px-4">
             {/* Logo and search bar */}
-            <div className="flex items-center justify-between py-4">
+            <div className="flex items-center justify-between py-2">
               <Link href="/" className="flex items-center">
-                <h1 className="text-xl md:text-2xl font-bold text-pink-700">
-                  SHRI NANU GEMS & JEWELERS
-                </h1>
+               <Image 
+                  src="/logo.png"
+                  alt="Logo"
+                  width={120}
+                  height={40}
+                  className="h-16 w-auto"
+                />
               </Link>
               
               <div className="hidden md:flex items-center space-x-6">
                 {/* Search bar */}
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search for jewelry..."
-                    className="border border-gray-300 rounded-full pl-10 pr-4 py-2 transition-all duration-300 w-64 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
-                  />
-                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                </div>
+            
                 
                 {/* Currency Selector */}
                 <CurrencySelector />
