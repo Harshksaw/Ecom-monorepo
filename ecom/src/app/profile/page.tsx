@@ -200,10 +200,12 @@ export default function ProfilePage() {
         data: payload,
       });
       
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         setProfile(response.data.user);
         setShowAddressModal(false);
         toast.success(editingAddressIndex !== null ? 'Address updated' : 'Address added');
+        setShowAddressModal(false);
+        window.location.reload();
       } else {
         toast.error(response.data.message || 'Failed to save address');
       }
@@ -231,12 +233,14 @@ export default function ProfilePage() {
       
       const response = await axios.delete(`${API_URL}/auth/address/${index}`);
       
-      if (response.status === 200) {
+      if (response.status === 200 ) {
         setProfile(response.data.user);
         toast.success('Address deleted');
       } else {
         toast.error(response.data.message || 'Failed to delete address');
       }
+
+      window.location.reload();
     } catch (error: any) {
       console.error('Error deleting address:', error);
       toast.error(error.response?.data?.message || 'An error occurred');
