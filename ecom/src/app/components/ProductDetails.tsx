@@ -76,6 +76,7 @@ interface Product {
 type ProductDetailsProps = { product: Product };
 
 export default function ProductDetails({ product }: ProductDetailsProps) {
+  console.log("🚀 ~ ProductDetails ~ product:", product)
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
 
   const dispatch = useDispatch();
