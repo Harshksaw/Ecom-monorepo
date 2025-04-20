@@ -46,6 +46,8 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ product, variant }: AddToCartButtonProps) {
+  // console.log("🚀 ~ AddToCartButton ~ variant:", variant)
+  // console.log("🚀 ~ AddToCartButton ~ product:", product)
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -86,7 +88,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
       stock: variant.stock
     };
     
-    // Dispatch the addToCart action
+    console.log("🚀 Dispatching addToCart with:", cartItem);
     dispatch(addToCart(cartItem));
     
     // Show success feedback
@@ -132,7 +134,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
               ? 'bg-green-600 text-white' 
               : 'bg-pink-600 hover:bg-pink-700 text-white'
           } disabled:opacity-70 disabled:cursor-not-allowed`}
-          onClick={handleAddToCart}
+          onClick={() => handleAddToCart()}
           disabled={isDisabled}
         >
           {isLoading ? (

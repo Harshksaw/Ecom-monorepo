@@ -138,12 +138,5 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
 export default ProductGrid;
 
-// Pagination Component
-interface PaginationProps {
-  totalPages: number;
-  currentPage: number;
-  categorySlug?: string;
-}
 
 
-// export { ProductCard };

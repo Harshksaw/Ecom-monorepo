@@ -30,6 +30,14 @@ interface UserProfile {
   addresses?: Address[];
 }
 
+const COUNTRIES = [
+  'India', 'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany',
+  'France', 'Italy', 'China', 'Japan', 'Singapore', 'UAE',
+
+  // Add more as needed or use a package like `country-list`
+];
+
+
 // Indian states list
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -79,6 +87,7 @@ export default function ProfilePage() {
     isDefault: false
   });
 
+  
   // Get userId from localStorage on client-side only
   useEffect(() => {
     const storedUser = getFromLocalStorage('user');
@@ -112,6 +121,7 @@ export default function ProfilePage() {
     
     fetchProfile();
   }, [token, userId?.id]);
+  
   
   // Handle address form changes
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -511,20 +521,18 @@ export default function ProfilePage() {
                   <label className="block text-gray-700 text-sm font-bold mb-2">
                     State
                   </label>
-                  <select
-                    name="state"
-                    value={addressForm.state}
-                    onChange={handleAddressChange}
-                    className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="">Select State</option>
-                    {INDIAN_STATES.map((state) => (
-                      <option key={state} value={state}>
-                        {state}
-                      </option>
-                    ))}
-                  </select>
+           
+                    <input
+  type="text"
+  name="state"
+  value={addressForm.state}
+  onChange={handleAddressChange}
+  placeholder="State / Province / Region"
+  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+  required
+/>
+
+
                 </div>
               </div>
               
@@ -535,22 +543,15 @@ export default function ProfilePage() {
                     PIN Code
                   </label>
                   <input
-                    type="text"
-                    name="postalCode"
-                    value={addressForm.postalCode}
-                    onChange={(e) => {
-                      const formattedValue = formatPinCode(e.target.value);
-                      setAddressForm(prev => ({
-                        ...prev,
-                        postalCode: formattedValue
-                      }));
-                    }}
-                    pattern="[0-9]{6}"
-                    maxLength={6}
-                    placeholder="6-digit PIN code"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
+  type="text"
+  name="postalCode"
+  value={addressForm.postalCode}
+  onChange={handleAddressChange}
+  placeholder="ZIP / Postal Code"
+  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+  required
+/>
+
                   <p className="text-xs text-gray-500 mt-1">
                     Indian PIN codes are 6 digits
                   </p>
@@ -559,13 +560,19 @@ export default function ProfilePage() {
                   <label className="block text-gray-700 text-sm font-bold mb-2">
                     Country
                   </label>
-                  <input
-                    type="text"
-                    name="country"
-                    value="India"
-                    readOnly
-                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-100 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
+                  <select
+  name="country"
+  value={addressForm.country}
+  onChange={handleAddressChange}
+  className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+  required
+>
+  <option value="">Select Country</option>
+  {COUNTRIES.map((country) => (
+    <option key={country} value={country}>{country}</option>
+  ))}
+</select>
+
                 </div>
               </div>
               

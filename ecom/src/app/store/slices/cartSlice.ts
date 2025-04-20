@@ -54,7 +54,11 @@ const cartSlice = createSlice({
           quantity: newQuantity,
         };
         
+        console.log("🚀 ~ updatedItems:", updatedItems)
         state.items = updatedItems;
+      }
+      else {
+        state.items.push(newItem); // <-- THIS LINE WAS MISSING
       }
       
       

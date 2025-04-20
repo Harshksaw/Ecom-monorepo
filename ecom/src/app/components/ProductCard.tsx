@@ -11,6 +11,7 @@ import {
   CURRENCY_SYMBOLS,
   CurrencyCode
 } from '@/app/store/slices/currencySlice';
+import { addToCart } from '../store/slices/cartSlice';
 
 interface Gem {
   type: string;
@@ -89,10 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
       ? firstVariant.price[""]
       : null);
   
-  // Calculate discount percentage
-  const discountPercentage = salePrice && regularPrice
-    ? Math.round(((regularPrice - salePrice) / regularPrice) * 100)
-    : null;
+
   
   // Format price with selected currency
   const formatPrice = (priceInINR: number | undefined | null): string => {
@@ -110,17 +108,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
     e.stopPropagation();
     setIsFavorite(!isFavorite);
   };
+  const dispatch = useDispatch();
 
   return (
     <div className={`rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 
     group ${cardBgColor}`}>
       {/* Product Image */}
       <Link href={`/product/${product._id}`} className="block relative">
-        {discountPercentage && discountPercentage > 0 && (
+        {/* {discountPercentage && discountPercentage > 0 && (
           <div className="absolute top-2 left-2 bg-pink-600 text-white px-2 py-1 rounded-full text-xs z-10">
             {discountPercentage}% OFF
           </div>
-        )}
+        )} */}
         
         {/* Favorite button - only show if enabled */}
         {showFavorite && (
@@ -213,14 +212,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-between items-center">
+        {/* <div className="flex justify-between items-center">
           <button 
             className="w-full bg-blue-500 flex flex-row justify-center items-center text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
             title="Add to Cart"
+            onClick={()=> dispatch(addToCart(product))}
           >
             <FaShoppingCart className="mr-2" /> Add
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

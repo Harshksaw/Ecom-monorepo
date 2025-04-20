@@ -40,7 +40,7 @@ export const fetchExchangeRates = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       // Using open exchange rate API (you'll need to replace this with your API key)
-      const response = await axios.get(`${API_URL}/api/currency/rates`)
+      const response = await axios.get(`${API_URL}/currency/rates`)
       const data = response.data;
       
       // Extract just the rates we need
