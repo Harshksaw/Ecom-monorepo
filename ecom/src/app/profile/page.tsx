@@ -7,6 +7,7 @@ import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaPlus, FaEdit, FaTrash } 
 import axios from 'axios';
 import { API_URL } from '../lib/api';
 import Wrapper from '../components/Wrapper';
+import { AnyMxRecord } from 'node:dns';
 
 // Address interface matching your schema
 interface Address {
@@ -215,7 +216,7 @@ export default function ProfilePage() {
   };
   
   // Delete address
-  const handleDeleteAddress = async (index: number) => {
+  const handleDeleteAddress = async (index: AnyMxRecord) => {
     if (!token || !userId?.id) {
       toast.error('You need to be logged in to delete addresses');
       return;
@@ -228,7 +229,7 @@ export default function ProfilePage() {
     try {
       setIsLoading(true);
       
-      const response = await axios.delete(`${API_URL}/auth/address/${index}/${userId.id}`);
+      const response = await axios.delete(`${API_URL}/auth/address/${index}`);
       
       if (response.status === 200) {
         setProfile(response.data.user);
@@ -413,7 +414,7 @@ export default function ProfilePage() {
                       </button>
                       
                       <button
-                        onClick={() => handleDeleteAddress(index)}
+                        onClick={() => handleDeleteAddress(address._id)}
                         className="text-red-600 hover:text-red-800 flex items-center text-sm"
                       >
                         <FaTrash className="mr-1" /> Delete

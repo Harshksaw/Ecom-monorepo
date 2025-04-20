@@ -61,11 +61,11 @@ const OrderSummary = ({
       </div>
       
       {/* Special Offers */}
-      {shipping > 0 && (
+      {/* {shipping > 0 && (
         <div className="bg-blue-50 text-blue-700 p-3 rounded mb-6 text-sm">
           Add {formatPrice(remainingForFreeShipping)} more to qualify for free shipping!
         </div>
-      )}
+      )} */}
       
       {/* Address required warning */}
       {showAddressRequired && !defaultShippingAddress && (
