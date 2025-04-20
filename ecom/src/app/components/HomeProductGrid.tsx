@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaShoppingCart, FaArrowRight } from 'react-icons/fa';
+import { FaShoppingCart, FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import ProductCard from './ProductCard';
-
 
 interface Gem {
   type: string;
@@ -77,8 +76,9 @@ interface ProductGridProps {
 }
 
 const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
-  console.log("🚀 ~ products:", products)
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
+  const [visibleProducts, setVisibleProducts] = useState<{ [key: string]: number }>({});
+  const sliderRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   
   useEffect(() => {
     // Group products by category
@@ -105,7 +105,61 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
     );
     
     setCategoryGroups(sortedGroups);
+    
+    // Initialize visible products count for each category
+    const initialVisibleProducts: { [key: string]: number } = {};
+    sortedGroups.forEach(category => {
+      initialVisibleProducts[category._id] = getVisibleProductsCount();
+    });
+    setVisibleProducts(initialVisibleProducts);
   }, [products]);
+
+  // Function to determine how many products to show based on screen size
+  const getVisibleProductsCount = () => {
+    if (typeof window === 'undefined') return 2; // Default for SSR
+    
+    const width = window.innerWidth;
+    if (width >= 1280) return 4; // xl
+    if (width >= 1024) return 3; // lg
+    if (width >= 768) return 2; // md
+    return 1; // sm
+  };
+
+  // Update visible products count on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const count = getVisibleProductsCount();
+      setVisibleProducts(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(key => {
+          updated[key] = count;
+        });
+        return updated;
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Slide functions
+  const slideLeft = (categoryId: string) => {
+    if (!sliderRefs.current[categoryId]) return;
+    
+    const slider = sliderRefs.current[categoryId];
+    if (slider) {
+      slider.scrollBy({ left: -slider.offsetWidth, behavior: 'smooth' });
+    }
+  };
+
+  const slideRight = (categoryId: string) => {
+    if (!sliderRefs.current[categoryId]) return;
+    
+    const slider = sliderRefs.current[categoryId];
+    if (slider) {
+      slider.scrollBy({ left: slider.offsetWidth, behavior: 'smooth' });
+    }
+  };
 
   return (
     <section className="py-12">
@@ -122,18 +176,50 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               </Link>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {category.products.slice(0, 4).map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
+            <div className="relative group">
+              {/* Left Arrow */}
+              <button 
+                onClick={() => slideLeft(category._id)}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 bg-white p-2 rounded-full shadow-md text-pink-600 hover:text-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                aria-label="Previous products"
+              >
+                <FaChevronLeft className="text-xl" />
+              </button>
+              
+              {/* Slider Container */}
+              <div 
+                ref={el => sliderRefs.current[category._id] = el}
+                className="flex overflow-x-auto scrollbar-hide snap-x scroll-smooth gap-6 pb-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {category.products.map((product) => (
+                  <div key={product._id} className="flex-none w-full md:w-1/2 lg:w-1/3 xl:w-1/4 snap-start">
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Right Arrow */}
+              <button 
+                onClick={() => slideRight(category._id)}
+                className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 bg-white p-2 rounded-full shadow-md text-pink-600 hover:text-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                aria-label="Next products"
+              >
+                <FaChevronRight className="text-xl" />
+              </button>
             </div>
           </div>
         ))}
       </div>
+      
+      {/* Custom CSS for hiding scrollbar */}
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 };
-
-
 
 export default HomeProductGrid;
