@@ -1,5 +1,7 @@
 // src/app/store/slices/currencySlice.ts
+import { API_URL } from '@/app/lib/api';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 // Currency types
 export type CurrencyCode = 'INR' | 'USD' | 'EUR' | 'GBP';
@@ -38,8 +40,8 @@ export const fetchExchangeRates = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       // Using open exchange rate API (you'll need to replace this with your API key)
-      const response = await fetch('https://api.exchangerate.host/latest?base=INR');
-      const data = await response.json();
+      const response = await axios.get(`${API_URL}/api/currency/rates`)
+      const data = response.data;
       
       // Extract just the rates we need
       const rates: ExchangeRates = {

@@ -4,6 +4,7 @@ import Image from 'next/image';
 
 import { FaShoppingCart } from 'react-icons/fa';
 import ProductPagination from './ProductPagination';
+import ProductCard from '../ProductCard';
 
 interface Product {
     _id: string;
@@ -56,84 +57,84 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   );
 };
 
-const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
-console.log("🚀 ~ product:", product)
+// const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+// console.log("🚀 ~ product:", product)
 
-  const firstVariant = product?.variants[0] || {};
+//   const firstVariant = product?.variants[0] || {};
   
-  // Safely get the first image or use a placeholder
-  const primaryImage = 
-    (product.images && product.images[0]) || 
-    (firstVariant.images && firstVariant.images[0]) || 
-    '/placeholder-image.jpg';
-  console.log("🚀 ~ product:", product)
+//   // Safely get the first image or use a placeholder
+//   const primaryImage = 
+//     (product.images && product.images[0]) || 
+//     (firstVariant.images && firstVariant.images[0]) || 
+//     '/placeholder-image.jpg';
+//   // console.log("🚀 ~ product:", product)
 
-  return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
-      {/* Product Image */}
-      <Link href={`/product/${product._id}`} className="block relative">
+//   return (
+//     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+//       {/* Product Image */}
+//       <Link href={`/product/${product._id}`} className="block relative">
    
-        <div className="relative w-full pt-[100%]">
-          <Image 
-            loading='lazy'
-            src={primaryImage }
-            alt={product.name}
-            fill
-            className="absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-      </Link>
+//         <div className="relative w-full pt-[100%]">
+//           <Image 
+//             loading='lazy'
+//             src={primaryImage }
+//             alt={product.name}
+//             fill
+//             className="absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-300"
+//           />
+//         </div>
+//       </Link>
 
-      {/* Product Details */}
-      <div className="p-4">
-        <Link href={`/products/${product.slug}`}>
-          <h3 className="text-lg font-semibold mb-2 line-clamp-2">
-            {product.name}
-          </h3>
-        </Link>
+//       {/* Product Details */}
+//       <div className="p-4">
+//         <Link href={`/products/${product.slug}`}>
+//           <h3 className="text-lg font-semibold mb-2 line-clamp-2">
+//             {product.name}
+//           </h3>
+//         </Link>
 
-        {/* Price */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center">
-            {product.salePrice ? (
-              <>
-                <span className="text-red-600 font-bold mr-2">
-                ₹{firstVariant.price?.default?.toFixed(2) || 'N/A'}
-                </span>
-                <span className="text-gray-400 line-through">
-                ₹{firstVariant.price?.default?.toFixed(2) || 'N/A'}
-                </span>
-              </>
-            ) : (
-              <span className="text-black font-bold">
-             ₹{firstVariant.price?.default?.toFixed(2) || 'N/A'}
-              </span>
-            )}
-          </div>
+//         {/* Price */}
+//         <div className="flex items-center justify-between mb-2">
+//           <div className="flex items-center">
+//             {product.salePrice ? (
+//               <>
+//                 <span className="text-red-600 font-bold mr-2">
+//                 ₹{firstVariant.price?.default?.toFixed(2) || 'N/A'}
+//                 </span>
+//                 <span className="text-gray-400 line-through">
+//                 ₹{firstVariant.price?.default?.toFixed(2) || 'N/A'}
+//                 </span>
+//               </>
+//             ) : (
+//               <span className="text-black font-bold">
+//              ₹{firstVariant.price?.default?.toFixed(2) || 'N/A'}
+//               </span>
+//             )}
+//           </div>
 
-          {/* Rating */}
-          {product.rating && (
-            <div className="flex items-center text-yellow-500">
-              ★ {product.rating.toFixed(1)}
-            </div>
-          )}
-        </div>
+//           {/* Rating */}
+//           {/* {product.rating && (
+//             <div className="flex items-center text-yellow-500">
+//               ★ {product.rating.toFixed(1)}
+//             </div>
+//           )} */}
+//         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-between items-center">
-        <button 
-  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-  title="Add to Cart"
->
-  <FaShoppingCart className="mr-2" /> Add
-</button>
+//         {/* Action Buttons */}
+//         <div className="flex justify-between items-center">
+//         <button 
+//   className="bg-blue-500 flex flex-row justify-center items-center text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+//   title="Add to Cart"
+// >
+//   <FaShoppingCart className="mr-2" /> Add
+// </button>
           
        
-        </div>
-      </div>
-    </div>
-  );
-};
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 export default ProductGrid;
 
@@ -145,4 +146,4 @@ interface PaginationProps {
 }
 
 
-export { ProductCard };
+// export { ProductCard };

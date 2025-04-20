@@ -69,9 +69,8 @@ export default async function CategoryDetailPage({
           </div>
         ) : (
           <>
-            {/* Sort options - can be added here */}
-            
-            {/* Product Grid */}
+
+
             <ProductGrid 
               products={productResponse} 
               totalPages={productResponse.meta?.pagination?.pageCount || 1}
