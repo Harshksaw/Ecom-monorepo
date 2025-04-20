@@ -142,15 +142,15 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   };
   
   return (
-    <div className="w-full py-8 px-20 md:py-16 bg-gradient-to-b from-pink-50 to-white">
+    <div className="w-full py-8 px-4 md:px-20 md:py-16 bg-gradient-to-b from-gray-50 to-white">
       <div className="text-sm mb-6 text-gray-500">
-        <span>Home</span> / <span>{product?.categoryId?.name}</span> / <span className="text-pink-600">{product?.name}</span>
+        <span>Home</span> / <span>{product?.categoryId?.name}</span> / <span className="text-indigo-600">{product?.name}</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left column with product images */}
         <div className="w-full lg:w-3/5">
-          <div className="bg-white p-4 rounded-2xl shadow-sm transition-all hover:shadow-md">
+          <div className="bg-white p-4 rounded-2xl shadow-sm transition-all hover:shadow-md border border-gray-100">
             <ProductDetailsCarousel images={displayImages} />
           </div>
 
@@ -160,7 +160,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               {displayImages.slice(0, 5).map((img, idx) => (
                 <div
                   key={idx}
-                  className="w-16 h-16 relative rounded-lg overflow-hidden border-2 border-white shadow-sm cursor-pointer hover:border-pink-300 transition-all"
+                  className="w-16 h-16 relative rounded-lg overflow-hidden border-2 border-white shadow-sm cursor-pointer hover:border-indigo-300 transition-all"
                   style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                 />
               ))}
@@ -174,17 +174,17 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
 
           {/* Gem details section */}
           {product?.gems && product.gems.length > 0 && (
-            <div className="mt-8 bg-white p-5 rounded-2xl shadow-sm">
+            <div className="mt-8 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
               <h3 className="font-semibold mb-4 flex items-center text-gray-800">
-                <FaGem className="mr-2 text-blue-500" />
+                <FaGem className="mr-2 text-indigo-500" />
                 Gemstone Details
               </h3>
               
               <div className="space-y-4">
                 {product.gems.map((gem, index) => (
-                  <div key={`gem-${index}`} className="border border-gray-100 rounded-xl p-4 bg-blue-50/30">
+                  <div key={`gem-${index}`} className="border border-gray-100 rounded-xl p-4 bg-indigo-50/30">
                     <div className="flex flex-row items-center mb-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-3">
                         <FaGem />
                       </div>
                       <h4 className="font-medium">{gem.type}</h4>
@@ -221,7 +221,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
 
         {/* Right column with product details */}
         <div className="w-full lg:w-2/5">
-          <div className="uppercase tracking-wider text-sm text-pink-600 mb-2">
+          <div className="uppercase tracking-wider text-sm text-indigo-600 mb-2">
             {product?.categoryId?.name}
           </div>
 
@@ -233,17 +233,17 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           <div className="flex flex-row flex-wrap gap-2 mb-4">
             <span className={`px-3 py-1 rounded-full text-xs font-medium flex flex-row items-center ${
               product?.materialType?.toLowerCase().includes('gold')
-                ? 'bg-yellow-100 text-yellow-800'
+                ? 'bg-amber-100 text-amber-800'
                 : product?.materialType?.toLowerCase().includes('silver')
                   ? 'bg-gray-100 text-gray-800'
-                  : 'bg-pink-100 text-pink-800'
+                  : 'bg-indigo-100 text-indigo-800'
             }`}>
               <FaPalette className="mr-1" />
               {product?.materialType} {product?.purity}
             </span>
 
             {product?.shape && (
-              <span className="flex-row px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 flex items-center">
+              <span className="flex-row px-3 py-1 rounded-full text-xs font-medium bg-violet-100 text-violet-800 flex items-center">
                 <FaCut className="mr-1" />
                 {product.shape} cut
               </span>
@@ -263,7 +263,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               onClick={() => changeCurrency('INR')}
               className={`flex items-center justify-center px-3 py-1 rounded-l-md text-sm font-medium transition-colors border ${
                 selectedCurrency === 'INR' 
-                  ? 'bg-pink-600 text-white border-pink-600' 
+                  ? 'bg-indigo-600 text-white border-indigo-600' 
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -274,7 +274,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               onClick={() => changeCurrency('USD')}
               className={`flex items-center justify-center px-3 py-1 border-l-0 border-r-0 text-sm font-medium transition-colors border ${
                 selectedCurrency === 'USD' 
-                  ? 'bg-pink-600 text-white border-pink-600' 
+                  ? 'bg-indigo-600 text-white border-indigo-600' 
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -285,7 +285,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               onClick={() => changeCurrency('EUR')}
               className={`flex items-center justify-center px-3 py-1 border-l-0 border-r-0 text-sm font-medium transition-colors border ${
                 selectedCurrency === 'EUR' 
-                  ? 'bg-pink-600 text-white border-pink-600' 
+                  ? 'bg-indigo-600 text-white border-indigo-600' 
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -296,7 +296,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               onClick={() => changeCurrency('GBP')}
               className={`flex items-center justify-center px-3 py-1 rounded-r-md text-sm font-medium transition-colors border ${
                 selectedCurrency === 'GBP' 
-                  ? 'bg-pink-600 text-white border-pink-600' 
+                  ? 'bg-indigo-600 text-white border-indigo-600' 
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -313,26 +313,13 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               </span>
               <span className="text-sm text-gray-500 ml-2">incl. taxes</span>
             </div>
-            {/* <div className={`text-sm font-medium mt-1 ${
-              selectedVariant?.stock > 5
-                ? 'text-green-600'
-                : selectedVariant?.stock > 0
-                  ? 'text-yellow-600'
-                  : 'text-red-600'
-            }`}>
-              {selectedVariant?.stock > 5
-                ? 'In Stock'
-                : selectedVariant?.stock > 0
-                  ? `Only ${selectedVariant.stock} left in stock`
-                  : 'Out of Stock'}
-            </div> */}
           </div>
 
           {/* Variant Selection */}
           {product?.variants?.length > 1 && (
             <div className="mb-6">
               <h3 className="font-semibold mb-3 flex items-center">
-                <FaPalette className="mr-2 text-pink-600" />
+                <FaPalette className="mr-2 text-indigo-600" />
                 Select Metal Color
               </h3>
               <div className="flex flex-wrap gap-3">
@@ -342,8 +329,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     onClick={() => setSelectedVariantIndex(idx)}
                     className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       idx === selectedVariantIndex
-                        ? 'bg-pink-600 text-white ring-2 ring-pink-300 ring-offset-2'
-                        : 'bg-gray-100 text-gray-800 hover:bg-pink-50'
+                        ? 'bg-indigo-100 text-indigo-900 ring-2 ring-indigo-300 ring-offset-2'
+                        : 'bg-gray-100 text-gray-800 hover:bg-gray-50'
                     }`}
                   >
                     {variant.metalColor.charAt(0).toUpperCase() + variant.metalColor.slice(1)}
@@ -360,17 +347,17 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               <AddToCartButton product={product} variant={selectedVariant} />
             </div>
             <button 
-  className="px-4 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium rounded-xl hover:shadow-md transition-all"
-  onClick={handleBuyNow}
->
-  Buy Now
-</button>
+              className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:shadow-md transition-all"
+              onClick={handleBuyNow}
+            >
+              Buy Now
+            </button>
           </div>
 
           {/* Product highlights */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-5 rounded-xl mb-8 hover:shadow-sm transition-all">
+          <div className="bg-gradient-to-r from-indigo-50 to-white p-5 rounded-xl mb-8 hover:shadow-sm transition-all border border-indigo-100">
             <h3 className="font-semibold mb-3 text-gray-800 flex items-center">
-              <FaBox className="mr-2 text-pink-600" />
+              <FaBox className="mr-2 text-indigo-600" />
               Highlights
             </h3>
             <p className="text-gray-700 mb-4">
@@ -408,7 +395,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           {product?.deliveryOptions && product.deliveryOptions.length > 0 && (
             <div className="bg-white border border-gray-100 p-4 rounded-xl mb-8 shadow-sm">
               <h3 className="font-semibold mb-3 text-gray-800 flex items-center">
-                <FaShippingFast className="mr-2 text-pink-600" />
+                <FaShippingFast className="mr-2 text-indigo-600" />
                 Delivery Options
               </h3>
               
@@ -443,8 +430,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     onClick={() => setSelectedVariantIndex(idx)}
                     className={`bg-white border cursor-pointer transition-all ${
                       idx === selectedVariantIndex
-                        ? 'border-pink-500 bg-pink-50/50 shadow-md'
-                        : 'border-gray-200 hover:border-pink-300'
+                        ? 'border-indigo-400 bg-indigo-50/50 shadow-md'
+                        : 'border-gray-200 hover:border-indigo-300'
                     } p-3 rounded-xl`}
                   >
                     <div className="flex justify-between items-center">
@@ -459,22 +446,13 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                           {variant.metalColor.charAt(0).toUpperCase() + variant.metalColor.slice(1)}
                         </div>
                       </div>
-                      {/* <div className={`text-sm font-medium ${
-                        variant.stock > 5
-                          ? 'text-green-600'
-                          : variant.stock > 0
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
-                      }`}>
-                        {variant.stock > 0 ? `In Stock (${variant.stock})` : 'Out of Stock'}
-                      </div> */}
                     </div>
                     <div className="flex justify-between text-sm text-gray-600 mt-1">
                       <div>
                         {formatPrice(variant.price.default)}
                       </div>
                       {idx === selectedVariantIndex && (
-                        <span className="text-pink-600 font-medium">Selected</span>
+                        <span className="text-indigo-600 font-medium">Selected</span>
                       )}
                     </div>
                   </div>
@@ -497,7 +475,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           {product?.materials && product.materials.length > 0 && (
             <div className="mb-8">
               <h3 className="font-semibold mb-3 border-b pb-2 flex items-center">
-                <FaGem className="mr-2 text-pink-600" />
+                <FaGem className="mr-2 text-indigo-600" />
                 Materials Used
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -517,7 +495,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           {product?.tags && product.tags.length > 0 && (
             <div className="mt-6">
               <h3 className="font-semibold mb-3 flex items-center text-sm">
-                <FaTags className="mr-2 text-pink-600" />
+                <FaTags className="mr-2 text-indigo-600" />
                 Tags
               </h3>
               <div className="flex flex-wrap gap-2">

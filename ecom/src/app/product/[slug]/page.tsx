@@ -15,7 +15,7 @@ export default async function ProductPage({ params }: any) {
       return (
         <Wrapper>
           <div className="flex flex-col items-center justify-center py-20">
-            <h1 className="text-2xl font-bold text-pink-600 mb-4">Product Not Found</h1>
+            <h1 className="text-2xl font-bold text-gray-600 mb-4">Product Not Found</h1>
             <p className="text-gray-600">The product you are looking for does not exist or has been removed.</p>
           </div>
         </Wrapper>
@@ -24,7 +24,7 @@ export default async function ProductPage({ params }: any) {
 
     return <ProductDetails product={product} />;
   } catch (error) {
-    console.error('Error fetching product data:', error);
+
     return (
       <Wrapper>
         <div className="py-10 text-center">

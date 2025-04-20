@@ -116,7 +116,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
       {/* Product Image */}
       <Link href={`/product/${product._id}`} className="block relative">
         {/* {discountPercentage && discountPercentage > 0 && (
-          <div className="absolute top-2 left-2 bg-pink-600 text-white px-2 py-1 rounded-full text-xs z-10">
+          <div className="absolute top-2 left-2 bg-gray-600 text-white px-2 py-1 rounded-full text-xs z-10">
             {discountPercentage}% OFF
           </div>
         )} */}
@@ -170,7 +170,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
                     ? 'bg-yellow-100 text-yellow-800'
                     : material.toLowerCase().includes('silver')
                       ? 'bg-gray-100 text-gray-800'
-                      : 'bg-pink-100 text-pink-800'
+                      : 'bg-gray-100 text-pink-800'
                   }`}
               >
                 {material}

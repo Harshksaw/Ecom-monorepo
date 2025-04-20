@@ -9,7 +9,7 @@ import { FaChevronLeft, FaChevronRight, FaGem, FaRegGem } from 'react-icons/fa';
 // Placeholder color by category
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
-    rings: 'bg-pink-100',
+    rings: 'bg-gray-100',
     earrings: 'bg-yellow-100',
     pendant: 'bg-blue-100',
     bracelet: 'bg-green-100',
@@ -17,7 +17,7 @@ const getCategoryColor = (category: string) => {
     gifts: 'bg-red-100',
     watches: 'bg-gray-100',
   };
-  return colors[category] || 'bg-pink-50';
+  return colors[category] || 'bg-gray-50';
 };
 
 interface CategoryTabsProps {

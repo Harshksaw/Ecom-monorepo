@@ -57,12 +57,12 @@ const Header = ({categories}:any) => {
     <>
       <header ref={headerRef} className={`w-full  transition-transform duration-300 z-50 ${show}`}>
         {/* Top promotional bar */}
-        <div className="bg-pink-100 py-1 text-center text-sm">
+        <div className="bg-white py-1 text-center text-sm">
           New Arrivals: Gold & Silver Collections Now Available!
         </div>
         
         {/* Main header */}
-        <div className="bg-white shadow-sm">
+        <div className="bg-gray-100 shadow-sm">
           <div className="container mx-auto px-4">
             {/* Logo and search bar */}
             <div className="flex items-center justify-between py-2">
@@ -87,7 +87,7 @@ const Header = ({categories}:any) => {
                 {user ? (
                   <div className="relative z-50" ref={userMenuRef}>
                     <button 
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-pink-50 rounded-full transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded-full transition-colors"
                       onClick={() => setShowUserMenu(!showUserMenu)}
                     >
                       <FaUser className="text-pink-700" />
@@ -106,7 +106,7 @@ const Header = ({categories}:any) => {
                         
                         <Link 
                           href="/profile" 
-                          className="px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
+                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FaUser className="mr-2 text-pink-700" />
@@ -115,7 +115,7 @@ const Header = ({categories}:any) => {
                         
                         <Link 
                           href="/orders" 
-                          className="px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
+                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FaShoppingBag className="mr-2 text-pink-700" />
@@ -125,7 +125,7 @@ const Header = ({categories}:any) => {
                         {user.role === 'Admin' && (
                           <Link 
                             href="/admin/dashboard" 
-                            className="px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
+                            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                             onClick={() => setShowUserMenu(false)}
                           >
                             <FaUserCog className="mr-2 text-pink-700" />
@@ -135,7 +135,7 @@ const Header = ({categories}:any) => {
                         
                         <button 
                           onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-pink-50 flex items-center"
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 flex items-center"
                         >
                           <FaSignOutAlt className="mr-2" />
                           Sign out
@@ -145,7 +145,7 @@ const Header = ({categories}:any) => {
                   </div>
                 ) : (
                   <Link href="/auth/login">
-                    <button className="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors">
+                    <button className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
                       Login
                     </button>
                   </Link>
@@ -156,7 +156,7 @@ const Header = ({categories}:any) => {
                   <div className="relative">
                     <BsCart className="text-[24px] text-gray-700" />
                     {cartItems > 0 && (
-                      <div className="h-[18px] min-w-[18px] rounded-full bg-pink-600 absolute -top-2 -right-2 text-white text-[12px] flex justify-center items-center px-[5px]">
+                      <div className="h-[18px] min-w-[18px] rounded-full bg-gray-600 absolute -top-2 -right-2 text-white text-[12px] flex justify-center items-center px-[5px]">
                         {cartItems}
                       </div>
                     )}
@@ -174,7 +174,7 @@ const Header = ({categories}:any) => {
                   <div className="relative">
                     <BsCart className="text-[20px] text-gray-700" />
                     {cartItems > 0 && (
-                      <div className="h-[14px] min-w-[14px] rounded-full bg-pink-600 absolute -top-1 -right-1 text-white text-[10px] flex justify-center items-center px-[2px]">
+                      <div className="h-[14px] min-w-[14px] rounded-full bg-gray-600 absolute -top-1 -right-1 text-white text-[10px] flex justify-center items-center px-[2px]">
                         {cartItems}
                       </div>
                     )}

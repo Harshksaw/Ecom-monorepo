@@ -953,8 +953,16 @@ export default function CreateProductPage() {
           >
             <option value="gold">Gold</option>
             <option value="silver">Silver</option>
+            <option value="yellowgold">Yellow Gold</option>
             <option value="rosegold">Rose Gold</option>
-            <option value="pinkgold">Pink Gold</option>
+            <option value="whitegold">White Gold</option>
+            <option value="silver">Silver</option>
+            <option value="sterlingsilver">Sterling Silver</option>
+            <option value="platinum">Platinum</option>
+            <option value="bronze">Bronze</option>
+            <option value="copper">Copper</option>
+            <option value="blackgold">Black Gold</option>
+            <option value="titanium">Titanium</option>
           </select>
         </div>
         
@@ -1036,8 +1044,8 @@ export default function CreateProductPage() {
         <div className={`border-2 border-dashed rounded-lg p-4 ${
           variant.metalColor === 'gold' ? 'bg-yellow-50 border-yellow-300' :
           variant.metalColor === 'silver' ? 'bg-gray-50 border-gray-300' :
-          variant.metalColor === 'rosegold' ? 'bg-pink-50 border-pink-300' :
-          'bg-pink-100 border-pink-400'
+          variant.metalColor === 'rosegold' ? 'bg-gray-50 border-pink-300' :
+          'bg-gray-100 border-pink-400'
         }`}>
           <div className="grid grid-cols-3 gap-3">
             {variant.imagePreviews?.map((preview:any, imgIndex:any) => (

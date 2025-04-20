@@ -61,8 +61,8 @@ const VariantImageUploader: React.FC<VariantImageUploaderProps> = ({
     switch(metalColor.toLowerCase()) {
       case 'gold': return 'border-yellow-500 bg-yellow-50';
       case 'silver': return 'border-gray-400 bg-gray-50';
-      case 'rosegold': return 'border-pink-300 bg-pink-50';
-      case 'pinkgold': return 'border-pink-400 bg-pink-50';
+      case 'rosegold': return 'border-pink-300 bg-gray-50';
+      case 'pinkgold': return 'border-pink-400 bg-gray-50';
       default: return 'border-blue-300 bg-blue-50';
     }
   };

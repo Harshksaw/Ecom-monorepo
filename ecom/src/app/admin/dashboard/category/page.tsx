@@ -196,7 +196,7 @@ const CreateCategoryPage = () => {
             type="submit"
             disabled={isLoading}
             className={`px-4 py-2 rounded-lg text-white ${
-              isLoading ? 'bg-gray-400' : 'bg-pink-600 hover:bg-pink-700'
+              isLoading ? 'bg-gray-400' : 'bg-gray-600 hover:bg-gray-700'
             }`}
           >
             {editingId ? 'Update' : 'Create'}

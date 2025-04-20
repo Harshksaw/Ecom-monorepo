@@ -29,7 +29,7 @@ const CategorySection = () => {
     fetchCategories();
   });
   return (
-    <section className="py-12 bg-pink-50">
+    <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-pink-800 mb-8">
           Shop By Category
@@ -73,7 +73,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className="absolute inset-0 bg-pink-100 flex items-center justify-center">
+            <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
               <span className="text-xl font-medium text-pink-800">{category.name}</span>
             </div>
           )}
