@@ -32,7 +32,28 @@ const Header = ({categories}:any) => {
 
   const isAdmin = user?.role === 'Admin'
   
- 
+  // Handle scroll for header visibility
+  useEffect(() => {
+    const controlNavbar = () => {
+      if (window.scrollY > 200) {
+        if (window.scrollY > lastScrollY) {
+          setShow('-translate-y-full')
+        } else {
+          setShow('translate-y-0')
+        }
+        setIsFixed(true)
+      } else {
+        setShow('translate-y-0')
+        setIsFixed(false)
+      }
+      setLastScrollY(window.scrollY)
+    }
+
+    window.addEventListener('scroll', controlNavbar)
+    return () => {
+      window.removeEventListener('scroll', controlNavbar)
+    }
+  }, [lastScrollY])
   
   // Close user menu when clicking outside
   useEffect(() => {
@@ -48,6 +69,20 @@ const Header = ({categories}:any) => {
     }
   }, [])
   
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setMobileMenu(false)
+      }
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+  
   const handleLogout = () => {
     logout()
     setShowUserMenu(false)
@@ -55,7 +90,7 @@ const Header = ({categories}:any) => {
   
   return (
     <>
-      <header ref={headerRef} className={`w-full  transition-transform duration-300 z-50 ${show}`}>
+      <header ref={headerRef} className={`w-full fixed top-0 left-0 transition-transform duration-300 z-50 ${show}`}>
         {/* Top promotional bar */}
         <div className="bg-white py-1 text-center text-sm">
           New Arrivals: Gold & Silver Collections Now Available!
@@ -65,21 +100,18 @@ const Header = ({categories}:any) => {
         <div className="bg-gray-100 shadow-sm">
           <div className="container mx-auto px-4">
             {/* Logo and search bar */}
-            <div className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-between py-0">
               <Link href="/" className="flex items-center">
                <Image 
                   src="/logo.png"
                   alt="Logo"
-                  width={120}
-                  height={40}
-                  className="h-16 w-auto"
+                  width={160}
+                  height={80}
+                  className="h-16 md:h-18 w-auto"
                 />
               </Link>
               
               <div className="hidden md:flex items-center space-x-6">
-                {/* Search bar */}
-            
-                
                 {/* Currency Selector */}
                 <CurrencySelector />
                 
@@ -87,7 +119,7 @@ const Header = ({categories}:any) => {
                 {user ? (
                   <div className="relative z-50" ref={userMenuRef}>
                     <button 
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded-full transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-pink-50 rounded-full transition-colors"
                       onClick={() => setShowUserMenu(!showUserMenu)}
                     >
                       <FaUser className="text-pink-700" />
@@ -106,7 +138,7 @@ const Header = ({categories}:any) => {
                         
                         <Link 
                           href="/profile" 
-                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                          className="px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FaUser className="mr-2 text-pink-700" />
@@ -115,7 +147,7 @@ const Header = ({categories}:any) => {
                         
                         <Link 
                           href="/orders" 
-                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                          className="px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FaShoppingBag className="mr-2 text-pink-700" />
@@ -125,7 +157,7 @@ const Header = ({categories}:any) => {
                         {user.role === 'Admin' && (
                           <Link 
                             href="/admin/dashboard" 
-                            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                            className="px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 flex items-center"
                             onClick={() => setShowUserMenu(false)}
                           >
                             <FaUserCog className="mr-2 text-pink-700" />
@@ -135,7 +167,7 @@ const Header = ({categories}:any) => {
                         
                         <button 
                           onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 flex items-center"
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-pink-50 flex items-center"
                         >
                           <FaSignOutAlt className="mr-2" />
                           Sign out
@@ -145,7 +177,7 @@ const Header = ({categories}:any) => {
                   </div>
                 ) : (
                   <Link href="/auth/login">
-                    <button className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
+                    <button className="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors">
                       Login
                     </button>
                   </Link>
@@ -156,7 +188,7 @@ const Header = ({categories}:any) => {
                   <div className="relative">
                     <BsCart className="text-[24px] text-gray-700" />
                     {cartItems > 0 && (
-                      <div className="h-[18px] min-w-[18px] rounded-full bg-gray-600 absolute -top-2 -right-2 text-white text-[12px] flex justify-center items-center px-[5px]">
+                      <div className="h-[18px] min-w-[18px] rounded-full bg-pink-600 absolute -top-2 -right-2 text-white text-[12px] flex justify-center items-center px-[5px]">
                         {cartItems}
                       </div>
                     )}
@@ -174,7 +206,7 @@ const Header = ({categories}:any) => {
                   <div className="relative">
                     <BsCart className="text-[20px] text-gray-700" />
                     {cartItems > 0 && (
-                      <div className="h-[14px] min-w-[14px] rounded-full bg-gray-600 absolute -top-1 -right-1 text-white text-[10px] flex justify-center items-center px-[2px]">
+                      <div className="h-[14px] min-w-[14px] rounded-full bg-pink-600 absolute -top-1 -right-1 text-white text-[10px] flex justify-center items-center px-[2px]">
                         {cartItems}
                       </div>
                     )}
@@ -201,21 +233,108 @@ const Header = ({categories}:any) => {
       
       {/* Category Tabs - either fixed or not based on scroll position */}
       <div 
-        className={`w-full z-40 transition-all duration-300 h-40 `}
+        className={`w-full z-40 transition-all duration-300 ${isFixed ? 'fixed top-0 left-0' : ''}`}
         style={{ 
-          marginTop: isFixed ? (headerRef.current ? headerRef.current.offsetHeight : 0) + 'px' : '0'
+          marginTop: isFixed ? '0' : (headerRef.current ? headerRef.current.offsetHeight : 0) + 'px' 
         }}
       >
         <CategoryTabs activeCategory={undefined} />
       </div>
       
-      {/* Spacer to prevent content jump when category tabs become fixed */}
-      {isFixed && (
-        <div className="h-20"></div> /* Adjust this height to match your CategoryTabs component height */
-      )}
+      {/* Spacer for fixed header */}
+      <div className="h-24 md:h-32"></div>
       
       {/* Mobile menu */}
-   
+      {mobileMenu && (
+        <div className="fixed top-0 left-0 w-full h-full bg-white z-50 pt-20 px-4 overflow-y-auto">
+          <div className="absolute top-4 right-4">
+            <VscChromeClose 
+              className="text-[24px]"
+              onClick={() => setMobileMenu(false)}
+            />
+          </div>
+          
+          {/* Mobile Navigation Links */}
+          <div className="flex flex-col space-y-4">
+            <Link 
+              href="/" 
+              className="py-3 border-b border-gray-200 font-medium"
+              onClick={() => setMobileMenu(false)}
+            >
+              Home
+            </Link>
+
+            {/* User account section */}
+            {user ? (
+              <>
+                <div className="py-2 border-b border-gray-200">
+                  <p className="font-medium text-gray-800">Account</p>
+                  <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                </div>
+                
+                <Link 
+                  href="/profile" 
+                  className="py-3 border-b border-gray-200 flex items-center"
+                  onClick={() => setMobileMenu(false)}
+                >
+                  <FaUser className="mr-2 text-pink-700" />
+                  Profile
+                </Link>
+                
+                <Link 
+                  href="/orders" 
+                  className="py-3 border-b border-gray-200 flex items-center"
+                  onClick={() => setMobileMenu(false)}
+                >
+                  <FaShoppingBag className="mr-2 text-pink-700" />
+                  My Orders
+                </Link>
+                
+                {user.role === 'Admin' && (
+                  <Link 
+                    href="/admin/dashboard" 
+                    className="py-3 border-b border-gray-200 flex items-center"
+                    onClick={() => setMobileMenu(false)}
+                  >
+                    <FaUserCog className="mr-2 text-pink-700" />
+                    Admin Dashboard
+                  </Link>
+                )}
+                
+                <button 
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenu(false);
+                  }}
+                  className="py-3 border-b border-gray-200 flex items-center text-red-600 w-full text-left"
+                >
+                  <FaSignOutAlt className="mr-2" />
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <Link 
+                href="/auth/login" 
+                className="py-3 border-b border-gray-200"
+                onClick={() => setMobileMenu(false)}
+              >
+                <button className="w-full px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors">
+                  Login
+                </button>
+              </Link>
+            )}
+            
+            <Link 
+              href="/cart" 
+              className="py-3 border-b border-gray-200 flex items-center"
+              onClick={() => setMobileMenu(false)}
+            >
+              <BsCart className="mr-2 text-pink-700" />
+              Cart {cartItems > 0 && `(${cartItems})`}
+            </Link>
+          </div>
+        </div>
+      )}
     </>
   )
 }

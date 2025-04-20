@@ -193,24 +193,36 @@ export const ProductService = {
 };
 
 // Category Service
-export const CategoryService = {
+export class CategoryService {
+  // Add cache storage
+  private static _cache: any[] | null = null;
+
   /**
    * Fetch all categories
    */
-  async getAllCategories() {
+  static async getAllCategories() {
+    // Return cached if present
+    if (this._cache) {
+      return { categories: this._cache };
+    }
+
     try {
       const response = await apiClient.get<ApiResponse<Category[]>>('/categories');
-      return response.data;
+      const data = response.data;
+
+      // Cache result
+      this._cache = data.categories;
+      return { categories: this._cache };
     } catch (error) {
       console.error('Error fetching categories:', error);
       throw error;
     }
-  },
+  }
 
   /**
    * Fetch a category by slug
    */
-  async getCategoryBySlug(slug: string) {
+  static async getCategoryBySlug(slug: string) {
     try {
       const response = await apiClient.get<ApiResponse<Category[]>>(
         `/categories?populate=*&filters[slug][$eq]=${slug}`
@@ -221,12 +233,12 @@ export const CategoryService = {
       console.error(`Error fetching category with slug ${slug}:`, error);
       throw error;
     }
-  },
+  }
 
   /**
    * Fetch products in a specific category
    */
-  async getProductsByCategory(categorySlug: string, page = 1, pageSize = 10) {
+  static async getProductsByCategory(categorySlug: string, page = 1, pageSize = 10) {
     try {
       const response = await apiClient.get<ApiResponse<Product[]>>(
         `/products?populate=*&filters[categories][slug][$eq]=${categorySlug}&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
@@ -237,7 +249,7 @@ export const CategoryService = {
       throw error;
     }
   }
-};
+}
 
 // Utility Helpers
 export const Helpers = {

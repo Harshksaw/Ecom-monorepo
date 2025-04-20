@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CategoryService } from '@/app/lib/api';
@@ -29,6 +29,16 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Memoize sorted list (New Arrivals first)
+  const orderedCategories = useMemo(() => {
+    const priority = ['New Arrivals'];
+    const top = priority
+      .map(name => categories.find((c: any) => c.name === name))
+      .filter(Boolean) as any[];
+    const rest = categories.filter((c: any) => !priority.includes(c.name));
+    return [...top, ...rest];
+  }, [categories]);
+
   useEffect(() => {
     (async () => {
       try {
@@ -51,7 +61,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
         </button>
 
         <div ref={scrollRef} className="flex space-x-6 overflow-x-auto overflow-y-visible py-4 px-12 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-          {categories.map(cat => (
+          {orderedCategories.map(cat => (
             <div
               key={cat._id}
               className="relative flex-shrink-0"
@@ -73,7 +83,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
                   </div>
 
                   {/* On hover: show gold and silver icons */}
-                  {hoveredCategory === cat.slug && cat.slug !== 'Gemstone' && (
+                  {hoveredCategory === cat.slug && cat.slug !== 'Gemstone'  && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center space-x-3 rounded-full">
                       <Link
                         href={`/category/${cat.slug}?material=gold`}
