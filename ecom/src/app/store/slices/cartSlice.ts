@@ -46,11 +46,8 @@ const cartSlice = createSlice({
         const updatedItems = [...state.items];
         const existingItem = updatedItems[existingItemIndex];
         
-        // Make sure we don't exceed stock
-        const newQuantity = Math.min(
-          existingItem.quantity + newItem.quantity,
-          existingItem.stock
-        );
+        // Add quantities without stock check
+        const newQuantity = existingItem.quantity + newItem.quantity;
         
         updatedItems[existingItemIndex] = {
           ...existingItem,
@@ -58,10 +55,8 @@ const cartSlice = createSlice({
         };
         
         state.items = updatedItems;
-      } else {
-        // Add new item to cart
-        state.items.push(newItem);
       }
+      
       
       // Update lastAdded for animation
       state.lastAdded = newItem.variantId;

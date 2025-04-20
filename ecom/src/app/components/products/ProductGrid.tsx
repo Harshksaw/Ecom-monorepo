@@ -121,12 +121,12 @@ console.log("🚀 ~ product:", product)
 
         {/* Action Buttons */}
         <div className="flex justify-between items-center">
-          <button 
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
-            title="Add to Cart"
-          >
-            <FaShoppingCart className="mr-2" /> Add
-          </button>
+        <button 
+  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+  title="Add to Cart"
+>
+  <FaShoppingCart className="mr-2" /> Add
+</button>
           
        
         </div>

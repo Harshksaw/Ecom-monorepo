@@ -152,7 +152,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
       </div>
       
       {/* Stock status message */}
-      {variant?.stock <= 5 && variant.stock > 0 && (
+      {/* {variant?.stock <= 5 && variant.stock > 0 && (
         <div className="text-xs text-yellow-600 mt-2">
           Only {variant.stock} left in stock - order soon
         </div>
@@ -161,7 +161,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
         <div className="text-xs text-red-600 mt-2">
           Out of stock - please check back later
         </div>
-      )}
+      )} */}
     </div>
   );
 }
