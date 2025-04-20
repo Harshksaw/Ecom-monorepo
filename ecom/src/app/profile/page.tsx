@@ -11,6 +11,7 @@ import { AnyMxRecord } from 'node:dns';
 
 // Address interface matching your schema
 interface Address {
+  id:any
   _id?: string;
   type: 'billing' | 'shipping';
   addressLine1: string;
@@ -77,7 +78,7 @@ export default function ProfilePage() {
   // Address management
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [editingAddressIndex, setEditingAddressIndex] = useState<number | null>(null);
-  const [addressForm, setAddressForm] = useState<Address>({
+  const [addressForm, setAddressForm] = useState<any>({
     type: 'shipping',
     addressLine1: '',
     addressLine2: '',
@@ -129,12 +130,12 @@ export default function ProfilePage() {
     const { name, value, type } = e.target;
     
     if (type === 'checkbox') {
-      setAddressForm(prev => ({
+      setAddressForm((prev: typeof addressForm) => ({
         ...prev,
         [name]: (e.target as HTMLInputElement).checked
       }));
     } else {
-      setAddressForm(prev => ({
+      setAddressForm((prev: typeof addressForm) => ({
         ...prev,
         [name]: value
       }));
@@ -418,7 +419,7 @@ export default function ProfilePage() {
                       </button>
                       
                       <button
-                        onClick={() => handleDeleteAddress(address._id)}
+                        onClick={() => handleDeleteAddress(address.id)}
                         className="text-red-600 hover:text-red-800 flex items-center text-sm"
                       >
                         <FaTrash className="mr-1" /> Delete
