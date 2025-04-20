@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {  FaShoppingCart, FaArrowRight } from 'react-icons/fa';
-
+import { FaShoppingCart, FaArrowRight } from 'react-icons/fa';
 
 interface Gem {
   type: string;
@@ -14,25 +13,47 @@ interface Gem {
   _id: string;
 }
 
+interface ProductVariant {
+  metalColor: string;
+  images: string[];
+  price: {
+    default: number;
+    [key: string]: number;
+  };
+  stock: number;
+  _id: string;
+}
+
+interface DeliveryOption {
+  type: string;
+  duration: string;
+  price: number;
+  _id: string;
+}
+
 interface Product {
   _id: string;
   name: string;
   sku: string;
   description: string;
-  price: number;
-  salePrice?: number;
   categoryId: {
     _id: string;
     name: string;
     slug: string;
   };
   images: string[];
-  weight?: number;
+  weight?: {
+    value: number;
+    unit: string;
+  };
   materials?: string[];
   gems?: Gem[];
-  stockQuantity: number;
+  materialType?: string;
+  purity?: string;
+  shape?: string;
+  variants: ProductVariant[];
+  deliveryOptions?: DeliveryOption[];
   isActive: boolean;
-  isFeatured: boolean;
   tags?: string[];
   dimensions?: {
     length: number;
@@ -53,8 +74,8 @@ interface ProductGridProps {
 }
 
 const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
+  console.log("🚀 ~ products:", products)
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
-  console.log("🚀 ~ categoryGroups:", categoryGroups)
   
   useEffect(() => {
     // Group products by category
@@ -98,42 +119,13 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               </Link>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {category.products.slice(0, 4).map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
             </div>
           </div>
         ))}
-        
-        {/* Materials categories as per sketch */}
-        {/* <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-yellow-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-            <h3 className="text-xl font-bold text-yellow-800 mb-3">Gold Collection</h3>
-            <p className="text-gray-700 mb-4">
-              Discover our exquisite range of gold jewelry crafted with precision and elegance.
-            </p>
-            <Link 
-              href="/category/gold"
-              className="inline-block px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors font-medium"
-            >
-              Explore Gold
-            </Link>
-          </div>
-          
-          <div className="bg-gray-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-            <h3 className="text-xl font-bold text-gray-700 mb-3">Silver Collection</h3>
-            <p className="text-gray-700 mb-4">
-              Browse our stunning silver jewelry collection with contemporary designs at affordable prices.
-            </p>
-            <Link 
-              href="/category/silver"
-              className="inline-block px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors font-medium"
-            >
-              Explore Silver
-            </Link>
-          </div>
-        </div> */}
       </div>
     </section>
   );
@@ -142,10 +134,16 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   
+  // Get default variant for pricing and images
+  const defaultVariant = product.variants && product.variants.length > 0 
+    ? product.variants[0] 
+    : null;
+  
   // Determine the material type for card background
-  const materialType = product.materials && product.materials.length > 0
-    ? product.materials[0].toLowerCase()
-    : 'other';
+  const materialType = product.materialType || 
+    (product.materials && product.materials.length > 0
+      ? product.materials[0].toLowerCase()
+      : 'other');
   
   const cardBgColor = 
     materialType.includes('gold') 
@@ -154,9 +152,15 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         ? 'bg-gray-50'
         : 'bg-white';
   
+  // Get prices from variant
+  const defaultPrice = defaultVariant?.price?.default || 0;
+  const salePrice = defaultVariant?.price[""] !== undefined && defaultVariant.price[""] > 0 
+    ? defaultVariant.price[""] 
+    : null;
+    
   // Calculate discount percentage if sale price exists
-  const discountPercentage = product.salePrice && product.price 
-    ? Math.round(((product.price - product.salePrice) / product.price) * 100)
+  const discountPercentage = salePrice && defaultPrice 
+    ? Math.round(((defaultPrice - salePrice) / defaultPrice) * 100)
     : null;
   
   const toggleFavorite = (e: React.MouseEvent) => {
@@ -176,15 +180,25 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           </div>
         )}
         <div className="relative w-full pt-[100%]">
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            className="absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          
-
-    
+          {defaultVariant && defaultVariant.images && defaultVariant.images.length > 0 ? (
+            <Image
+              src={defaultVariant.images[0]}
+              alt={product.name}
+              fill
+              className="absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : product.images && product.images.length > 0 ? (
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              className="absolute top-0 left-0 object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100">
+              <span className="text-gray-400">No image</span>
+            </div>
+          )}
         </div>
       </Link>
 
@@ -196,9 +210,14 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           </h3>
         </Link>
 
-        {/* Materials & Gems */}
+        {/* Materials & Gems Tags */}
         <div className="flex flex-wrap gap-1 mb-3">
-          {product.materials && product.materials.slice(0, 2).map((material, idx) => (
+          {product.purity && (
+            <span className="inline-block bg-yellow-100 rounded-full px-2 py-1 text-xs text-yellow-800">
+              {product.purity}
+            </span>
+          )}
+          {product.materials && product.materials.slice(0, 1).map((material, idx) => (
             <span 
               key={idx} 
               className={`inline-block rounded-full px-2 py-1 text-xs ${
@@ -222,34 +241,34 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         {/* Price */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center">
-            {product.salePrice ? (
+            {salePrice ? (
               <>
                 <span className="text-pink-600 font-bold mr-2">
-                  ₹{product.salePrice?.toFixed(2)}
+                  ₹{salePrice.toFixed(2)}
                 </span>
                 <span className="text-gray-400 line-through text-sm">
-                  ₹{product.price?.toFixed(2)}
+                  ₹{defaultPrice.toFixed(2)}
                 </span>
               </>
             ) : (
               <span className="text-pink-700 font-bold">
-                ₹{product.price?.toFixed(2)}
+                ₹{defaultPrice.toFixed(2)}
               </span>
             )}
           </div>
 
           {/* Stock Status */}
           <div className={
-            product.stockQuantity > 5 
+            defaultVariant && defaultVariant.stock > 5
               ? 'text-xs font-medium text-green-600' 
-              : product.stockQuantity > 0 
+              : defaultVariant && defaultVariant.stock > 0
                 ? 'text-xs font-medium text-yellow-600' 
                 : 'text-xs font-medium text-red-600'
           }>
-            {product.stockQuantity > 5 
+            {defaultVariant && defaultVariant.stock > 5
               ? 'In Stock' 
-              : product.stockQuantity > 0 
-                ? `Only ${product.stockQuantity} left` 
+              : defaultVariant && defaultVariant.stock > 0
+                ? `Only ${defaultVariant.stock} left` 
                 : 'Out of Stock'}
           </div>
         </div>
@@ -257,11 +276,11 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         {/* Add to Cart Button */}
         <button 
           className={
-            product.stockQuantity > 0 
+            defaultVariant && defaultVariant.stock > 0
               ? 'w-full px-4 py-2 rounded-md flex items-center justify-center text-sm bg-pink-600 text-white hover:bg-pink-700 transition-colors' 
               : 'w-full px-4 py-2 rounded-md flex items-center justify-center text-sm bg-gray-300 text-gray-500 cursor-not-allowed'
           }
-          disabled={product.stockQuantity === 0}
+          disabled={!defaultVariant || defaultVariant.stock === 0}
         >
           <FaShoppingCart className="mr-2" />
           {product.stockQuantity > 0 ? 'Add to Cart' : 'Sold Out'}

@@ -83,9 +83,9 @@ exports.createProduct = async (req, res) => {
       if (!parsedPrice.default || parsedPrice.default <= 0) {
         throw new Error("Product price is required");
       }
-      if (isNaN(parsedStock) || parsedStock < 0) {
-        throw new Error("Stock quantity must be a non-negative number");
-      }
+      // if (isNaN(parsedStock) || parsedStock < 0) {
+      //   throw new Error("Stock quantity must be a non-negative number");
+      // }
     
 
         const variantImages = req.files[`variant_${index}_images`] 
