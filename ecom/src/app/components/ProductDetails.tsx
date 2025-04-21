@@ -1,28 +1,28 @@
 // src/components/ProductDetails.tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { 
-  FaRuler, 
-  FaWeight, 
-  FaShippingFast, 
-  FaCheck, 
-  FaGem, 
-  FaDollarSign, 
-  FaRupeeSign, 
-  FaTags, 
-  FaPalette, 
-  FaCut, 
+import { useState } from "react";
+import {
+  FaRuler,
+  FaWeight,
+  FaShippingFast,
+  FaCheck,
+  FaGem,
+  FaDollarSign,
+  FaRupeeSign,
+  FaTags,
+  FaPalette,
+  FaCut,
   FaBox,
   FaEuroSign,
-  FaPoundSign
-} from 'react-icons/fa';
-import ProductDetailsCarousel from './ProductDetailsCarousel';
-import AddToCartButton from './AddToCartButton';
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../store/slices/cartSlice';
-import { useCurrency } from '../../hooks/useCurrency';
-import { CurrencyCode } from '../store/slices/currencySlice';
+  FaPoundSign,
+} from "react-icons/fa";
+import ProductDetailsCarousel from "./ProductDetailsCarousel";
+import AddToCartButton from "./AddToCartButton";
+import { useDispatch } from "react-redux";
+import { addToCart, setDeliveryOptions } from "../store/slices/cartSlice";
+import { useCurrency } from "../../hooks/useCurrency";
+import { CurrencyCode } from "../store/slices/currencySlice";
 
 // Interfaces (can be moved to a shared types file)
 interface ProductVariant {
@@ -79,72 +79,85 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
 
   const dispatch = useDispatch();
-  const { selectedCurrency, changeCurrency, formatPrice, currencySymbol } = useCurrency();
-  const selectedVariant = product?.variants?.[selectedVariantIndex] || product?.variants?.[0];
+  const { selectedCurrency, changeCurrency, formatPrice, currencySymbol } =
+    useCurrency();
+  const selectedVariant =
+    product?.variants?.[selectedVariantIndex] || product?.variants?.[0];
 
   const displayImages = [
     ...(selectedVariant?.images || []),
-    ...(product?.images || [])
+    ...(product?.images || []),
   ].filter((img): img is string => img !== null);
 
   // Helper to get currency icon based on currency code
   const getCurrencyIcon = (currency: CurrencyCode) => {
     switch (currency) {
-      case 'INR': return <FaRupeeSign className="mr-1" />;
-      case 'USD': return <FaDollarSign className="mr-1" />;
-      case 'EUR': return <FaEuroSign className="mr-1" />;
-      case 'GBP': return <FaPoundSign className="mr-1" />;
-      default: return <FaRupeeSign className="mr-1" />;
+      case "INR":
+        return <FaRupeeSign className="mr-1" />;
+      case "USD":
+        return <FaDollarSign className="mr-1" />;
+      case "EUR":
+        return <FaEuroSign className="mr-1" />;
+      case "GBP":
+        return <FaPoundSign className="mr-1" />;
+      default:
+        return <FaRupeeSign className="mr-1" />;
     }
   };
 
   // Get clarity description
   const getClarityDescription = (clarity?: string) => {
-    if (!clarity) return '';
-    
+    if (!clarity) return "";
+
     const clarityMap: Record<string, string> = {
-      'IF': 'Internally Flawless',
-      'VVS1': 'Very Very Slightly Included (1)',
-      'VVS2': 'Very Very Slightly Included (2)',
-      'VS1': 'Very Slightly Included (1)',
-      'VS2': 'Very Slightly Included (2)',
-      'SI1': 'Slightly Included (1)',
-      'SI2': 'Slightly Included (2)',
+      IF: "Internally Flawless",
+      VVS1: "Very Very Slightly Included (1)",
+      VVS2: "Very Very Slightly Included (2)",
+      VS1: "Very Slightly Included (1)",
+      VS2: "Very Slightly Included (2)",
+      SI1: "Slightly Included (1)",
+      SI2: "Slightly Included (2)",
     };
-    
+
     return clarityMap[clarity] || clarity;
   };
 
   const handleBuyNow = () => {
     if (!selectedVariant) return;
-    
+
     // Create cart item and add to cart first
     const cartItem = {
       productId: product._id,
       variantId: selectedVariant._id,
       name: product.name,
       metalColor: selectedVariant.metalColor,
-      image: selectedVariant.images[0] || product.images[0] || '',
+      image: selectedVariant.images[0] || product.images[0] || "",
       price: selectedVariant.price.default,
       quantity: 1,
       sku: product.sku,
-      stock: selectedVariant.stock
+      stock: selectedVariant.stock,
     };
-    
+
     // Dispatch to add to cart first
     dispatch(addToCart(cartItem));
-    
+
+    if (product.deliveryOptions) {
+      dispatch(setDeliveryOptions(product.deliveryOptions));
+      // dispatch(set);
+    }
+
     // This would typically navigate to checkout page
-    alert('Proceeding to checkout with ' + product?.name);
-    
+    alert("Proceeding to checkout with " + product?.name);
+
     // In a real implementation, you would use router to navigate:
     // router.push('/checkout');
   };
-  
+
   return (
     <div className="w-full py-8 px-20 md:py-16 bg-gradient-to-b from-pink-50 to-white">
       <div className="text-sm mb-6 text-gray-500">
-        <span>Home</span> / <span>{product?.categoryId?.name}</span> / <span className="text-pink-600">{product?.name}</span>
+        <span>Home</span> / <span>{product?.categoryId?.name}</span> /{" "}
+        <span className="text-pink-600">{product?.name}</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
@@ -161,7 +174,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 <div
                   key={idx}
                   className="w-16 h-16 relative rounded-lg overflow-hidden border-2 border-white shadow-sm cursor-pointer hover:border-pink-300 transition-all"
-                  style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                  style={{
+                    backgroundImage: `url(${img})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
                 />
               ))}
               {displayImages.length > 5 && (
@@ -179,35 +196,48 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 <FaGem className="mr-2 text-blue-500" />
                 Gemstone Details
               </h3>
-              
+
               <div className="space-y-4">
                 {product.gems.map((gem, index) => (
-                  <div key={`gem-${index}`} className="border border-gray-100 rounded-xl p-4 bg-blue-50/30">
+                  <div
+                    key={`gem-${index}`}
+                    className="border border-gray-100 rounded-xl p-4 bg-blue-50/30"
+                  >
                     <div className="flex flex-row items-center mb-3">
                       <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
                         <FaGem />
                       </div>
                       <h4 className="font-medium">{gem.type}</h4>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div className="flex items-center">
-                        <span className="font-medium text-gray-700">Carat:</span>
+                        <span className="font-medium text-gray-700">
+                          Carat:
+                        </span>
                         <span className="ml-1 text-gray-600">{gem.carat}</span>
                       </div>
-                      
+
                       {gem.color && (
                         <div className="flex items-center">
-                          <span className="font-medium text-gray-700">Color:</span>
-                          <span className="ml-1 text-gray-600">{gem.color}</span>
+                          <span className="font-medium text-gray-700">
+                            Color:
+                          </span>
+                          <span className="ml-1 text-gray-600">
+                            {gem.color}
+                          </span>
                         </div>
                       )}
-                      
+
                       {gem.clarity && (
                         <div className="flex items-center col-span-2">
-                          <span className="font-medium text-gray-700">Clarity:</span>
+                          <span className="font-medium text-gray-700">
+                            Clarity:
+                          </span>
                           <span className="ml-1 text-gray-600">
-                            {gem.clarity} {getClarityDescription(gem.clarity) && `(${getClarityDescription(gem.clarity)})`}
+                            {gem.clarity}{" "}
+                            {getClarityDescription(gem.clarity) &&
+                              `(${getClarityDescription(gem.clarity)})`}
                           </span>
                         </div>
                       )}
@@ -231,13 +261,15 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
 
           {/* Materials and shape */}
           <div className="flex flex-row flex-wrap gap-2 mb-4">
-            <span className={`px-3 py-1 rounded-full text-xs font-medium flex flex-row items-center ${
-              product?.materialType?.toLowerCase().includes('gold')
-                ? 'bg-yellow-100 text-yellow-800'
-                : product?.materialType?.toLowerCase().includes('silver')
-                  ? 'bg-gray-100 text-gray-800'
-                  : 'bg-pink-100 text-pink-800'
-            }`}>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium flex flex-row items-center ${
+                product?.materialType?.toLowerCase().includes("gold")
+                  ? "bg-yellow-100 text-yellow-800"
+                  : product?.materialType?.toLowerCase().includes("silver")
+                  ? "bg-gray-100 text-gray-800"
+                  : "bg-pink-100 text-pink-800"
+              }`}
+            >
               <FaPalette className="mr-1" />
               {product?.materialType} {product?.purity}
             </span>
@@ -260,44 +292,44 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           {/* Currency selector */}
           <div className="mb-4 flex">
             <button
-              onClick={() => changeCurrency('INR')}
+              onClick={() => changeCurrency("INR")}
               className={`flex items-center justify-center px-3 py-1 rounded-l-md text-sm font-medium transition-colors border ${
-                selectedCurrency === 'INR' 
-                  ? 'bg-pink-600 text-white border-pink-600' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                selectedCurrency === "INR"
+                  ? "bg-pink-600 text-white border-pink-600"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
               }`}
             >
               <FaRupeeSign className="mr-1" />
               INR
             </button>
             <button
-              onClick={() => changeCurrency('USD')}
+              onClick={() => changeCurrency("USD")}
               className={`flex items-center justify-center px-3 py-1 border-l-0 border-r-0 text-sm font-medium transition-colors border ${
-                selectedCurrency === 'USD' 
-                  ? 'bg-pink-600 text-white border-pink-600' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                selectedCurrency === "USD"
+                  ? "bg-pink-600 text-white border-pink-600"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
               }`}
             >
               <FaDollarSign className="mr-1" />
               USD
             </button>
             <button
-              onClick={() => changeCurrency('EUR')}
+              onClick={() => changeCurrency("EUR")}
               className={`flex items-center justify-center px-3 py-1 border-l-0 border-r-0 text-sm font-medium transition-colors border ${
-                selectedCurrency === 'EUR' 
-                  ? 'bg-pink-600 text-white border-pink-600' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                selectedCurrency === "EUR"
+                  ? "bg-pink-600 text-white border-pink-600"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
               }`}
             >
               <FaEuroSign className="mr-1" />
               EUR
             </button>
             <button
-              onClick={() => changeCurrency('GBP')}
+              onClick={() => changeCurrency("GBP")}
               className={`flex items-center justify-center px-3 py-1 rounded-r-md text-sm font-medium transition-colors border ${
-                selectedCurrency === 'GBP' 
-                  ? 'bg-pink-600 text-white border-pink-600' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                selectedCurrency === "GBP"
+                  ? "bg-pink-600 text-white border-pink-600"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
               }`}
             >
               <FaPoundSign className="mr-1" />
@@ -342,12 +374,15 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     onClick={() => setSelectedVariantIndex(idx)}
                     className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       idx === selectedVariantIndex
-                        ? 'bg-pink-600 text-white ring-2 ring-pink-300 ring-offset-2'
-                        : 'bg-gray-100 text-gray-800 hover:bg-pink-50'
+                        ? "bg-pink-600 text-white ring-2 ring-pink-300 ring-offset-2"
+                        : "bg-gray-100 text-gray-800 hover:bg-pink-50"
                     }`}
                   >
-                    {variant.metalColor.charAt(0).toUpperCase() + variant.metalColor.slice(1)}
-                    {idx === selectedVariantIndex && <FaCheck className="inline-block ml-1 text-xs" />}
+                    {variant.metalColor.charAt(0).toUpperCase() +
+                      variant.metalColor.slice(1)}
+                    {idx === selectedVariantIndex && (
+                      <FaCheck className="inline-block ml-1 text-xs" />
+                    )}
                   </button>
                 ))}
               </div>
@@ -359,12 +394,12 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
             <div className="flex-grow">
               <AddToCartButton product={product} variant={selectedVariant} />
             </div>
-            <button 
-  className="px-4 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium rounded-xl hover:shadow-md transition-all"
-  onClick={handleBuyNow}
->
-  Buy Now
-</button>
+            <button
+              className="px-4 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium rounded-xl hover:shadow-md transition-all"
+              onClick={handleBuyNow}
+            >
+              Buy Now
+            </button>
           </div>
 
           {/* Product highlights */}
@@ -374,18 +409,24 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               Highlights
             </h3>
             <p className="text-gray-700 mb-4">
-              {product?.description?.split('.')?.[0] ? `${product.description.split('.')[0]}.` : ''}
+              {product?.description?.split(".")?.[0]
+                ? `${product.description.split(".")[0]}.`
+                : ""}
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div className="text-sm">
                 <span className="font-medium text-gray-700">Material:</span>
-                <span className="ml-1 text-gray-600">{product?.materialType} {product?.purity}</span>
+                <span className="ml-1 text-gray-600">
+                  {product?.materialType} {product?.purity}
+                </span>
               </div>
               {product?.weight && (
                 <div className="text-sm flex items-center">
                   <FaWeight className="mr-1 text-gray-500" size={12} />
                   <span className="font-medium text-gray-700">Weight:</span>
-                  <span className="ml-1 text-gray-600">{product.weight.value} {product.weight.unit}</span>
+                  <span className="ml-1 text-gray-600">
+                    {product.weight.value} {product.weight.unit}
+                  </span>
                 </div>
               )}
               <div className="text-sm">
@@ -397,7 +438,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                   <FaRuler className="mr-1 text-gray-500" size={12} />
                   <span className="font-medium text-gray-700">Size:</span>
                   <span className="ml-1 text-gray-600">
-                    {product.dimensions.length}×{product.dimensions.width}×{product.dimensions.height || 0} mm
+                    {product.dimensions.length}×{product.dimensions.width}×
+                    {product.dimensions.height || 0} mm
                   </span>
                 </div>
               )}
@@ -411,20 +453,25 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 <FaShippingFast className="mr-2 text-pink-600" />
                 Delivery Options
               </h3>
-              
+
               <div className="space-y-3">
                 {product.deliveryOptions.map((option, index) => (
-                  <div key={`delivery-${option._id || index}`} className="flex justify-between items-center p-2 border-b border-gray-100 last:border-b-0">
+                  <div
+                    key={`delivery-${option._id || index}`}
+                    className="flex justify-between items-center p-2 border-b border-gray-100 last:border-b-0"
+                  >
                     <div>
                       <div className="font-medium text-gray-800">
-                        {option.type.charAt(0).toUpperCase() + option.type.slice(1)} Delivery
+                        {option.type.charAt(0).toUpperCase() +
+                          option.type.slice(1)}{" "}
+                        Delivery
                       </div>
                       <div className="text-sm text-gray-600">
                         {option.duration}
                       </div>
                     </div>
                     <div className="text-sm font-medium">
-                      {option.price > 0 ? formatPrice(option.price) : 'Free'}
+                      {option.price > 0 ? formatPrice(option.price) : "Free"}
                     </div>
                   </div>
                 ))}
@@ -435,7 +482,9 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           {/* Variant comparison */}
           {product?.variants?.length > 1 && (
             <div className="mb-8">
-              <h3 className="font-semibold mb-3 border-b pb-2">Available Variants</h3>
+              <h3 className="font-semibold mb-3 border-b pb-2">
+                Available Variants
+              </h3>
               <div className="space-y-3">
                 {product.variants.map((variant, idx) => (
                   <div
@@ -443,8 +492,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     onClick={() => setSelectedVariantIndex(idx)}
                     className={`bg-white border cursor-pointer transition-all ${
                       idx === selectedVariantIndex
-                        ? 'border-pink-500 bg-pink-50/50 shadow-md'
-                        : 'border-gray-200 hover:border-pink-300'
+                        ? "border-pink-500 bg-pink-50/50 shadow-md"
+                        : "border-gray-200 hover:border-pink-300"
                     } p-3 rounded-xl`}
                   >
                     <div className="flex justify-between items-center">
@@ -452,11 +501,14 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                         {variant.images[0] && (
                           <div
                             className="w-10 h-10 rounded-lg mr-3 bg-center bg-cover"
-                            style={{ backgroundImage: `url(${variant.images[0]})` }}
+                            style={{
+                              backgroundImage: `url(${variant.images[0]})`,
+                            }}
                           />
                         )}
                         <div className="font-medium text-gray-800">
-                          {variant.metalColor.charAt(0).toUpperCase() + variant.metalColor.slice(1)}
+                          {variant.metalColor.charAt(0).toUpperCase() +
+                            variant.metalColor.slice(1)}
                         </div>
                       </div>
                       {/* <div className={`text-sm font-medium ${
@@ -470,11 +522,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                       </div> */}
                     </div>
                     <div className="flex justify-between text-sm text-gray-600 mt-1">
-                      <div>
-                        {formatPrice(variant.price.default)}
-                      </div>
+                      <div>{formatPrice(variant.price.default)}</div>
                       {idx === selectedVariantIndex && (
-                        <span className="text-pink-600 font-medium">Selected</span>
+                        <span className="text-pink-600 font-medium">
+                          Selected
+                        </span>
                       )}
                     </div>
                   </div>
@@ -487,7 +539,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           <div className="mb-8">
             <h3 className="font-semibold mb-3 border-b pb-2">Description</h3>
             <div className="text-sm text-gray-700 space-y-2">
-              {product?.description?.split('\n').map((para, i) => (
+              {product?.description?.split("\n").map((para, i) => (
                 <p key={i}>{para}</p>
               ))}
             </div>
@@ -502,8 +554,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {product.materials.map((material, index) => (
-                  <span 
-                    key={`material-${index}`} 
+                  <span
+                    key={`material-${index}`}
                     className="inline-block bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700"
                   >
                     {material}

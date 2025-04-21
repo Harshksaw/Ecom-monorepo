@@ -7,7 +7,6 @@ const productSchema = new mongoose.Schema({
   sku: { type: String, required: true, unique: true },
   description: { type: String, required: true },
 
-
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
@@ -19,10 +18,10 @@ const productSchema = new mongoose.Schema({
     unit: {
       type: String,
       enum: ["grams", "carat", "tola", "oz"],
-      default: "grams"
-    }
+      default: "grams",
+    },
   },
-  
+
   dimensions: {
     length: { type: Number },
     width: { type: Number },
@@ -45,48 +44,49 @@ const productSchema = new mongoose.Schema({
   },
   purity: {
     type: String,
-
   },
   shape: {
     type: String,
-    enum: ["round", "oval", "princess", "emerald", "pear", "marquise", "heart", "cushion"],
+    enum: [
+      "round",
+      "oval",
+      "princess",
+      "emerald",
+      "pear",
+      "marquise",
+      "heart",
+      "cushion",
+    ],
   },
   color: {
     type: String,
     enum: ["yellow", "white", "rose", "silver", "multicolor"],
-  }
-,  
-variants: [
-  {
-    metalColor: {
-      type: String,
-      enum: ["gold", "silver", "rosegold", "pinkgold"],
-      required: true,
+  },
+  variants: [
+    {
+      metalColor: {
+        type: String,
+        enum: ["gold", "silver", "rosegold", "pinkgold"],
+        required: true,
+      },
+      images: [{ type: String }],
+      price: {
+        type: Map,
+        of: Number,
+        default: {},
+      },
+      stock: { type: Number, default: 100 },
     },
-    images: [{ type: String }],
-    price: {
-      type: Map,
-      of: Number,
-      default: {}
+  ],
+
+  deliveryOptions: [
+    {
+      type: { type: String }, // e.g., "standard", "express"
+      // enum: ["standard", "international"],
+      duration: { type: String }, // e.g., "5-7 business days"
+      price: { type: Number }, // e.g., extra cost for faster shipping
     },
-    stock: { type: Number, default: 100 },
-  }
-],
-
-
-deliveryOptions: [
-  {
-    type: { type: String }, // e.g., "standard", "express"
-    duration: { type: String }, // e.g., "5-7 business days"
-    price: { type: Number }, // e.g., extra cost for faster shipping
-  }
-],
-
-
-
-  
-  
-
+  ],
 
   isActive: { type: Boolean, default: true },
 
