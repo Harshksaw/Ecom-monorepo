@@ -1,4 +1,3 @@
-// src/app/cart/components/OrderSummary.tsx
 'use client';
 
 import { FaShieldAlt, FaExclamationTriangle } from 'react-icons/fa';
@@ -7,7 +6,6 @@ import { useCurrency } from '../../../hooks/useCurrency';
 
 interface OrderSummaryProps {
   subtotal: number;
-
   shipping: number;
   total: number;
   isProcessing: boolean;
@@ -19,7 +17,6 @@ interface OrderSummaryProps {
 
 const OrderSummary = ({
   subtotal,
-
   shipping,
   total,
   isProcessing,
@@ -30,10 +27,6 @@ const OrderSummary = ({
 }: OrderSummaryProps) => {
   // Use the currency hook for price formatting
   const { formatPrice, selectedCurrency } = useCurrency();
-  
-  // Calculate free shipping threshold based on currency
-  const freeShippingThreshold = 2000; // In INR
-  const remainingForFreeShipping = freeShippingThreshold - subtotal;
 
   return (
     <div className="bg-gray-50 rounded-lg p-6 sticky top-8">
@@ -46,11 +39,9 @@ const OrderSummary = ({
           <span>{formatPrice(subtotal)}</span>
         </div>
         
-   
-        
         <div className="flex justify-between">
           <span className="text-gray-600">Shipping</span>
-          <span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
+          <span>{formatPrice(shipping)}</span>
         </div>
       </div>
       
@@ -59,13 +50,6 @@ const OrderSummary = ({
         <span>Total</span>
         <span>{formatPrice(total)}</span>
       </div>
-      
-      {/* Special Offers */}
-      {/* {shipping > 0 && (
-        <div className="bg-blue-50 text-blue-700 p-3 rounded mb-6 text-sm">
-          Add {formatPrice(remainingForFreeShipping)} more to qualify for free shipping!
-        </div>
-      )} */}
       
       {/* Address required warning */}
       {showAddressRequired && !defaultShippingAddress && (

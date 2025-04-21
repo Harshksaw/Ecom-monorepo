@@ -1,26 +1,25 @@
 // src/app/cart/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Wrapper from '../components/Wrapper';
 import EmptyCart from './EmptyCart';
-
 import Script from "next/script";
 import { useAuth } from '../context/authcontext';
 import { API_URL } from '../lib/api';
 import { useCurrency } from '../../hooks/useCurrency';
 
-// Import our new components
+// Import our components
 import CartItemsList from './components/CartItemsList';
 import ShippingAddressSection from './components/ShippingAddressSection';
 import OrderSummary from './components/OrderSummary';
 import { loadRazorpay } from '../utils/razorpay';
 
 // Types
-import { CartItem, UserProfile, Address } from './types';
+import { UserProfile, Address } from './types';
 import axios from 'axios';
 import { clearCart, selectCartItems } from '../store/slices/cartSlice';
 import toast from 'react-hot-toast';
@@ -32,64 +31,125 @@ const CartPage = () => {
   const { token } = useAuth();
   const { selectedCurrency, formatPrice } = useCurrency();
   
-  // Core INR values (base currency)
-  const [subtotal, setSubtotal] = useState(0);
-
-  const [shipping, setShipping] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [userId, setUserId] = useState('');
-
-  const [isInternationalCustomer, setIsInternationalCustomer] = useState(false);
+  // State management
+  const [orderState, setOrderState] = useState({
+    subtotal: 0,
+    shipping: 0,
+    total: 0
+  });
   
-  // User profile and address states
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [defaultShippingAddress, setDefaultShippingAddress] = useState<Address | null>(null);
+  const [userState, setUserState] = useState({
+    userId: '',
+    userProfile: null as UserProfile | null,
+    defaultShippingAddress: null as Address | null,
+    isInternationalCustomer: false,
+    isAddressLoading: true,
+    showAddressRequired: false
+  });
+  
+  const [processingState, setProcessingState] = useState({
+    isProcessing: false
+  });
+  
+  // Calculate delivery cost based on delivery options and type
+  const calculateDeliveryCost = useCallback((
+    deliveryOptions: { type: string; price: number }[],
+    selectedType: string
+  ): number => {
+    if (!Array.isArray(deliveryOptions) || deliveryOptions.length === 0) {
+      return 0;
+    }
+  
+    const selectedOption = deliveryOptions.find(
+      (option) => option.type.toLowerCase() === selectedType.toLowerCase()
+    );
+  
+    return selectedOption ? selectedOption.price : 0;
+  }, []);
 
-  const [isAddressLoading, setIsAddressLoading] = useState(true);
-  const [showAddressRequired, setShowAddressRequired] = useState(false);
+
+  // Calculate delivery cost whenever relevant state changes
+  useEffect(() => {
+    if (cartItems && cartItems.length > 0) {
+      const deliveryType = userState.isInternationalCustomer ? 'International' : 'Standard';
+      
+      // Calculate shipping cost for each item in the cart
+      const deliveryCost = cartItems.reduce((total, item) => {
+        // Check if item has deliveryOptions and it's an array
+        const deliveryOptions = item.deliveryOptions && 
+                               Array.isArray(item.deliveryOptions) ? 
+                               item.deliveryOptions : [];
+        
+        // Calculate per-item delivery cost and multiply by quantity
+        const itemDeliveryCost = calculateDeliveryCost(deliveryOptions, deliveryType);
+        const quantity = item.quantity || 1;
+        
+        // Add to total
+        return total + (itemDeliveryCost * quantity);
+      }, 0);
+      
+      // Update order state with new shipping cost
+      setOrderState(prev => ({
+        ...prev,
+        shipping: deliveryCost
+      }));
+    } else {
+      // Reset shipping cost if cart is empty
+      setOrderState(prev => ({
+        ...prev,
+        shipping: 0
+      }));
+    }
+  }, [cartItems, userState.isInternationalCustomer, calculateDeliveryCost]);
 
   // Load user profile and addresses
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
-        setIsAddressLoading(true);
+        setUserState(prev => ({ ...prev, isAddressLoading: true }));
+        
         // Get user info from localStorage
         const userInfo = localStorage.getItem('user');
+        // console.log("🚀 ~ loadUserProfile ~ userInfo:", userInfo)
         
         if (userInfo) {
           const parsedUser = JSON.parse(userInfo);
           if (parsedUser && parsedUser.id) {
-            setUserId(parsedUser.id);
+            setUserState(prev => ({ ...prev, userId: parsedUser.id }));
             
             // Use your API to get user profile
             const response = await axios.get(`${API_URL}/auth/profile/${parsedUser.id}`);
             
             if (response.status === 200) {
               const userData = response.data;
+              console.log("🚀 ~ loadUserProfile ~ userData:", userData)
               
               if (userData && userData.user) {
-                setUserProfile(userData.user);
-                
                 // Find default addresses
+                let defaultShipping = null;
+                let isInternational = false;
+                
                 if (userData.user.addresses && userData.user.addresses.length > 0) {
-                  const defaultShipping = userData.user.addresses.find(
-                    (addr: Address) => addr.type === 'shipping' && addr.isDefault
+                  defaultShipping = userData.user.addresses.find(
+                    (addr: Address) =>  addr.isDefault
                   );
                   
                   // If no default shipping found, use the first shipping address
                   const firstShipping = userData.user.addresses.find(
-                    (addr: Address) => addr.type === 'shipping'
+                    (addr: Address) => addr.type != ''
                   );
                   
-                  setDefaultShippingAddress(defaultShipping || firstShipping || null);
-
-                  if(defaultShipping?.country !== 'India' || firstShipping?.country !== 'India') {
-                    setIsInternationalCustomer(true);
-                  }
-
-
+                  defaultShipping = defaultShipping || firstShipping || null;
+                  console.log("🚀 ~ loadUserProfile ~ defaultShipping:", defaultShipping)
+                  isInternational = (defaultShipping?.country !== 'India');
                 }
+                
+                setUserState(prev => ({
+                  ...prev,
+                  userProfile: userData.user,
+                  defaultShippingAddress: defaultShipping,
+                  isInternationalCustomer: isInternational
+                }));
               }
             } else {
               console.error('Failed to fetch user profile');
@@ -99,34 +159,48 @@ const CartPage = () => {
       } catch (error) {
         console.error('Error loading user profile:', error);
       } finally {
-        setIsAddressLoading(false);
+        setUserState(prev => ({ ...prev, isAddressLoading: false }));
       }
     };
     
     loadUserProfile();
   }, [token]);
+               
 
   // Calculate totals whenever cart items change
   useEffect(() => {
-    // Calculate subtotal - always in INR (base currency)
-    const subtotalValue = cartItems.reduce((total: number, item: any) => {
-      return total + (item.price * (item.quantity || 1));
-    }, 0);
-    
-
-    const shippingValue = isInternationalCustomer ? 0 : 0; // Set shipping cost based on your logic
-    const totalValue = subtotalValue  + shippingValue;
-    
-    setSubtotal(subtotalValue);
-
-    setShipping(shippingValue);
-    setTotal(totalValue);
-  }, [cartItems]);
+    if (cartItems && cartItems.length > 0) {
+      // Calculate subtotal - always in INR (base currency)
+      const subtotalValue = cartItems.reduce((total, item) => {
+        const price = item.price || 0;
+        const quantity = item.quantity || 1;
+        return total + (price * quantity);
+      }, 0);
+      
+      // Update order state with new calculations
+      setOrderState(prev => {
+        return {
+          ...prev,
+          subtotal: subtotalValue,
+          total: subtotalValue + prev.shipping
+        };
+      });
+    } else {
+      // Reset all values if cart is empty
+      setOrderState({
+        subtotal: 0,
+        shipping: 0,
+        total: 0
+      });
+    }
+  }, [cartItems, orderState.shipping]);
 
   // Check if all required information is available for checkout
-  const isCheckoutReady = (): boolean => {
+  const isCheckoutReady = useCallback((): boolean => {
     // Check if cart is not empty
     if (cartItems.length === 0) return false;
+    
+    const { userProfile, defaultShippingAddress } = userState;
     
     // Check if user profile exists with required fields
     if (!userProfile || !userProfile.firstName || !userProfile.email) return false;
@@ -143,7 +217,7 @@ const CartPage = () => {
     ) return false;
     
     return true;
-  };
+  }, [cartItems, userState]);
 
   // Handle checkout - this now uses our loadRazorpay utility
   const handleCheckout = async () => {
@@ -153,15 +227,17 @@ const CartPage = () => {
     }
   
     if (!isCheckoutReady()) {
-      setShowAddressRequired(true);
+      setUserState(prev => ({ ...prev, showAddressRequired: true }));
       toast.error('Please add your shipping address to continue');
       return;
     }
   
-    setIsProcessing(true);
+    setProcessingState({ isProcessing: true });
     const toastId = toast.loading('Creating your order...');
   
     try {
+      const { subtotal, shipping, total } = orderState;
+      const { userId, defaultShippingAddress, userProfile } = userState;
 
       const formattedItems = cartItems.map((item: any) => ({
         productId: item.productId,
@@ -182,7 +258,6 @@ const CartPage = () => {
         body: JSON.stringify({
           total, // Always in INR
           receipt: `receipt_${Date.now()}`,
-
           subtotal, // Always in INR
           shippingCost: shipping, // Always in INR
           shippingAddress: defaultShippingAddress,
@@ -239,7 +314,7 @@ const CartPage = () => {
       console.error('Checkout error:', error);
       toast.error(error.message || 'Failed to initiate checkout. Please try again.', { id: toastId });
     } finally {
-      setIsProcessing(false);
+      setProcessingState({ isProcessing: false });
     }
   };
 
@@ -256,8 +331,6 @@ const CartPage = () => {
         signature: razorpay_signature
       });
       
-      const verifyData = verifyResponse.data;
-      
       if (verifyResponse.status === 200) {
         toast.success('Payment successful! Order confirmed.');
         // Clear the cart after successful payment
@@ -266,6 +339,7 @@ const CartPage = () => {
         // Redirect to order confirmation page
         router.push(`/orders`);
       } else {
+        const verifyData = verifyResponse.data;
         toast.error(`Payment verification failed: ${verifyData.message || 'Please contact support.'}`, { id: verifyToastId });
       }
     } catch (error: any) {
@@ -284,6 +358,8 @@ const CartPage = () => {
     return <EmptyCart />;
   }
 
+
+  console.log(userState.defaultShippingAddress)
   return (
     <>
       <Wrapper>
@@ -314,24 +390,23 @@ const CartPage = () => {
             <div className="lg:w-96 flex-shrink-0 space-y-6">
               {/* Shipping Address Section */}
               <ShippingAddressSection 
-                isAddressLoading={isAddressLoading}
-                defaultShippingAddress={defaultShippingAddress}
-                userProfile={userProfile}
-                showAddressRequired={showAddressRequired}
+                isAddressLoading={userState.isAddressLoading}
+                defaultShippingAddress={userState.defaultShippingAddress}
+                userProfile={userState.userProfile}
+                showAddressRequired={userState.showAddressRequired}
                 handleAddAddress={handleAddAddress}
               />
               
               {/* Order Summary */}
               <OrderSummary 
-                subtotal={subtotal}
-
-                shipping={shipping}
-                total={total}
-                isProcessing={isProcessing}
+                subtotal={orderState.subtotal}
+                shipping={orderState.shipping}
+                total={orderState.total}
+                isProcessing={processingState.isProcessing}
                 isCheckoutReady={isCheckoutReady}
                 handleCheckout={handleCheckout}
-                showAddressRequired={showAddressRequired}
-                defaultShippingAddress={defaultShippingAddress}
+                showAddressRequired={userState.showAddressRequired}
+                defaultShippingAddress={userState.defaultShippingAddress}
               />
             </div>
           </div>

@@ -28,26 +28,26 @@ interface CartItemsListProps {
 const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
   // Use the currency hook for price formatting
   const { formatPrice } = useCurrency();
-  
+
   // Handle quantity change
   const updateQuantity = (productId: string, variantId: string, quantity: number) => {
     // Get the item to update
-    const item = cartItems.find(item => 
+    const item = cartItems.find(item =>
       item.productId === productId && item.variantId === variantId
     );
-    
+
     if (!item) return;
-    
+
     // Make sure quantity doesn't exceed stock
     // const newQuantity = Math.min(quantity, item.stock);
-    
+
     // Update cart with new quantity
-    dispatch(updateCartItemQuantity({ 
-      productId, 
-      variantId, 
-      quantity: quantity 
+    dispatch(updateCartItemQuantity({
+      productId,
+      variantId,
+      quantity: quantity
     }));
-    
+
     toast.success('Cart updated');
   };
 
@@ -62,28 +62,28 @@ const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
       {/* Cart Header */}
       <div className="hidden md:grid grid-cols-5 border-b pb-4 mb-4">
         <div className="col-span-2 text-gray-700 font-medium">Product</div>
-        <div className="text-center text-gray-700 font-medium">Price</div>
-        <div className="text-center text-gray-700 font-medium">Quantity</div>
+        {/* <div className="text-center text-gray-700 font-medium">Price</div> */}
+        {/* <div className="text-center text-gray-700 font-medium">Quantity</div> */}
         <div className="text-center text-gray-700 font-medium">Total</div>
       </div>
-      
+
       {/* Cart Items */}
       <div className="space-y-6">
         {cartItems.map((item) => {
           return (
-            <div 
-              key={`${item.productId}-${item.variantId}`} 
-              className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center border-b pb-6"
+            <div
+              key={`${item.productId}-${item.variantId}`}
+              className="grid grid-cols-1 md:grid-cols-5 gap-4  items-center  border-b pb-6"
             >
               {/* Product Image & Name (Col 1-2) */}
               <div className="col-span-1 md:col-span-2 flex items-center space-x-4">
                 {/* Image */}
                 <div className="w-20 h-20 relative rounded overflow-hidden flex-shrink-0 bg-gray-100">
                   {item.image ? (
-                    <Image 
-                      src={item.image} 
-                      alt={item.name} 
-                      fill 
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
                       className="object-cover"
                     />
                   ) : (
@@ -92,7 +92,7 @@ const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Name & Remove Button */}
                 <div className="flex-grow">
                   <h3 className="text-md font-medium">{item.name}</h3>
@@ -101,7 +101,7 @@ const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
                       {item.metalColor.charAt(0).toUpperCase() + item.metalColor.slice(1)}
                     </p>
                   )}
-                  <button 
+                  <button
                     onClick={() => handleRemoveItem(item.productId, item.variantId)}
                     className="text-sm text-red-500 mt-1 flex items-center gap-1 hover:text-red-700"
                   >
@@ -109,39 +109,19 @@ const CartItemsList = ({ cartItems, dispatch }: CartItemsListProps) => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Unit Price (Col 3) */}
-              <div className="md:text-center flex justify-between md:block">
+              {/* <div className="md:text-center flex justify-between md:block">
                 <span className="md:hidden text-gray-600">Price:</span>
                 <div>
                   <span className="font-medium">
                     {formatPrice(item.price)}
                   </span>
                 </div>
-              </div>
-              
-              {/* Quantity (Col 4) */}
-              <div className="md:text-center flex justify-between md:block">
-                <span className="md:hidden text-gray-600">Quantity:</span>
-                <div className="inline-block">
-                <select 
-  value={item.quantity}
-  onChange={(e) => updateQuantity(
-    item.productId, 
-    item.variantId, 
-    parseInt(e.target.value)
-  )}
-  className="border rounded p-1 w-16 text-center"
->
-  {Array.from({ length: 10 }, (_, i) => (
-    <option key={i} value={i + 1}>
-      {i + 1}
-    </option>
-  ))}
-</select>
-                </div>
-              </div>
-              
+              </div> */}
+
+         
+
               {/* Subtotal (Col 5) */}
               <div className="md:text-center flex justify-between md:block">
                 <span className="md:hidden text-gray-600">Total:</span>
