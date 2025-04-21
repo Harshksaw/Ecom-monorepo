@@ -135,12 +135,10 @@ const CartPage = () => {
                   );
                   
                   // If no default shipping found, use the first shipping address
-                  const firstShipping = userData.user.addresses.find(
-                    (addr: Address) => addr.type != ''
-                  );
+                  const firstShipping = userData.user.addresses[0]
                   
                   defaultShipping = defaultShipping || firstShipping || null;
-                  console.log("🚀 ~ loadUserProfile ~ defaultShipping:", defaultShipping)
+                  // console.log("🚀 ~ loadUserProfile ~ defaultShipping:", defaultShipping)
                   isInternational = (defaultShipping?.country !== 'India');
                 }
                 
