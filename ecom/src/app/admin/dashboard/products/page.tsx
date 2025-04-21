@@ -97,10 +97,27 @@ export default function CreateProductPage() {
   
   // Delivery options
   const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOption[]>([{
-    type: "standard",
+    type: "Standard",
     duration: "5-7 business days",
-    price: "0"
+    price: "200"
+  },
+  {
+    type: "International",
+    duration: "7 -11 business days",
+    price: "1500"
   }]);
+
+  const handleChange = (
+    idx: number,
+    field: keyof DeliveryOption,
+    value: string | number
+  ) => {
+    const opts = [...deliveryOptions];
+    // @ts-ignore
+    opts[idx][field] = value;
+    setDeliveryOptions(opts);
+  };
+
   
   // Tags
   const [tags, setTags] = useState<string[]>([""]);
@@ -139,29 +156,6 @@ export default function CreateProductPage() {
     }
   }, [name]);
 
-  // Main image upload handler
-  // const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const files = e.target.files;
-  //   if (files) {
-  //     const newFiles = Array.from(files);
-  //     const validFiles = validateFiles(newFiles);
-
-  //     if (images.length + validFiles.length > 5) {
-  //       toast.error("Maximum 5 images allowed");
-  //       return;
-  //     }
-
-  //     const newImageFiles = [...images, ...validFiles];
-  //     const newImagePreviews = [...imagePreviews];
-      
-  //     validFiles.forEach(file => {
-  //       newImagePreviews.push(URL.createObjectURL(file));
-  //     });
-
-  //     setImages(newImageFiles);
-  //     setImagePreviews(newImagePreviews);
-  //   }
-  // };
 
   const handleVariantImageUpload = (e: React.ChangeEvent<HTMLInputElement>, variantIndex: number) => {
     const files = e.target.files;
@@ -967,7 +961,7 @@ export default function CreateProductPage() {
         </div>
         
         {/* Stock */}
-        <div>
+        {/* <div>
           <label className="block text-gray-700 text-sm font-bold mb-1">
             Stock Quantity*
           </label>
@@ -980,7 +974,7 @@ export default function CreateProductPage() {
 
             required
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Pricing */}
@@ -1138,43 +1132,51 @@ export default function CreateProductPage() {
             <FaPlus className="mr-2" /> Add Tag
           </button>
         </div>
+      <div className="flex flex-col gap-10 mt-6">
 
-        {/* Image Upload */}
-        <div className="mt-6">
-          <label className="block text-gray-700 font-bold mb-2">
-            Product Images
-          </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-              {/* Image Previews */}
-              {imagePreviews.map((preview, index) => (
-                <div key={index} className="relative">
-                  <Image
-                    src={preview}
-                    alt={`Product preview ${index + 1}`}
-                    width={150}
-                    height={150}
-                    className="rounded-lg object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
-                  >
-                    <FaTimes />
-                  </button>
-                </div>
-              ))}
+      
+
+        {deliveryOptions.map((opt, idx) => (
+        <div
+          key={idx}
+          className="flex flex-col md:flex-row md:items-center gap-4 border p-4 rounded-lg  "
+        >
+          {/* Type */}
+          <input
+            type="text"
+            placeholder="e.g. standard • express"
+            value={opt.type}
+            onChange={(e) => handleChange(idx, 'type', e.target.value)}
+            className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {/* Duration */}
+          <input
+            type="text"
+            placeholder="e.g. 5-7 business days"
+            value={opt.duration}
+            onChange={(e) => handleChange(idx, 'duration', e.target.value)}
+            className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {/* Price */}
+          <input
+            type="number"
+            placeholder="Price"
+            value={opt.price}
+            onChange={(e) =>
+              handleChange(idx, 'price', parseFloat(e.target.value) || 0)
+            }
+            className="w-24 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+       
+        </div>
+      ))}
+</div>
+
 
           
-
-              
-            </div>
-            <p className="text-sm text-gray-500 mt-2 text-center">
-              Upload up to 5 images (JPEG, PNG, GIF)
-            </p>
-          </div>
-        </div>
 
         {/* Submit Button */}
         <div className="mt-8">

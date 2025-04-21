@@ -12,6 +12,7 @@ export interface CartItem {
   quantity: number;
   sku: string;
   stock: number;
+  deliveryOptions?: any[]
 }
 
 // Cart state interface

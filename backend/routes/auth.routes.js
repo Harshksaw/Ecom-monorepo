@@ -107,15 +107,17 @@ router.get('/profile/:id', async (req, res) => {
       
       const user = await User.findById(req.params.id);
       if (!user) {
+   
         return res.status(404).json({ message: 'User not found' });
       }
       
       // Find address by ID
-      const addressIndex = user.addresses.findIndex(addr => addr._id.toString() === req.body.addressId);
+      const addressIndex = user.addresses.findIndex(addr => addr._id.toString() === req.query.addressId);
       if (addressIndex === -1) {
         return res.status(404).json({ message: 'Address not found' });
       }
-      
+
+      console.log("🚀 ~ router.put ~ addressIndex:", addressIndex)
       // If updating to default, remove default from other addresses of same type
       if (isDefault) {
         user.addresses.forEach(addr => {

@@ -84,6 +84,7 @@ exports.login = async (req, res) => {
         lastName: user.lastName,
         phoneNumber: user.phoneNumber,
         role: user.role
+
       }
     });
   } catch (error) {

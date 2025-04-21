@@ -76,11 +76,13 @@ interface Product {
 type ProductDetailsProps = { product: Product };
 
 export default function ProductDetails({ product }: ProductDetailsProps) {
+  console.log("🚀 ~ ProductDetails ~ productcart:", product)
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
 
   const dispatch = useDispatch();
   const { selectedCurrency, changeCurrency, formatPrice, currencySymbol } = useCurrency();
   const selectedVariant = product?.variants?.[selectedVariantIndex] || product?.variants?.[0];
+  console.log("🚀 ~ ProductDetails ~ selectedVariant:", selectedVariant)
 
   const displayImages = [
     ...(selectedVariant?.images || []),

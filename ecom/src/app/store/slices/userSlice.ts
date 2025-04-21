@@ -2,15 +2,29 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface UserState {
     id: string;
-    firstName: string;
+    name: string;
     email: string;
+    address: {
+        street?: string;
+        city?: string;
+        state?: string;
+        zip?: string;
+        country?: string;
+    };
+    phone: string;
+    isLoggedIn: boolean;
 }
 
 const initialState: UserState = {
 
     id: '',
-    firstName: '',
-    email: ''
+    name: '',
+    email: '',
+    address:{},
+    phone: '',
+    isLoggedIn: false,
+
+
 };
 
 const userSlice = createSlice({
@@ -19,13 +33,21 @@ const userSlice = createSlice({
     reducers: {
         setUser(state, action: PayloadAction<UserState>) {
             state.id = action.payload.id;
-            state.firstName = action.payload.firstName;
+            state.name = action.payload.name;
             state.email = action.payload.email;
+            state.address = action.payload.address;
+            state.phone = action.payload.phone;
+            state.isLoggedIn = action.payload.isLoggedIn;
+            
         },
         clearUser(state) {
             state.id = '';
-            state.firstName = '';
+            state.name = '';
             state.email = '';
+            state.address = {};
+            state.phone = '';
+            state.isLoggedIn = false;
+
         }
     }
 });
