@@ -1,4 +1,4 @@
-// ===================== controllers/product.controller.js =====================
+
 const Product = require("../model/Products");
 const Category = require("../model/Category");
 const { deleteImage, getPublicIdFromUrl } = require("../utils/cloudinary");
@@ -17,9 +17,7 @@ exports.createProduct = async (req, res) => {
       // If using array configuration
       mainImages = req.files.map(file => file.path);
     }
-    console.log("🚀 ~ file: product.controller.js ~ exports.createProduct= ~ req.files", req.body);
-    console.log("🚀 ~ exports.createProduct= ~ images:", mainImages);
-    
+
     const {
       name,
       sku,

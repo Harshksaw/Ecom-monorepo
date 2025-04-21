@@ -7,7 +7,6 @@ import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaPlus, FaEdit, FaTrash } 
 import axios from 'axios';
 import { API_URL } from '../lib/api';
 import Wrapper from '../components/Wrapper';
-import { AnyMxRecord } from 'node:dns';
 
 // Address interface matching your schema
 interface Address {
@@ -40,17 +39,7 @@ const COUNTRIES = [
 ];
 
 
-// Indian states list
-const INDIAN_STATES = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
-  'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
-  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
-  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
-];
+
 
 // Utility function for safe localStorage access
 const getFromLocalStorage = (key: string) => {
@@ -85,7 +74,7 @@ export default function ProfilePage() {
     city: '',
     state: '',
     postalCode: '',
-    country: 'India',
+    country: '',
     isDefault: false
   });
 
@@ -113,6 +102,7 @@ export default function ProfilePage() {
         } else {
           toast.error(response.data.message || 'Failed to load profile');
         }
+          console.log("🚀 ~ fetchProfile ~ response.data.user:", response.data.user)
       } catch (error: any) {
         console.error('Error fetching profile:', error);
         toast.error(error.response?.data?.message || 'An error occurred');
@@ -151,7 +141,7 @@ export default function ProfilePage() {
       city: '',
       state: '',
       postalCode: '',
-      country: 'India',
+      country: '',
       isDefault: false
     });
     setEditingAddressIndex(null);
@@ -159,10 +149,12 @@ export default function ProfilePage() {
   };
   
   // Open modal to edit existing address
-  const handleEditAddress = (address: Address, index: number) => {
+  const handleEditAddress = (address: Address, index: any) => {
+    console.log("🚀 ~ handleEditAddress ~ index:", index)
+    console.log("🚀 ~ handleEditAddress ~ address:", address)
     setAddressForm({
       ...address,
-      country: 'India' // Ensure country is always India in this context
+
     });
     setEditingAddressIndex(index);
     setShowAddressModal(true);
@@ -184,13 +176,13 @@ export default function ProfilePage() {
       const payload = {
         address: {
           ...addressForm,
-          country: 'India' // Ensure country is always India
+
         },
         index: editingAddressIndex
       };
       
       const endpoint = editingAddressIndex !== null 
-        ? `${API_URL}/auth/address/${editingAddressIndex}` 
+        ? `${API_URL}/auth/address/${userId.id}?addressId=${editingAddressIndex}` 
         : `${API_URL}/auth/address/${userId.id}`;
       
       const method = editingAddressIndex !== null ? 'put' : 'post';
@@ -206,7 +198,7 @@ export default function ProfilePage() {
         setShowAddressModal(false);
         toast.success(editingAddressIndex !== null ? 'Address updated' : 'Address added');
         setShowAddressModal(false);
-        window.location.reload();
+        // window.location.reload();
       } else {
         toast.error(response.data.message || 'Failed to save address');
       }
@@ -219,7 +211,8 @@ export default function ProfilePage() {
   };
   
   // Delete address
-  const handleDeleteAddress = async (index: AnyMxRecord) => {
+  const handleDeleteAddress = async (index: any) => {
+    console.log("🚀 ~ handleDeleteAddress ~ index:", index)
     if (!token || !userId?.id) {
       toast.error('You need to be logged in to delete addresses');
       return;
@@ -240,6 +233,7 @@ export default function ProfilePage() {
       } else {
         toast.error(response.data.message || 'Failed to delete address');
       }
+
 
       window.location.reload();
     } catch (error: any) {
@@ -279,13 +273,6 @@ export default function ProfilePage() {
     }
   };
   
-  // Format postal code to ensure it matches Indian PIN code format (6 digits)
-  const formatPinCode = (value: string) => {
-    // Remove non-digit characters
-    const digits = value.replace(/\D/g, '');
-    // Limit to 6 digits (Indian PIN code)
-    return digits.slice(0, 6);
-  };
 
   // Show loading state
   if (isLoading && !profile) {
@@ -412,14 +399,14 @@ export default function ProfilePage() {
                     {/* Address Actions */}
                     <div className="flex space-x-3">
                       <button
-                        onClick={() => handleEditAddress(address, index)}
+                        onClick={() => handleEditAddress(address, address._id)}
                         className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
                       >
                         <FaEdit className="mr-1" /> Edit
                       </button>
                       
                       <button
-                        onClick={() => handleDeleteAddress(address.id)}
+                        onClick={() => handleDeleteAddress(address._id)}
                         className="text-red-600 hover:text-red-800 flex items-center text-sm"
                       >
                         <FaTrash className="mr-1" /> Delete

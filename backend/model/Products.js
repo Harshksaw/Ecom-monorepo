@@ -49,18 +49,18 @@ const productSchema = new mongoose.Schema({
   },
   shape: {
     type: String,
-    enum: ["round", "oval", "princess", "emerald", "pear", "marquise", "heart", "cushion"],
+
   },
   color: {
     type: String,
-    enum: ["yellow", "white", "rose", "silver", "multicolor"],
+
   }
 ,  
 variants: [
   {
     metalColor: {
       type: String,
-      enum: ["gold", "silver", "rosegold", "pinkgold"],
+
       required: true,
     },
     images: [{ type: String }],

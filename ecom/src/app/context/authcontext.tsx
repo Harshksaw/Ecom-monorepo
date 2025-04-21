@@ -10,8 +10,14 @@ interface User {
   id: string;
   email: string;
   firstName: string;
+  name:string;
+  phone:any
   lastName: string;
   role: string;
+  phoneNumber?: string;
+  address:any;
+  createdAt: string;
+
 }
 
 interface AuthContextType {

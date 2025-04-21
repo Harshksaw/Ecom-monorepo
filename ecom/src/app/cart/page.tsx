@@ -39,10 +39,13 @@ const CartPage = () => {
   const [total, setTotal] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [userId, setUserId] = useState('');
+
+  const [isInternationalCustomer, setIsInternationalCustomer] = useState(false);
   
   // User profile and address states
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [defaultShippingAddress, setDefaultShippingAddress] = useState<Address | null>(null);
+
   const [isAddressLoading, setIsAddressLoading] = useState(true);
   const [showAddressRequired, setShowAddressRequired] = useState(false);
 
@@ -80,6 +83,12 @@ const CartPage = () => {
                   );
                   
                   setDefaultShippingAddress(defaultShipping || firstShipping || null);
+
+                  if(defaultShipping?.country !== 'India' || firstShipping?.country !== 'India') {
+                    setIsInternationalCustomer(true);
+                  }
+
+
                 }
               }
             } else {
@@ -105,7 +114,7 @@ const CartPage = () => {
     }, 0);
     
 
-    const shippingValue = subtotalValue > 2000 ? 0 : 150; // Free shipping over ₹2000
+    const shippingValue = isInternationalCustomer ? 0 : 0; // Set shipping cost based on your logic
     const totalValue = subtotalValue  + shippingValue;
     
     setSubtotal(subtotalValue);
