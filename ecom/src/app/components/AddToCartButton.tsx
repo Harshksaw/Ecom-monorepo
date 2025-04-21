@@ -48,7 +48,7 @@ interface Product {
 
 interface AddToCartButtonProps {
   product: Product;
-  variant: ProductVariant;
+  variant: any
 }
 
 export default function AddToCartButton({ product, variant }: AddToCartButtonProps) {
