@@ -17,11 +17,11 @@ import CurrencySelector from '../CurrencySelector'
 
 const Header = ({categories}:any) => {
   const [mobileMenu, setMobileMenu] = useState(false)
-  const [showCatMenu, setShowCatMenu] = useState(false)
+
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [show, setShow] = useState('translate-y-0')
   const [lastScrollY, setLastScrollY] = useState(0)
-  const [showSearchBar, setShowSearchBar] = useState(false)
+
   const [isFixed, setIsFixed] = useState(false)
   
   const cartItems = useSelector(selectCartItemsCount);
@@ -90,7 +90,7 @@ const Header = ({categories}:any) => {
   
   return (
     <>
-      <header ref={headerRef} className={`w-full fixed top-0 left-0 transition-transform duration-300 z-50 ${show}`}>
+      <header ref={headerRef} className={`w-full fixed top-0 left-0 transition-transform duration-300 z-50  ${show}`}>
         {/* Top promotional bar */}
         <div className="bg-white py-1 text-center text-sm">
           New Arrivals: Gold & Silver Collections Now Available!
@@ -242,8 +242,8 @@ const Header = ({categories}:any) => {
       </div>
       
       {/* Spacer for fixed header */}
-      <div className="h-24 md:h-32"></div>
-      
+      {/* <div className="h-24 md:h-32"></div>
+       */}
       {/* Mobile menu */}
       {mobileMenu && (
         <div className="fixed top-0 left-0 w-full h-full bg-white z-50 pt-20 px-4 overflow-y-auto">

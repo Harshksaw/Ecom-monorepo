@@ -58,7 +58,7 @@ export const HeroBanner = () => {
   }
 
   return (
-    <div className="relative w-full max-w-[1360px] mx-auto z-10">
+    <div className="relative w-full max-w-[1360px] mx-auto z-10 ">
       <Carousel
         autoPlay={true}
         infiniteLoop={true}
@@ -69,7 +69,7 @@ export const HeroBanner = () => {
       >
         {images.map((image) => (
           <div key={image._id} className="carousel-slide">
-            <div className="relative h-[300px] md:h-[400px] overflow-hidden">
+            <div className="relative h-[300px] md:h-[500px] overflow-hidden">
             <Image
                 src={image.url}
                 alt={image.legend || "Banner image"}
@@ -79,9 +79,7 @@ export const HeroBanner = () => {
               />
               {image.legend && (
                 <div
-                  className="px-[15px] md:px-[40px] py-[10px] md:py-[25px] font-oswald 
-                  bg-white/80 absolute bottom-[25px] md:bottom-[50px] left-0 text-black/[0.9] text-[15px]
-                  md:text-[24px] uppercase font-medium cursor-pointer hover:opacity-90"
+                  className=""
                 >
                   {image.legend}
                 </div>
