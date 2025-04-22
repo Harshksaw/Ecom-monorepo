@@ -69,7 +69,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
               onMouseEnter={() => setHoveredCategory(cat.slug)}
               onMouseLeave={() => setHoveredCategory(null)}
             >
-              <Link href={`/category/${cat.slug}`} className={`block h-28 w-28 rounded-full overflow-hidden transform transition hover:scale-105 ${activeCategory === cat.slug ? 'ring-2 ring-pink-500' : ''}`}>                
+              <Link href={`/category/${cat.slug}`} className={`block h-24 w-24 rounded-full overflow-hidden transform transition hover:scale-105 ${activeCategory === cat.slug ? 'ring-2 ring-pink-500' : ''}`}>                
                 <div className="relative aspect-square">
                   {cat.imageUrl ? (
                     <Image src={cat.imageUrl} alt={cat.name} fill className="object-cover" sizes="112px" />
@@ -80,7 +80,17 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 rounded-full" />
                   <div className="absolute bottom-0 w-full p-2 text-center">
-                    <h3 className="text-white text-sm font-medium truncate">{cat.name}</h3>
+                    <h3 className="text-white text-sm font-medium truncate">
+                      {cat.name.length > 8 ? (
+                      <>
+                        {cat.name.slice(0, 3)}
+                        <br />
+                        {cat.name.slice(3)}
+                      </>
+                      ) : (
+                      cat.name
+                      )}
+                    </h3>
                   </div>
 
                   {/* On hover: show gold and silver icons */}

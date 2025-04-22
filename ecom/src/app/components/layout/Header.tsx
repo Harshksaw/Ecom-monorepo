@@ -66,7 +66,7 @@ const Header = ({ categories }: any) => {
   return (
     <>
       <header ref={headerRef} className={`w-full fixed top-0 left-0 bg-gray-200  border-b-2 border-black  transition-transform duration-300 z-50 ${show}`}>
-        <div className="container mx-auto px-4 relative flex items-center h-16">
+        <div className="container mx-auto px-4 relative flex items-center h-20">
 
 
           <button
@@ -80,7 +80,7 @@ const Header = ({ categories }: any) => {
           {/* Center: Logo */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <Link href="/" className="flex items-center">
-              <Image src="/logo.png" alt="Logo" width={160} height={80} className="h-20 mt-2 w-auto" />
+              <Image src="/logo.png" alt="Logo" width={160} height={80} className="h-24 mt-2 w-auto" />
             </Link>
           </div>
 
