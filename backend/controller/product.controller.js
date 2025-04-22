@@ -35,7 +35,8 @@ exports.createProduct = async (req, res) => {
       shape,
       color,
       variants,
-      deliveryOptions
+      deliveryOptions,
+      reviews
     } = req.body;
 
     // Validate input
@@ -98,7 +99,8 @@ exports.createProduct = async (req, res) => {
 
       
     });
-    
+    const parsedReviews =
+    typeof reviews === "string" ? JSON.parse(reviews) : reviews;
 
     const newProduct = new Product({
       name,
@@ -119,6 +121,7 @@ exports.createProduct = async (req, res) => {
       isActive,
       isFeatured,
       tags: parsedTags,
+      reviews:parsedReviews
     });
 
     await newProduct.save();

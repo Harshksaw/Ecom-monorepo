@@ -81,7 +81,37 @@ deliveryOptions: [
     price: { type: Number }, // e.g., extra cost for faster shipping
   }
 ],
+reviews: [
+  {
 
+    userName: { type: String, required: true },
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    comment: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
+    verified: {
+      type: Boolean,
+      default: false
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }
+],
 
 
   

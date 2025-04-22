@@ -23,6 +23,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '../store/slices/cartSlice';
 import { useCurrency } from '../../hooks/useCurrency';
 import { CurrencyCode } from '../store/slices/currencySlice';
+import CustomerReviews from './ProductReviews';
 
 // Interfaces (can be moved to a shared types file)
 interface ProductVariant {
@@ -71,6 +72,7 @@ interface Product {
   dimensions?: Dimensions;
   deliveryOptions?: DeliveryOption[];
   tags?: string[];
+  reviews:any[];
 }
 
 type ProductDetailsProps = { product: Product };
@@ -514,6 +516,9 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           )}
         </div>
       </div>
+
+
+      <CustomerReviews reviews={product?.reviews}/>
     </div>
   );
 }

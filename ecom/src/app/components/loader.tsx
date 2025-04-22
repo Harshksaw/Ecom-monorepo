@@ -5,7 +5,7 @@ export default function Loader() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-75">
       <div className="relative">
         {/* Diamond/Gem Shape */}
-        <div className="w-16 h-16 bg-pink-100 rotate-45 rounded-lg shadow-lg relative overflow-hidden">
+        <div className="w-16 h-16 bg-blue-100 rotate-45 rounded-lg shadow-lg relative overflow-hidden">
           {/* Sparkling effect */}
           <div className="absolute w-4 h-4 bg-white rounded-full top-2 left-2 opacity-80 animate-pulse" />
           <div className="absolute w-2 h-2 bg-white rounded-full bottom-4 right-4 opacity-60 animate-ping" />
@@ -19,7 +19,7 @@ export default function Loader() {
         </div>
         
         {/* Optional outer glow */}
-        <div className="absolute inset-0 -m-1 bg-pink-300 rotate-45 rounded-lg opacity-30 animate-ping" style={{ animationDuration: "3s" }} />
+        <div className="absolute inset-0 -m-1 bg-blue-300 rotate-45 rounded-lg opacity-30 animate-ping" style={{ animationDuration: "3s" }} />
       </div>
       
       {/* Add CSS for custom animation */}
