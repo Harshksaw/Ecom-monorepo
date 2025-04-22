@@ -23,7 +23,7 @@ const ShippingPolicy = () => {
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-2">Delivery Time:</h2>
           <p>
-            Once dispatched, delivery usually takes <strong>10–15 working days</strong>, depending on your location and courier service availability.
+            Once dispatched, delivery usually takes <strong>7 -10 working days</strong>, depending on your location and courier service availability.
           </p>
         </section>
 

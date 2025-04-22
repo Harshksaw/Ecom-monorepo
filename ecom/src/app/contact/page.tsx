@@ -18,9 +18,14 @@ import { API_URL } from '../lib/api';
 // Centralized variables for easy maintenance
 const CONTACT_INFO = {
   title: 'Get in Touch',
-  subtitle: 'We\'d love to hear from you',
+  subtitle: "We'd love to hear from you",
   description: 'Have questions about our products, services, or any other inquiries? Fill out the form below and our team will get back to you as soon as possible.',
-  phone: '+91 98765 43210',
+  phones: [
+    '+91 98765 43210',
+    '+91 9782441137',
+    '+91 7615952290',
+    '+91 9461137445',
+  ],
   email: 'support@yourjewelrystore.com',
   address: {
     line1: '123 Jewelry Avenue',
@@ -28,17 +33,17 @@ const CONTACT_INFO = {
     city: 'Mumbai',
     state: 'Maharashtra',
     postalCode: '400001',
-    country: 'India'
+    country: 'India',
   },
   hours: {
     weekdays: 'Monday - Friday: 10:00 AM - 8:00 PM',
-    weekends: 'Saturday - Sunday: 11:00 AM - 6:00 PM'
+    weekends: 'Saturday - Sunday: 11:00 AM - 6:00 PM',
   },
   socialMedia: {
     whatsapp: 'https://wa.me/919876543210',
-    instagram: 'https://instagram.com/yourjewelrystore',
-    facebook: 'https://facebook.com/yourjewelrystore',
-    twitter: 'https://twitter.com/yourjewelrystore'
+    instagram: 'https://www.instagram.com/shrinanugems?igsh=MW8wZ3JtMnc2c2F6Yw==',
+    facebook: 'https://www.facebook.com/share/1BYZVxzmBg',
+    twitter: 'https://x.com/shrinanu',
   },
   mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3771.949139008728!2d72.82766641489448!3d19.01699988712555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7ce40ffad7c8b%3A0x51d3a45f69913f5c!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1627894265658!5m2!1sen!2sin',
   formPlaceholders: {
@@ -47,8 +52,8 @@ const CONTACT_INFO = {
     phone: 'Your Phone Number (Optional)',
     subject: 'Subject',
     message: 'Your Message',
-    submitButton: 'Send Message'
-  }
+    submitButton: 'Send Message',
+  },
 };
 
 // Form field type for validation
@@ -109,10 +114,7 @@ export default function ContactPage() {
     setIsSubmitting(true);
     
     try {
-      // This would be replaced with your actual API call
-      // const response = await axios.post('/api/contact', { name: name.value, email: email.value, phone: phone.value, subject: subject.value, message: message.value });
-     await axios.post(`${API_URL}/api/contact`, { name: name.value, email: email.value, phone: phone.value, subject: subject.value, message: message.value });
-      // Simulate API call
+      await axios.post(`${API_URL}/api/contact`, { name: name.value, email: email.value, phone: phone.value, subject: subject.value, message: message.value });
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Reset form on success
@@ -142,7 +144,7 @@ export default function ContactPage() {
   return (
     <Wrapper>
       <div className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-96 mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
@@ -172,11 +174,15 @@ export default function ContactPage() {
                       </div>
                       <div className="ml-3 text-base text-gray-700">
                         <p>Phone</p>
-                        <p className="mt-1 font-medium">
-                          <a href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, '')}`} className="hover:text-indigo-600">
-                            {CONTACT_INFO.phone}
-                          </a>
-                        </p>
+                        <ul className="mt-1 font-medium space-y-1">
+                          {CONTACT_INFO.phones.map((phone, index) => (
+                            <li key={index}>
+                              <a href={`tel:${phone.replace(/\s+/g, '')}`} className="hover:text-indigo-600">
+                                {phone}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
                     
@@ -247,8 +253,8 @@ export default function ContactPage() {
               </div>
               
               {/* Map */}
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden h-80">
-                {/* <iframe
+              {/* <div className="bg-white rounded-lg shadow-lg overflow-hidden h-80">
+                <iframe
                   src={CONTACT_INFO.mapEmbedUrl}
                   width="100%"
                   height="100%"
@@ -256,8 +262,8 @@ export default function ContactPage() {
                   allowFullScreen={false}
                   loading="lazy"
                   title="Store Location"
-                /> */}
-              </div>
+                />
+              </div> */}
             </div>
           </div>
         </div>
@@ -265,5 +271,3 @@ export default function ContactPage() {
     </Wrapper>
   );
 }
-
-

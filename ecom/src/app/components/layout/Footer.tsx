@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FaFacebookF, FaInstagram, FaLinkedinIn, FaWhatsapp } from 'react-icons/fa'
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTwitter, FaWhatsapp } from 'react-icons/fa'
 
 const Footer = () => {
   return (
@@ -96,6 +96,15 @@ const Footer = () => {
                 aria-label="WhatsApp"
               >
                 <FaWhatsapp />
+              </a>
+              <a
+                href="https://x.com/shrinanu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-900 hover:bg-gray-200 transition-colors"
+                aria-label="WhatsApp"
+              >
+                <FaTwitter />
               </a>
             </div>
           </div>
