@@ -27,21 +27,21 @@ const Header = ({ categories }: any) => {
 
   const isAdmin = user?.role === 'Admin'
 
-  useEffect(() => {
-    const controlNavbar = () => {
-      if (window.scrollY > 200) {
-        if (window.scrollY > lastScrollY) setShow('-translate-y-full')
-        else setShow('translate-y-0')
-        setIsFixed(true)
-      } else {
-        setShow('translate-y-0')
-        setIsFixed(false)
-      }
-      setLastScrollY(window.scrollY)
-    }
-    window.addEventListener('scroll', controlNavbar)
-    return () => window.removeEventListener('scroll', controlNavbar)
-  }, [lastScrollY])
+  // useEffect(() => {
+  //   const controlNavbar = () => {
+  //     if (window.scrollY > 200) {
+  //       if (window.scrollY > lastScrollY) setShow('-translate-y-full')
+  //       else setShow('translate-y-0')
+  //       setIsFixed(true)
+  //     } else {
+  //       setShow('translate-y-0')
+  //       setIsFixed(false)
+  //     }
+  //     setLastScrollY(window.scrollY)
+  //   }
+  //   window.addEventListener('scroll', controlNavbar)
+  //   return () => window.removeEventListener('scroll', controlNavbar)
+  // }, [lastScrollY])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -177,7 +177,7 @@ const Header = ({ categories }: any) => {
         <div className="border-t border-gray-300 px-4 py-3">
           <h3 className="font-medium mb-2 text-black">Categories</h3>
           <ul className="space-y-1">
-            {categories?.filter(cat => cat.isActive).map((category: any) => (
+            {categories?.filter((cat:any )=> cat.isActive).map((category: any) => (
               <li key={category._id}>
                 <Link href={`/category/${category.slug}`} className="block px-4 py-2 text-gray-700 hover:bg-gray-300 rounded-md" onClick={() => setMobileMenu(false)}>
                   {category.name}

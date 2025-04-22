@@ -72,6 +72,7 @@ interface Product {
   dimensions?: Dimensions;
   deliveryOptions?: DeliveryOption[];
   tags?: string[];
+  reviews:any[];
 }
 
 type ProductDetailsProps = { product: Product };
