@@ -65,24 +65,30 @@ export default function RootLayout({
         </Providers>
 
         {/* ✅ Tawk.to Script added correctly */}
-        <Script
-          id="tawk-to-widget"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-              (function(){
-                var s1 = document.createElement("script"),
-                    s0 = document.getElementsByTagName("script")[0];
-                s1.async = true;
-                s1.src = 'https://embed.tawk.to/6801d026c31dfa190da6b641/1ip3ha67o';
-                s1.charset = 'UTF-8';
-                s1.setAttribute('crossorigin', '*');
-                s0.parentNode.insertBefore(s1, s0);
-              })();
-            `,
-          }}
-        />
+  {/* ✅ Tawk.to Script added, but hidden on load */}
+<Script
+  id="tawk-to-widget"
+  strategy="afterInteractive"
+  dangerouslySetInnerHTML={{
+    __html: `
+      var Tawk_API = Tawk_API || {};
+      // as soon as it loads, hide the widget
+      Tawk_API.onLoad = function() {
+        Tawk_API.hideWidget();
+      };
+      (function(){
+        var s1 = document.createElement("script"),
+            s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/6801d026c31dfa190da6b641/1ip3ha67o';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+      })();
+    `,
+  }}
+/>
+
       </body>
     </html>
   )
