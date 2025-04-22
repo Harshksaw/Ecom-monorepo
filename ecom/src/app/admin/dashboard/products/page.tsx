@@ -20,7 +20,14 @@ interface Category {
   _id: string;
   name: string;
 }
-
+// 1) Near the top of the file, add:
+interface Review {
+  userName: string;
+  rating: number;
+  title: string;
+  comment: string;
+  verified: boolean;
+}
 interface Gem {
   type: string;
   carat: string;
@@ -82,10 +89,10 @@ export default function CreateProductPage() {
     width: "",
     height: "",
   });
-  
+
   // Gems
   const [gems, setGems] = useState<Gem[]>([]);
-  
+
   // Variants
   const [variants, setVariants] = useState<any[]>([{
     metalColor: "gold",
@@ -94,7 +101,7 @@ export default function CreateProductPage() {
     images: [],
     imagePreviews: []
   }]);
-  
+
   // Delivery options
   const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOption[]>([{
     type: "Standard",
@@ -118,10 +125,10 @@ export default function CreateProductPage() {
     setDeliveryOptions(opts);
   };
 
-  
+
   // Tags
   const [tags, setTags] = useState<string[]>([""]);
-  
+
   // Main product images
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -221,10 +228,10 @@ export default function CreateProductPage() {
     const currentVariant = variants[variantIndex];
     const currentImages = currentVariant.images || [];
     const currentPreviews = currentVariant.imagePreviews || [];
-    
-    const newImages = currentImages.filter((_:any, i:any)  => i !== imageIndex);
-    const newPreviews = currentPreviews.filter((_:any, i:any) => i !== imageIndex);
-    
+
+    const newImages = currentImages.filter((_: any, i: any) => i !== imageIndex);
+    const newPreviews = currentPreviews.filter((_: any, i: any) => i !== imageIndex);
+
     updateVariant(variantIndex, 'images', newImages);
     updateVariant(variantIndex, 'imagePreviews', newPreviews);
   };
@@ -265,8 +272,8 @@ export default function CreateProductPage() {
   const addVariant = () => {
     setVariants([...variants, {
       metalColor: "gold",
-      price: {"default": ""},
-      stock:0,
+      price: { "default": "" },
+      stock: 0,
       images: [],
       imagePreviews: []
     }]);
@@ -286,7 +293,7 @@ export default function CreateProductPage() {
     newVariants[index] = { ...newVariants[index], [field]: value };
     setVariants(newVariants);
   };
-  
+
   // Update variant price
   const updateVariantPrice = (variantIndex: number, priceKey: string, value: number) => {
     const newVariants = [...variants];
@@ -294,20 +301,20 @@ export default function CreateProductPage() {
     newVariants[variantIndex].price = { ...currentPrices, [priceKey]: value };
     setVariants(newVariants);
   };
-  
+
   // Add variant price option
   const addVariantPriceOption = (variantIndex: number) => {
     const newPriceKey = `option_${Object.keys(variants[variantIndex].price).length}`;
     updateVariantPrice(variantIndex, newPriceKey, 0);
   };
-  
+
   // Remove variant price option
   const removeVariantPriceOption = (variantIndex: number, priceKey: string) => {
     if (Object.keys(variants[variantIndex].price).length === 1) {
       toast.error("At least one price option is required");
       return;
     }
-    
+
     const newVariants = [...variants];
     const newPrices = { ...newVariants[variantIndex].price };
     delete newPrices[priceKey];
@@ -368,13 +375,13 @@ export default function CreateProductPage() {
       setIsLoading(false);
       return;
     }
-    
+
     if (!materialType) {
       toast.error("Material type is required");
       setIsLoading(false);
       return;
     }
-    
+
     if (!purity) {
       toast.error("Purity is required");
       setIsLoading(false);
@@ -396,12 +403,16 @@ export default function CreateProductPage() {
     formData.append("purity", purity);
     if (shape) formData.append("shape", shape);
     if (color) formData.append("color", color);
-    
+
     // Add weight
     if (weight.value) {
       formData.append("weight[value]", weight.value);
       formData.append("weight[unit]", weight.unit);
     }
+
+
+    formData.append("reviews", JSON.stringify(reviews));
+
 
     // Add dimensions
     if (dimensions.length || dimensions.width || dimensions.height) {
@@ -426,7 +437,7 @@ export default function CreateProductPage() {
         formData.append(`gems[${index}][clarity]`, gem.clarity);
       }
     });
-    
+
     // Add variants
     const variantsToSend = variants.map(variant => {
       const variantData = {
@@ -437,14 +448,14 @@ export default function CreateProductPage() {
       return variantData;
     });
     formData.append("variants", JSON.stringify(variantsToSend));
-    
+
     // Add variant images separately
     variants.forEach((variant, variantIndex) => {
-      variant.images?.forEach((image:any, imageIndex:any) => {
+      variant.images?.forEach((image: any, imageIndex: any) => {
         formData.append(`variant_${variantIndex}_images`, image);
       });
     });
-    
+
     // Add delivery options
     formData.append("deliveryOptions", JSON.stringify(deliveryOptions));
 
@@ -488,7 +499,7 @@ export default function CreateProductPage() {
       setDimensions({ length: "", width: "", height: "" });
       setVariants([{
         metalColor: "gold",
-        price: {"default": ""},
+        price: { "default": "" },
         stock: "0",
         images: [],
         imagePreviews: []
@@ -509,6 +520,26 @@ export default function CreateProductPage() {
       setIsLoading(false);
     }
   };
+
+
+  const [reviews, setReviews] = useState<Review[]>([
+    { userName: "", rating: 5, title: "", comment: "", verified: false }
+  ]);
+
+  const addReview = () => {
+    setReviews([...reviews, { userName: "", rating: 5, title: "", comment: "", verified: false }]);
+  };
+
+  const removeReview = (idx: number) => {
+    setReviews(reviews.filter((_, i) => i !== idx));
+  };
+
+  const updateReview = (idx: number, field: keyof Review, value: any) => {
+    const newReviews = [...reviews];
+    newReviews[idx] = { ...newReviews[idx], [field]: value };
+    setReviews(newReviews);
+  };
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -600,7 +631,7 @@ export default function CreateProductPage() {
               ))}
             </select>
           </div>
-          
+
           {/* Status and Featured Toggles */}
           <div className="mt-6 grid md:grid-cols-2 gap-6">
             <div className="flex items-center">
@@ -615,7 +646,7 @@ export default function CreateProductPage() {
                 Active Product
               </label>
             </div>
-            
+
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -634,7 +665,7 @@ export default function CreateProductPage() {
         {/* Material Properties Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 pb-2 border-b">Material Properties</h2>
-          
+
           <div className="grid md:grid-cols-2 gap-6">
             {/* Material Type */}
             <div>
@@ -656,50 +687,50 @@ export default function CreateProductPage() {
                 <option value="silver">Silver</option>
               </select>
             </div>
-            
+
             {/* Purity */}
-        {/* Purity */}
-<div>
-  <label
-    htmlFor="purity"
-    className="block text-gray-700 font-bold mb-2"
-  >
-    Purity*
-  </label>
-  <input
-    type="text"
-    id="purity"
-    value={purity}
-    onChange={(e) => setPurity(e.target.value)}
-    placeholder="e.g., 22K, 18K"
-    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-    required
-  />
-</div>
+            {/* Purity */}
+            <div>
+              <label
+                htmlFor="purity"
+                className="block text-gray-700 font-bold mb-2"
+              >
+                Purity*
+              </label>
+              <input
+                type="text"
+                id="purity"
+                value={purity}
+                onChange={(e) => setPurity(e.target.value)}
+                placeholder="e.g., 22K, 18K"
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
 
-{/* Shape */}
-<div>
-  <label
-    htmlFor="shape"
-    className="block text-gray-700 font-bold mb-2"
-  >
-    Shape
-  </label>
-  <input
-    type="text"
-    id="shape"
-    value={shape}
-    onChange={(e) => setShape(e.target.value)}
-    placeholder="e.g., Round, Oval"
-    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-  />
-</div>
+            {/* Shape */}
+            <div>
+              <label
+                htmlFor="shape"
+                className="block text-gray-700 font-bold mb-2"
+              >
+                Shape
+              </label>
+              <input
+                type="text"
+                id="shape"
+                value={shape}
+                onChange={(e) => setShape(e.target.value)}
+                placeholder="e.g., Round, Oval"
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-            
+
             {/* Color */}
-          
+
           </div>
-          
+
           {/* Materials */}
           <div className="mt-6">
             <label className="block text-gray-700 font-bold mb-2">
@@ -738,7 +769,7 @@ export default function CreateProductPage() {
         {/* Physical Properties Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 pb-2 border-b">Physical Properties</h2>
-          
+
           {/* Weight */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="col-span-2">
@@ -752,14 +783,14 @@ export default function CreateProductPage() {
                 type="number"
                 id="weight"
                 value={weight.value}
-                onChange={(e) => setWeight({...weight, value: e.target.value})}
+                onChange={(e) => setWeight({ ...weight, value: e.target.value })}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Weight value"
                 min="0"
                 step="0.01"
               />
             </div>
-            
+
             <div>
               <label
                 htmlFor="weightUnit"
@@ -770,7 +801,7 @@ export default function CreateProductPage() {
               <select
                 id="weightUnit"
                 value={weight.unit}
-                onChange={(e) => setWeight({...weight, unit: e.target.value})}
+                onChange={(e) => setWeight({ ...weight, unit: e.target.value })}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="grams">Grams</option>
@@ -917,189 +948,188 @@ export default function CreateProductPage() {
         </div>
 
         {/* Variants Section */}
-<div className="mb-8">
-  <h2 className="text-xl font-bold mb-4 pb-2 border-b">Product Variants</h2>
-  
-  {variants.map((variant, variantIndex) => (
-    <div key={variantIndex} className="p-4 border rounded-lg mb-4 bg-gray-50">
-      <div className="flex justify-between items-center mb-3">
-        <h4 className="text-lg font-medium">Variant {variantIndex + 1}</h4>
-        <button
-          type="button"
-          onClick={() => removeVariant(variantIndex)}
-          className="text-red-500 hover:text-red-700"
-        >
-          <FaTrash />
-        </button>
-      </div>
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Product Variants</h2>
 
-      <div className="grid md:grid-cols-2 gap-4 mb-4">
-        {/* Metal Color */}
-        <div>
-          <label className="block text-gray-700 text-sm font-bold mb-1">
-            Metal Color*
-          </label>
-          <select
-            value={variant.metalColor}
-            onChange={(e) => updateVariant(variantIndex, "metalColor", e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="gold">Gold</option>
-            <option value="silver">Silver</option>
-            <option value="yellowgold">Yellow Gold</option>
-            <option value="rosegold">Rose Gold</option>
-            <option value="whitegold">White Gold</option>
-            <option value="silver">Silver</option>
-            <option value="sterlingsilver">Sterling Silver</option>
-            <option value="platinum">Platinum</option>
-            <option value="bronze">Bronze</option>
-            <option value="copper">Copper</option>
-            <option value="blackgold">Black Gold</option>
-            <option value="titanium">Titanium</option>
-          </select>
-        </div>
-        
-        {/* Stock */}
-        {/* <div>
-          <label className="block text-gray-700 text-sm font-bold mb-1">
-            Stock Quantity*
-          </label>
-          <input
-            type="number"
-            value={variant.stock}
-            onChange={(e) => updateVariant(variantIndex, "stock",Number(e.target.value))}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Available stock"
-
-            required
-          />
-        </div> */}
-      </div>
-
-      {/* Pricing */}
-      <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2">
-          Pricing*
-        </label>
-        {Object.entries(variant.price).map(([priceKey, priceValue]) => (
-          <div key={priceKey} className="flex items-center space-x-2 mb-2">
-            <input
-              type="text"
-              value={priceKey === "default" ? "Default Price" : priceKey}
-              className="w-1/3 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
-              readOnly={priceKey === "default"}
-              onChange={(e) => {
-                if (priceKey !== "default") {
-                  const newVariants = [...variants];
-                  const oldPrice = {...newVariants[variantIndex].price};
-                  delete oldPrice[priceKey];
-                  oldPrice[e.target.value] = priceValue as string;
-                  newVariants[variantIndex].price = oldPrice;
-                  setVariants(newVariants);
-                }
-              }}
-            />
-            <input
-              type="number"
-              value={priceValue as string | number}
-              onChange={(e) => updateVariantPrice(variantIndex, priceKey, Number(e.target.value))}
-              className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Price"
-              min="0"
-              step="0.01"
-              required={priceKey === "default"}
-            />
-            {priceKey !== "default" && (
-              <button
-                type="button"
-                onClick={() => removeVariantPriceOption(variantIndex, priceKey)}
-                className="text-red-500 hover:text-red-700"
-              >
-                <FaTrash />
-              </button>
-            )}
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={() => addVariantPriceOption(variantIndex)}
-          className="mt-2 flex items-center text-blue-500 hover:text-blue-700 text-sm"
-        >
-          <FaPlus className="mr-1" /> Add Price Option
-        </button>
-      </div>
-
-      {/* Variant Images - THIS IS THE KEY PART FOR METAL COLOR ASSOCIATION */}
-      <div>
-        <label className="block text-gray-700 text-sm font-bold mb-2">
-          {variant.metalColor.charAt(0).toUpperCase() + variant.metalColor.slice(1)} Images
-        </label>
-        <div className={`border-2 border-dashed rounded-lg p-4 ${
-          variant.metalColor === 'gold' ? 'bg-yellow-50 border-yellow-300' :
-          variant.metalColor === 'silver' ? 'bg-gray-50 border-gray-300' :
-          variant.metalColor === 'rosegold' ? 'bg-gray-50 border-pink-300' :
-          'bg-gray-100 border-pink-400'
-        }`}>
-          <div className="grid grid-cols-3 gap-3">
-            {variant.imagePreviews?.map((preview:any, imgIndex:any) => (
-              <div key={imgIndex} className="relative">
-                <Image
-                  src={preview}
-                  alt={`${variant.metalColor} variant image ${imgIndex + 1}`}
-                  width={100}
-                  height={100}
-                  className="rounded-lg object-cover h-24 w-24"
-                />
+          {variants.map((variant, variantIndex) => (
+            <div key={variantIndex} className="p-4 border rounded-lg mb-4 bg-gray-50">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-lg font-medium">Variant {variantIndex + 1}</h4>
                 <button
                   type="button"
-                  onClick={() => removeVariantImage(variantIndex, imgIndex)}
-                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 text-xs"
+                  onClick={() => removeVariant(variantIndex)}
+                  className="text-red-500 hover:text-red-700"
                 >
-                  <FaTimes />
+                  <FaTrash />
                 </button>
-                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 rounded-b-lg text-center capitalize">
-                  {variant.metalColor}
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                {/* Metal Color */}
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-1">
+                    Metal Color*
+                  </label>
+                  <select
+                    value={variant.metalColor}
+                    onChange={(e) => updateVariant(variantIndex, "metalColor", e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="gold">Gold</option>
+                    <option value="silver">Silver</option>
+                    <option value="yellowgold">Yellow Gold</option>
+                    <option value="rosegold">Rose Gold</option>
+                    <option value="whitegold">White Gold</option>
+                    <option value="silver">Silver</option>
+                    <option value="sterlingsilver">Sterling Silver</option>
+                    <option value="platinum">Platinum</option>
+                    <option value="bronze">Bronze</option>
+                    <option value="copper">Copper</option>
+                    <option value="blackgold">Black Gold</option>
+                    <option value="titanium">Titanium</option>
+                  </select>
+                </div>
+
+                {/* Stock */}
+                {/* <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-1">
+                    Stock Quantity*
+                  </label>
+                  <input
+                    type="number"
+                    value={variant.stock}
+                    onChange={(e) => updateVariant(variantIndex, "stock",Number(e.target.value))}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Available stock"
+
+                    required
+                  />
+                </div> */}
+              </div>
+
+              {/* Pricing */}
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Pricing*
+                </label>
+                {Object.entries(variant.price).map(([priceKey, priceValue]) => (
+                  <div key={priceKey} className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="text"
+                      value={priceKey === "default" ? "Default Price" : priceKey}
+                      className="w-1/3 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                      readOnly={priceKey === "default"}
+                      onChange={(e) => {
+                        if (priceKey !== "default") {
+                          const newVariants = [...variants];
+                          const oldPrice = { ...newVariants[variantIndex].price };
+                          delete oldPrice[priceKey];
+                          oldPrice[e.target.value] = priceValue as string;
+                          newVariants[variantIndex].price = oldPrice;
+                          setVariants(newVariants);
+                        }
+                      }}
+                    />
+                    <input
+                      type="number"
+                      value={priceValue as string | number}
+                      onChange={(e) => updateVariantPrice(variantIndex, priceKey, Number(e.target.value))}
+                      className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Price"
+                      min="0"
+                      step="0.01"
+                      required={priceKey === "default"}
+                    />
+                    {priceKey !== "default" && (
+                      <button
+                        type="button"
+                        onClick={() => removeVariantPriceOption(variantIndex, priceKey)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <FaTrash />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => addVariantPriceOption(variantIndex)}
+                  className="mt-2 flex items-center text-blue-500 hover:text-blue-700 text-sm"
+                >
+                  <FaPlus className="mr-1" /> Add Price Option
+                </button>
+              </div>
+
+              {/* Variant Images - THIS IS THE KEY PART FOR METAL COLOR ASSOCIATION */}
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  {variant.metalColor.charAt(0).toUpperCase() + variant.metalColor.slice(1)} Images
+                </label>
+                <div className={`border-2 border-dashed rounded-lg p-4 ${variant.metalColor === 'gold' ? 'bg-yellow-50 border-yellow-300' :
+                    variant.metalColor === 'silver' ? 'bg-gray-50 border-gray-300' :
+                      variant.metalColor === 'rosegold' ? 'bg-gray-50 border-pink-300' :
+                        'bg-gray-100 border-pink-400'
+                  }`}>
+                  <div className="grid grid-cols-3 gap-3">
+                    {variant.imagePreviews?.map((preview: any, imgIndex: any) => (
+                      <div key={imgIndex} className="relative">
+                        <Image
+                          src={preview}
+                          alt={`${variant.metalColor} variant image ${imgIndex + 1}`}
+                          width={100}
+                          height={100}
+                          className="rounded-lg object-cover h-24 w-24"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeVariantImage(variantIndex, imgIndex)}
+                          className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 text-xs"
+                        >
+                          <FaTimes />
+                        </button>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 rounded-b-lg text-center capitalize">
+                          {variant.metalColor}
+                        </div>
+                      </div>
+                    ))}
+
+                    {(!variant.images || variant.images.length < 3) && (
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-24 w-24">
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/gif"
+                          multiple
+                          onChange={(e) => handleVariantImageUpload(e, variantIndex)}
+                          className="hidden"
+                          id={`variantImageUpload-${variantIndex}`}
+                        />
+                        <label
+                          htmlFor={`variantImageUpload-${variantIndex}`}
+                          className="cursor-pointer flex flex-col items-center"
+                        >
+                          <FaCloudUploadAlt className="text-2xl text-gray-400 mb-1" />
+                          <span className="text-gray-600 text-xs capitalize">{variant.metalColor}</span>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    Upload images showing this product in <span className="font-medium capitalize">{variant.metalColor}</span> color
+                  </p>
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
 
-            {(!variant.images || variant.images.length < 3) && (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-24 w-24">
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif"
-                  multiple
-                  onChange={(e) => handleVariantImageUpload(e, variantIndex)}
-                  className="hidden"
-                  id={`variantImageUpload-${variantIndex}`}
-                />
-                <label
-                  htmlFor={`variantImageUpload-${variantIndex}`}
-                  className="cursor-pointer flex flex-col items-center"
-                >
-                  <FaCloudUploadAlt className="text-2xl text-gray-400 mb-1" />
-                  <span className="text-gray-600 text-xs capitalize">{variant.metalColor}</span>
-                </label>
-              </div>
-            )}
-          </div>
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            Upload images showing this product in <span className="font-medium capitalize">{variant.metalColor}</span> color
-          </p>
+          <button
+            type="button"
+            onClick={addVariant}
+            className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
+          >
+            <FaPlus className="mr-2" /> Add Variant
+          </button>
         </div>
-      </div>
-    </div>
-  ))}
-  
-  <button
-    type="button"
-    onClick={addVariant}
-    className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
-  >
-    <FaPlus className="mr-2" /> Add Variant
-  </button>
-</div>
 
         {/* Tags */}
         <div className="mt-6">
@@ -1132,51 +1162,133 @@ export default function CreateProductPage() {
             <FaPlus className="mr-2" /> Add Tag
           </button>
         </div>
-      <div className="flex flex-col gap-10 mt-6">
+        <div className="flex flex-col gap-10 mt-6">
 
-      
 
-        {deliveryOptions.map((opt, idx) => (
-        <div
-          key={idx}
-          className="flex flex-col md:flex-row md:items-center gap-4 border p-4 rounded-lg  "
-        >
-          {/* Type */}
-          <input
-            type="text"
-            placeholder="e.g. standard • express"
-            value={opt.type}
-            onChange={(e) => handleChange(idx, 'type', e.target.value)}
-            className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
 
-          {/* Duration */}
-          <input
-            type="text"
-            placeholder="e.g. 5-7 business days"
-            value={opt.duration}
-            onChange={(e) => handleChange(idx, 'duration', e.target.value)}
-            className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          {deliveryOptions.map((opt, idx) => (
+            <div
+              key={idx}
+              className="flex flex-col md:flex-row md:items-center gap-4 border p-4 rounded-lg  "
+            >
+              {/* Type */}
+              <input
+                type="text"
+                placeholder="e.g. standard • express"
+                value={opt.type}
+                onChange={(e) => handleChange(idx, 'type', e.target.value)}
+                className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
 
-          {/* Price */}
-          <input
-            type="number"
-            placeholder="Price"
-            value={opt.price}
-            onChange={(e) =>
-              handleChange(idx, 'price', parseFloat(e.target.value) || 0)
-            }
-            className="w-24 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+              {/* Duration */}
+              <input
+                type="text"
+                placeholder="e.g. 5-7 business days"
+                value={opt.duration}
+                onChange={(e) => handleChange(idx, 'duration', e.target.value)}
+                className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
 
-       
+              {/* Price */}
+              <input
+                type="number"
+                placeholder="Price"
+                value={opt.price}
+                onChange={(e) =>
+                  handleChange(idx, 'price', parseFloat(e.target.value) || 0)
+                }
+                className="w-24 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+
+            </div>
+          ))}
         </div>
-      ))}
-</div>
 
 
-          
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Fake Reviews</h2>
+          {reviews.map((rev, i) => (
+            <div key={i} className="p-4 border rounded-lg mb-4 bg-gray-50">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-medium">Review {i + 1}</h4>
+                <button
+                  type="button"
+                  onClick={() => removeReview(i)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  Remove
+                </button>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-1">Name</label>
+                  <input
+                    type="text"
+                    value={rev.userName}
+                    onChange={(e) => updateReview(i, "userName", e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="User name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-1">Rating</label>
+                  <select
+                    value={rev.rating}
+                    onChange={(e) => updateReview(i, "rating", Number(e.target.value))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <option key={n} value={n}>{n} star{n > 1 ? 's' : ''}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-gray-700 text-sm font-bold mb-1">Title</label>
+                  <input
+                    type="text"
+                    value={rev.title}
+                    onChange={(e) => updateReview(i, "title", e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Review title"
+                    required
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-gray-700 text-sm font-bold mb-1">Comment</label>
+                  <textarea
+                    value={rev.comment}
+                    onChange={(e) => updateReview(i, "comment", e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    rows={3}
+                    placeholder="Review text"
+                    required
+                  />
+                </div>
+                <div className="md:col-span-2 flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={rev.verified}
+                    onChange={(e) => updateReview(i, "verified", e.target.checked)}
+                    id={`verified-${i}`}
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                  />
+                  <label htmlFor={`verified-${i}`} className="text-gray-700">
+                    Verified purchase
+                  </label>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addReview}
+            className="flex items-center text-blue-500 hover:text-blue-700"
+          >
+            <FaPlus className="mr-2" /> Add Review
+          </button>
+        </div>
 
         {/* Submit Button */}
         <div className="mt-8">
@@ -1184,16 +1296,18 @@ export default function CreateProductPage() {
             type="submit"
             disabled={isLoading}
             className={`w-full py-3 rounded-lg text-white font-bold 
-              ${
-                isLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-600"
+              ${isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-600"
               }`}
           >
             {isLoading ? "Creating Product..." : "Create Product"}
           </button>
         </div>
       </form>
+
+      
+      
     </div>
   );
 }

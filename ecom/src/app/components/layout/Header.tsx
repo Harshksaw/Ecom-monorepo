@@ -65,10 +65,10 @@ const Header = ({ categories }: any) => {
 
   return (
     <>
-      <header ref={headerRef} className={`w-full fixed top-0 left-0 bg-gray-200 transition-transform duration-300 z-50 ${show}`}>
+      <header ref={headerRef} className={`w-full fixed top-0 left-0 bg-gray-200  border-b-2 border-black  transition-transform duration-300 z-50 ${show}`}>
         <div className="container mx-auto px-4 relative flex items-center h-16">
 
-          {/* Left: Hamburger */}
+
           <button
             onClick={toggleMobileMenu}
             className="mobile-menu-button p-2 text-black hover:text-gray-700"
