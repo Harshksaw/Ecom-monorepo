@@ -192,40 +192,102 @@ exports.addAddress = async (req, res) => {
 };
 
 // Update an existing address
+// exports.updateAddress = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const { index } = req.params;
+//     const { address } = req.body;
+    
+//     // Validate params
+//     const addressIndex = parseInt(index);
+//     if (isNaN(addressIndex)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Invalid address index'
+//       });
+//     }
+    
+//     // Find user
+//     const user = await User.findById(userId);
+    
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'User not found'
+//       });
+//     }
+    
+//     // Check if address exists
+//     if (!user.addresses || !user.addresses[addressIndex]) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Address not found'
+//       });
+//     }
+//     console.log()
+//     // If this is being set as default, unset any existing defaults of the same type
+//     if (address.isDefault && !user.addresses[addressIndex].isDefault) {
+//       user.addresses.forEach((addr, i) => {
+//         if (i !== addressIndex && addr.type === address.type) {
+//           addr.isDefault = false;
+//         }
+//       });
+//     }
+    
+//     // Update the address fields
+//     user.addresses[addressIndex] = {
+//       ...user.addresses[addressIndex],
+//       ...address
+//     };
+    
+//     // Save the user
+//     user.updatedAt = Date.now();
+//     await user.save();
+    
+//     res.status(200).json({
+//       success: true,
+//       message: 'Address updated successfully',
+//       user
+//     });
+//   } catch (error) {
+//     console.error('Error updating address:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server error',
+//       error: error.message
+//     });
+//   }
+// };
 exports.updateAddress = async (req, res) => {
   try {
     const userId = req.user.id;
     const { index } = req.params;
     const { address } = req.body;
-    
-    // Validate params
+    console.log(index,address);
     const addressIndex = parseInt(index);
     if (isNaN(addressIndex)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid address index'
+        message: 'Invalid address index',
       });
     }
-    
-    // Find user
+
     const user = await User.findById(userId);
-    
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     }
-    
-    // Check if address exists
+
     if (!user.addresses || !user.addresses[addressIndex]) {
       return res.status(404).json({
         success: false,
-        message: 'Address not found'
+        message: 'Address not found',
       });
     }
-    
-    // If this is being set as default, unset any existing defaults of the same type
+
+    // Handle default flag
     if (address.isDefault && !user.addresses[addressIndex].isDefault) {
       user.addresses.forEach((addr, i) => {
         if (i !== addressIndex && addr.type === address.type) {
@@ -233,31 +295,31 @@ exports.updateAddress = async (req, res) => {
         }
       });
     }
-    
-    // Update the address fields
-    user.addresses[addressIndex] = {
-      ...user.addresses[addressIndex],
-      ...address
-    };
-    
-    // Save the user
-    user.updatedAt = Date.now();
+
+    // Perform the update directly
+    Object.assign(user.addresses[addressIndex], address);
+
+    // Let mongoose know the array was modified
+    user.markModified('addresses');
+
+    user.updatedAt = new Date();
     await user.save();
-    
+    console.log(user);
     res.status(200).json({
       success: true,
       message: 'Address updated successfully',
-      user
+      user,
     });
   } catch (error) {
     console.error('Error updating address:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
-      error: error.message
+      error: error.message,
     });
   }
 };
+
 
 // Delete an address
 exports.deleteAddress = async (req, res) => {
@@ -381,6 +443,49 @@ exports.setDefaultAddress = async (req, res) => {
     });
   } catch (error) {
     console.error('Error setting default address:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+//  forgot-password 
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email, phoneNumber, newPassword } = req.body;
+
+    if (!email && !phoneNumber) {
+      return res
+        .status(400)
+        .json({ message: "Email or phone number is required" });
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 8 characters long" });
+    }
+
+    // Find user by email or phone number
+    const user = await User.findOne({
+      $or: [{ email }, { phoneNumber }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Hash the new password
+    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error('Error forgot password:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',

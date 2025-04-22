@@ -8,6 +8,8 @@ const multer = require('multer');
 const upload = multer();
 //add image
 router.post('/add-img',upload.single('image'), cloudinaryController.saveImageCloudinary);
+// add video
+router.post('/add-img',upload.single('video'), cloudinaryController.saveVideoCloudinary);
 
 //add image
 router.post('/add-multiple-img',upload.array('images',5), cloudinaryController.addMultipleImageCloudinary);

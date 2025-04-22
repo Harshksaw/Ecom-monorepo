@@ -199,5 +199,6 @@ router.delete('/addresses/:index', userController.deleteAddress);
 
 // Route for setting an address as default
 router.patch('/address/:index/default/:id', userController.setDefaultAddress);
+router.post("/forgot-password", userController.forgotPassword);
   
   module.exports = router;
