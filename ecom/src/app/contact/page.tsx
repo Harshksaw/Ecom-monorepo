@@ -9,7 +9,8 @@ import {
   FaWhatsapp,
   FaInstagram,
   FaFacebook,
-  FaTwitter
+  FaTwitter,
+  FaLinkedin
 } from 'react-icons/fa';
 import Wrapper from '../components/Wrapper';
 import axios from 'axios';
@@ -21,18 +22,18 @@ const CONTACT_INFO = {
   subtitle: "We'd love to hear from you",
   description: 'Have questions about our products, services, or any other inquiries? Fill out the form below and our team will get back to you as soon as possible.',
   phones: [
-    '+91 98765 43210',
+
     '+91 9782441137',
     '+91 7615952290',
     '+91 9461137445',
   ],
-  email: 'support@yourjewelrystore.com',
+  email: 'Shrinanugems111@gmail.com',
   address: {
-    line1: '123 Jewelry Avenue',
-    line2: 'Gemstone District',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    postalCode: '400001',
+    line1: 'House No.4357',
+    line2: 'Nathmal Ji Ka Chowk',
+    city: 'Johai Bazar, Jaipur',
+    state: 'Rajasthan',
+    postalCode: '302003',
     country: 'India',
   },
   hours: {
@@ -40,10 +41,11 @@ const CONTACT_INFO = {
     weekends: 'Saturday - Sunday: 11:00 AM - 6:00 PM',
   },
   socialMedia: {
-    whatsapp: 'https://wa.me/919876543210',
+    whatsapp: 'https://wa.me/919782441137',
     instagram: 'https://www.instagram.com/shrinanugems?igsh=MW8wZ3JtMnc2c2F6Yw==',
     facebook: 'https://www.facebook.com/share/1BYZVxzmBg',
     twitter: 'https://x.com/shrinanu',
+    linkedin: 'https://www.linkedin.com/in/gajanand-daga-926a68208',
   },
   mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3771.949139008728!2d72.82766641489448!3d19.01699988712555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7ce40ffad7c8b%3A0x51d3a45f69913f5c!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1627894265658!5m2!1sen!2sin',
   formPlaceholders: {
@@ -245,6 +247,9 @@ export default function ContactPage() {
                         </a>
                         <a href={CONTACT_INFO.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-indigo-600">
                           <FaTwitter className="h-6 w-6" />
+                        </a>
+                        <a href={CONTACT_INFO.socialMedia.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-indigo-600">
+                          <FaLinkedin className="h-6 w-6" />
                         </a>
                       </div>
                     </div>
