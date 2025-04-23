@@ -355,6 +355,7 @@ const CheckoutPage = () => {
                 </div>
                 
                 <PaymentMethodSelector
+                icon={null}
                   selectedMethod={paymentMethod}
                   onSelectMethod={setPaymentMethod}
                 />
@@ -370,7 +371,7 @@ const CheckoutPage = () => {
                 <CartItemsList 
                   cartItems={cartItems} 
                   dispatch={dispatch}
-                  readOnly={true}
+                  // readOnly={true}
                 />
               </div>
             </div>

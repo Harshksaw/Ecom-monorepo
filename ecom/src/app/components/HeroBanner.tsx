@@ -15,7 +15,7 @@ interface BannerMedia {
 }
 
 export const HeroBanner = () => {
-  const [media, setMedia] = useState<BannerMedia[]>([])
+  const [media, setMedia] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
@@ -121,7 +121,7 @@ export const HeroBanner = () => {
                 />
               ) : (
                 <video
-                  ref={el => videoRefs.current[index] = el}
+                  ref={el => { videoRefs.current[index] = el; }}
                   className="w-full h-full object-cover"
                   playsInline
                   muted
