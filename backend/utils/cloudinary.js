@@ -26,8 +26,10 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'jewelry-ecommerce', // Store in a specific folder
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp','mp4', 'mov', 'avi', 'mkv'],
     transformation: [{ width: 1000, crop: 'limit' }], // Resize large images
+    resource_type:"auto"
+
     // You can add more transformations as needed
   }
 });
@@ -43,7 +45,8 @@ const upload = multer({
   { name: 'variant_1_images', maxCount: 3 },
   { name: 'variant_2_images', maxCount: 3 },
   { name: 'variant_3_images', maxCount: 3 },
-  { name: 'variant_4_images', maxCount: 3 }
+  { name: 'variant_4_images', maxCount: 3 },
+  { name: 'video', maxCount: 1 },
 ]);
 // Create an error-handling wrapper for the upload middleware
 const handleUpload = (req, res, next) => {

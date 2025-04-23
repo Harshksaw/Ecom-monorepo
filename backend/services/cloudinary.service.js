@@ -14,12 +14,13 @@ const { Readable } = require('stream');
 const cloudinaryImageUpload = (imageBuffer) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { upload_preset: secret.cloudinary_upload_preset },
+
+      {resource_type:"auto", upload_preset: secret.cloudinary_upload_preset },
       (error, result) => {
         if (error) {
           console.error('Error uploading to Cloudinary:', error);
           reject(error);
-        } else {i
+        } else {
           resolve(result);
         }
       }
