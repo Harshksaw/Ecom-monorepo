@@ -39,7 +39,7 @@ const CustomerReviews: React.FC<CustomerReviewsProps> = ({ reviews }) => {
       'bg-purple-100 text-purple-600',
       'bg-amber-100 text-amber-600',
       'bg-cyan-100 text-cyan-600',
-      'bg-pink-100 text-pink-600',
+      'bg-pink-100 text-gray-600',
       'bg-indigo-100 text-indigo-600'
     ];
     

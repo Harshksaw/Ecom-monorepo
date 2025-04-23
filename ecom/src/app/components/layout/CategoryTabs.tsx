@@ -58,7 +58,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
     <div className="w-full bg-white shadow-sm sticky top-0 z-40 overflow-visible">
       <div className="container mx-auto px-4 relative overflow-visible">
         <button onClick={scrollLeft} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full w-10 h-10 shadow flex items-center justify-center">
-          <FaChevronLeft className="text-pink-600" />
+          <FaChevronLeft className="text-gray-600" />
         </button>
 
         <div ref={scrollRef} className="flex space-x-6 overflow-x-auto overflow-y-visible py-4 px-12 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
@@ -119,7 +119,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
         </div>
 
         <button onClick={scrollRight} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full w-10 h-10 shadow flex items-center justify-center">
-          <FaChevronRight className="text-pink-600" />
+          <FaChevronRight className="text-gray-600" />
         </button>
       </div>
     </div>

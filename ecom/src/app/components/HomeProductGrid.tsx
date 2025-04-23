@@ -167,10 +167,10 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
         {categoryGroups.map((category) => (
           <div key={category._id} className="mb-16">
             <div className="flex justify-between items-center mb-8 border-b border-pink-200 pb-2">
-              <h2 className="text-2xl font-bold text-pink-800">{category.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{category.name}</h2>
               <Link 
                 href={`/category/${category.slug}`}
-                className="flex items-center text-pink-600 hover:text-pink-700 text-sm font-medium"
+                className="flex items-center text-gray-600 hover:text-gray-700 text-sm font-medium"
               >
                 View All <FaArrowRight className="ml-2" />
               </Link>
@@ -180,7 +180,7 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               {/* Left Arrow */}
               <button 
                 onClick={() => slideLeft(category._id)}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 bg-white p-2 rounded-full shadow-md text-pink-600 hover:text-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 bg-white p-2 rounded-full shadow-md text-gray-600 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 aria-label="Previous products"
               >
                 <FaChevronLeft className="text-xl" />
@@ -203,7 +203,7 @@ const HomeProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               {/* Right Arrow */}
               <button 
                 onClick={() => slideRight(category._id)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 bg-white p-2 rounded-full shadow-md text-pink-600 hover:text-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 bg-white p-2 rounded-full shadow-md text-gray-600 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 aria-label="Next products"
               >
                 <FaChevronRight className="text-xl" />

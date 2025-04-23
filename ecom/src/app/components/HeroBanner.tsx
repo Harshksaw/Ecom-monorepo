@@ -95,7 +95,7 @@ export const HeroBanner = () => {
     <div className="relative w-full max-w-[1360px] mx-auto z-10">
       <Carousel
   autoPlay={media.every(item => item.type === 'image')} // Only autoplay if all slides are images
-  interval={media[currentSlide]?.type === 'video' ? 10000 : 3000} // Longer interval for video slides
+  interval={media[currentSlide]?.type === 'video' ? 5000 : 3000} // Longer interval for video slides
   infiniteLoop
   showThumbs={false}
   showIndicators
@@ -124,7 +124,7 @@ export const HeroBanner = () => {
                   ref={el => { videoRefs.current[index] = el; }}
                   className="w-full h-full object-cover"
                   playsInline
-                  muted
+                  muted={media[index]?.isMuted} 
                   loop
                   onError={(e) => console.error("Video failed to load:", e)}
                 >

@@ -38,7 +38,7 @@ const storage = new CloudinaryStorage({
 // Setup multer with Cloudinary storage with better error handling
 const upload = multer({
   storage,
-  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  limits: { fileSize: 25 * 1024 * 1024 }, // 15MB
 }).fields([
   { name: 'images', maxCount: 5 },
   { name: 'variant_0_images', maxCount: 3 },
