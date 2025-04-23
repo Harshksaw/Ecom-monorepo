@@ -253,7 +253,7 @@ const Header = ({ categories }: any) => {
         )}
       </div>
 
-      {mobileMenu && <div className="fixed inset-0 bg-black bg-opacity-30 z-40" onClick={() => setMobileMenu(false)} />}
+      {mobileMenu && <div className="fixed inset-0 bg-transparent bg-opacity-30 z-40" onClick={() => setMobileMenu(false)} />}
     </>
   )
 }

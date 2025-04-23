@@ -1,91 +1,120 @@
-'use client';
-
-import { FaShieldAlt, FaExclamationTriangle } from 'react-icons/fa';
-import { Address } from '../types';
+// src/app/checkout/components/OrderSummary.tsx
+import React from 'react';
 import { useCurrency } from '../../../hooks/useCurrency';
+import { Address } from '../../cart/types';
+import { FaShoppingBag } from 'react-icons/fa';
+import Link from 'next/link';
+
 
 interface OrderSummaryProps {
-  subtotal: number;
+  subtotal: any;
   shipping: number;
   total: number;
   isProcessing: boolean;
   isCheckoutReady: () => boolean;
   handleCheckout: () => void;
+  paymentMethod: string;
   showAddressRequired: boolean;
   defaultShippingAddress: Address | null;
 }
 
-const OrderSummary = ({
+const OrderSummary: React.FC<OrderSummaryProps> = ({
   subtotal,
   shipping,
   total,
   isProcessing,
   isCheckoutReady,
-  handleCheckout,
+
+  paymentMethod,
   showAddressRequired,
   defaultShippingAddress
-}: OrderSummaryProps) => {
-  // Use the currency hook for price formatting
-  const { formatPrice, selectedCurrency } = useCurrency();
+}) => {
+  const { formatPrice } = useCurrency();
+  
+  // Get the payment method display name
+  const getPaymentMethodName = () => {
+    switch(paymentMethod) {
+      case 'payoneer':
+        return 'Payoneer';
+      case 'credit-card':
+        return 'Credit Card';
+      case 'bank-transfer':
+        return 'Bank Transfer';
+      default:
+        return 'Selected payment method';
+    }
+  };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6 sticky top-8">
-      <h2 className="text-xl font-bold mb-6">Order Summary</h2>
-      
-      {/* Summary Details */}
-      <div className="space-y-3 border-b pb-4 mb-4">
-        <div className="flex justify-between">
+    <div>
+      {/* Order Items Summary */}
+      <div className="border-b pb-4 mb-4">
+        <div className="flex justify-between mb-2">
           <span className="text-gray-600">Subtotal</span>
-          <span>{formatPrice(subtotal)}</span>
+          <span className="font-medium">{formatPrice(subtotal)}</span>
         </div>
-        
-        <div className="flex justify-between">
+        <div className="flex justify-between mb-2">
           <span className="text-gray-600">Shipping</span>
-          <span>{formatPrice(shipping)}</span>
+          <span className="font-medium">{formatPrice(shipping)}</span>
         </div>
       </div>
       
       {/* Total */}
-      <div className="flex justify-between font-bold text-lg mb-6">
-        <span>Total</span>
-        <span>{formatPrice(total)}</span>
+      <div className="flex justify-between mb-6">
+        <span className="text-lg font-semibold">Total</span>
+        <span className="text-lg font-semibold">{formatPrice(total)}</span>
       </div>
       
-      {/* Address required warning */}
-      {showAddressRequired && !defaultShippingAddress && (
-        <div className="bg-red-50 text-red-700 p-3 rounded mb-6 text-sm flex items-start">
-          <FaExclamationTriangle className="flex-shrink-0 mr-2 mt-1" />
-          <p>Please add a shipping address before proceeding to checkout</p>
+      {/* Payment Method Summary */}
+      <div className="bg-gray-50 p-3 rounded mb-6">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600">Payment Method:</span>
+          <span className="font-medium">{getPaymentMethodName()}</span>
         </div>
-      )}
+      </div>
       
-      {/* Payment notice for international customers */}
-      {selectedCurrency !== 'INR' && (
-        <div className="bg-yellow-50 text-yellow-700 p-3 rounded mb-6 text-sm">
-          Your payment will be processed in INR. Your bank may apply currency conversion fees.
+      {/* Warning if address is missing */}
+      {showAddressRequired && !defaultShippingAddress && (
+        <div className="bg-red-50 text-red-700 p-3 rounded mb-6 text-sm">
+          Please add a shipping address to continue with your purchase.
         </div>
       )}
       
       {/* Checkout Button */}
-      <button 
-        className={`w-full py-3 rounded-lg font-medium flex items-center justify-center ${
-          isProcessing 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : isCheckoutReady()
-              ? 'bg-blue-600 text-white hover:bg-blue-700 transition-colors'
-              : 'bg-gray-300 text-gray-700 cursor-not-allowed'
-        }`}
-        onClick={handleCheckout}
-        disabled={isProcessing || !isCheckoutReady()}
+      <Link
+        href="/checkout"
+        // disabled={!isCheckoutReady() || isProcessing}
+        className={`w-full py-3 px-4 flex items-center justify-center rounded ${
+          isCheckoutReady() && !isProcessing
+            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+        } transition-colors duration-200`}
       >
-        <FaShieldAlt className="mr-2" />
-        {isProcessing ? 'Processing...' : 'Pay with Razorpay'}
-      </button>
+        {isProcessing ? (
+          <>
+            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+          </>
+        ) : (
+          <>
+            <FaShoppingBag className="mr-2 h-5 w-5" />
+            Complete Purchase
+          </>
+        )}
+      </Link>
       
-      {/* Secure Payments */}
-      <div className="mt-4 text-center text-xs text-gray-500 flex items-center justify-center">
-        <FaShieldAlt className="mr-1" />
-        <p>100% Secure Payments | All major cards accepted</p>
+      {/* Security Notice */}
+      <div className="mt-4 text-xs text-gray-500 text-center">
+        <div className="flex items-center justify-center mb-1">
+          <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          Secure Checkout
+        </div>
+        <p>Your payment information is processed securely.</p>
       </div>
     </div>
   );

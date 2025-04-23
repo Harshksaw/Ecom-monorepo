@@ -35,7 +35,6 @@ const createOrder = async (req, res) => {
   
   try {
     const {
-      receipt,
       subtotal,
       shippingCost,
       total,
@@ -45,8 +44,12 @@ const createOrder = async (req, res) => {
       status = 'pending'
     } = req.body;
     
+    console.log("🚀 ~ createOrder ~ shippingAddress:", shippingAddress);
+    console.log("🚀 ~ createOrder ~ items:", items);
+    
     // Extract user ID from request params
     const { userId } = req.params;
+    console.log("🚀 ~ createOrder ~ userId:", userId);
     
     // Validate required fields
     if (!userId || !items || !Array.isArray(items) || items.length === 0 || !shippingAddress) {
@@ -286,13 +289,21 @@ const cancelOrder = async (req, res) => {
       });
     }
     
-    // Find the order
+    // Find the order first
     const order = await Order.findById(orderId);
     
     if (!order) {
       return res.status(404).json({
         success: false,
         message: 'Order not found'
+      });
+    }
+    
+    // Only allow admin or the order owner to cancel
+    if (req.user && req.user.role !== 'admin' && order.userId.toString() !== req.user.id) {
+      return res.status(403).json({ 
+        success: false,
+        message: 'Unauthorized' 
       });
     }
     

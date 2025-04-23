@@ -251,7 +251,7 @@ const CartPage = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+
         },
         body: JSON.stringify({
           total, // Always in INR
@@ -273,40 +273,42 @@ const CartPage = () => {
       toast.success('Order created successfully!', { id: toastId });
   
       // Load Razorpay
-      const Razorpay = await loadRazorpay();
+      // const Razorpay = await loadRazorpay();
       
-      // Add currency conversion notice for international customers
-      if (selectedCurrency !== 'INR') {
-        toast.success(`Your card will be charged in INR (${formatPrice(total)} converts to approximately ₹${total.toLocaleString()}).`, {
-          duration: 6000,
-        });
-      }
+      // // Add currency conversion notice for international customers
+      // if (selectedCurrency !== 'INR') {
+      //   toast.success(`Your card will be charged in INR (${formatPrice(total)} converts to approximately ₹${total.toLocaleString()}).`, {
+      //     duration: 6000,
+      //   });
+      // }
       
       // Initialize Razorpay options (always in INR)
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
-        amount: Math.round(total * 100), // in paisa (INR)
-        currency: 'INR', // Razorpay requires INR for Indian merchants
-        name: 'Jewelry Store',
-        description: 'Purchase of fine jewelry',
-        order_id: orderData.orderId,
-        image: '/logo.PNG',
-        handler: (response: any) => handlePaymentSuccess(response),
-        prefill: {
-          name: userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : '',
-          email: userProfile?.email || '',
-          contact: userProfile?.phoneNumber || ''
-        },
-        notes: { 
-          address: 'Jewelry Store Corporate Office',
-          order_id: orderData.orderId 
-        },
-        theme: { color: '#3B82F6' }
-      };
+      // const options = {
+      //   key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
+      //   amount: Math.round(total * 100), // in paisa (INR)
+      //   currency: 'INR', // Razorpay requires INR for Indian merchants
+      //   name: 'Jewelry Store',
+      //   description: 'Purchase of fine jewelry',
+      //   order_id: orderData.orderId,
+      //   image: '/logo.PNG',
+      //   handler: (response: any) => handlePaymentSuccess(response),
+      //   prefill: {
+      //     name: userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : '',
+      //     email: userProfile?.email || '',
+      //     contact: userProfile?.phoneNumber || ''
+      //   },
+      //   notes: { 
+      //     address: 'Jewelry Store Corporate Office',
+      //     order_id: orderData.orderId 
+      //   },
+      //   theme: { color: '#3B82F6' }
+      // };
   
-      // Create Razorpay instance and open checkout
-      const razorpayInstance = new Razorpay(options);
-      razorpayInstance.open();
+      // // Create Razorpay instance and open checkout
+      // const razorpayInstance = new Razorpay(options);
+      // razorpayInstance.open();
+
+
 
     } catch (error: any) {
       console.error('Checkout error:', error);
@@ -403,6 +405,7 @@ const CartPage = () => {
                 isProcessing={processingState.isProcessing}
                 isCheckoutReady={isCheckoutReady}
                 handleCheckout={handleCheckout}
+                paymentMethod="payoneer" // Example value for payment method
                 showAddressRequired={userState.showAddressRequired}
                 defaultShippingAddress={userState.defaultShippingAddress}
               />

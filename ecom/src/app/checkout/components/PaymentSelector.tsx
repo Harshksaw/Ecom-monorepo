@@ -5,6 +5,7 @@ import React from 'react';
 interface PaymentMethodSelectorProps {
   selectedMethod: string;
   onSelectMethod: (method: string) => void;
+  icon:any
 }
 
 const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
@@ -21,7 +22,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   return (
     <div className="space-y-3">
-      {paymentMethods.map((method) => (
+      {paymentMethods.map((method:any) => (
         <div 
           key={method.id}
           className={`border rounded-lg p-4 cursor-pointer transition-all ${
@@ -33,7 +34,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         >
           <div className="flex items-center">
             <div className="mr-3">
-              {method.icon}
+              {method?.icon}
             </div>
             <div className="flex-grow">
               <div className="font-medium">{method.name}</div>
