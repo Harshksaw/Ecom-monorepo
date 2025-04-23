@@ -4,17 +4,19 @@ const Image = require("../model/Image"); // Updated path to match your actual fi
 // Upload multiple images to Cloudinary and save URLs to DB
 const uploadCarouselImages = async (req, res) => {
   try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ 
-        success: false,
-        message: "No files uploaded" 
-      });
-    }
+
+    console.log(req.files.images , "----")
+    // if (!req.files || req.files.length === 0) {
+    //   return res.status(400).json({ 
+    //     success: false,
+    //     message: "No files uploaded" 
+    //   });
+    // }
 
     // Process uploaded files (they're already uploaded to Cloudinary by multer-storage-cloudinary)
     const savedImages = [];
     
-    for (const file of req.files) {
+    for (const file of req.files.images) {
       try {
         // Extract the publicId from the Cloudinary URL
         // Format: https://res.cloudinary.com/your-cloud-name/image/upload/v1234567/folder/filename
@@ -25,6 +27,8 @@ const uploadCarouselImages = async (req, res) => {
         const newImage = new Image({
           url: file.path,
           publicId: `jewelry-ecommerce/${publicId}`, // Include folder in publicId
+          type: file.mimetype,
+
         });
         
         // Save to database
