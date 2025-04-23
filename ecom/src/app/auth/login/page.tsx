@@ -94,6 +94,8 @@ const dispatch = useDispatch();
               create a new account
             </Link>
           </p>
+      
+
         </div>
         
         <form 
@@ -210,6 +212,12 @@ const dispatch = useDispatch();
               </span>
               Admin Login
             </button>
+            <Link 
+  href="/auth/forgot" 
+  className="font-medium text-center text-blue-600 hover:text-blue-500"
+>
+  Forgot your password?
+</Link>
           </div>
 
           {/* Divider */}

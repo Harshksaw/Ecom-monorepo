@@ -65,71 +65,100 @@ const Header = ({ categories }: any) => {
 
   return (
     <>
-      <header ref={headerRef} className={`w-full fixed top-0 left-0 bg-gray-200  border-b-2 border-black  transition-transform duration-300 z-50 ${show}`}>
-        <div className="container mx-auto px-4 relative flex items-center h-20">
-
-
-          <button
-            onClick={toggleMobileMenu}
-            className="mobile-menu-button p-2 text-black hover:text-gray-700"
-            aria-label={mobileMenu ? 'Close menu' : 'Open menu'}
-          >
-            <FaBars className="h-6 w-6" />
-          </button>
+      <header ref={headerRef} className={`w-full fixed top-0 left-0 bg-gray-200 border-b-2 border-black transition-transform duration-300 z-50 ${show}`}>
+        <div className="container mx-auto px-4 relative flex items-center justify-between h-20">
+          {/* Left: Menu button */}
+          <div className="flex items-center">
+            <button
+              onClick={toggleMobileMenu}
+              className="mobile-menu-button p-2 text-black hover:text-gray-700"
+              aria-label={mobileMenu ? 'Close menu' : 'Open menu'}
+            >
+              <FaBars className="h-6 w-6" />
+            </button>
+          </div>
 
           {/* Center: Logo */}
-          <div className="absolute left-1/2 transform -translate-x-1/2">
+          <div className="flex justify-center mx-auto">
             <Link href="/" className="flex items-center">
-              <Image src="/logo.png" alt="Logo" width={160} height={80} className="h-24 mt-2 w-auto" />
+              <Image 
+                src="/logo.png" 
+                alt="Logo" 
+                width={160} 
+                height={80} 
+                className="h-16 md:h-24 w-auto" 
+              />
             </Link>
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center space-x-4 ml-auto">
-            <CurrencySelector />
+          <div className="flex items-center space-x-4">
+            <div className="hidden md:block">
+              <CurrencySelector />
+            </div>
 
-            {/* User Menu */}
-            {user ? (
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-300 transition-colors text-black"
-                >
-                  <FaUser />
-                  <span className="text-sm font-medium">{user.firstName || 'Account'}</span>
-                </button>
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 flex flex-col">
-                    <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-300">
-                      <p className="font-medium">Signed in as</p>
-                      <p className="truncate">{user.email}</p>
-                    </div>
-                    <Link href="/profile" className="px-4 py-2 text-sm text-black hover:bg-gray-100 flex items-center">
-                      <FaUser className="mr-2" /> Profile
-                    </Link>
-                    <Link href="/orders" className="px-4 py-2 text-sm text-black hover:bg-gray-100 flex items-center">
-                      <FaShoppingBag className="mr-2" /> My Orders
-                    </Link>
-                    {isAdmin && (
-                      <Link href="/admin/dashboard" className="px-4 py-2 text-sm text-black hover:bg-gray-100 flex items-center">
-                        <FaUserCog className="mr-2" /> Admin Dashboard
+            {/* User Menu - Desktop */}
+            <div className="hidden md:block">
+              {user ? (
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-300 transition-colors text-black"
+                  >
+                    <FaUser />
+                    <span className="text-sm font-medium">{user.firstName || 'Account'}</span>
+                  </button>
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 flex flex-col">
+                      <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-300">
+                        <p className="font-medium">Signed in as</p>
+                        <p className="truncate">{user.email}</p>
+                      </div>
+                      <Link href="/profile" className="px-4 py-2 text-sm text-black hover:bg-gray-100 flex items-center">
+                        <FaUser className="mr-2" /> Profile
                       </Link>
-                    )}
-                    <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 flex items-center">
-                      <FaSignOutAlt className="mr-2" /> Sign out
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link href="/auth/login">
-                <button className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400 transition-colors">
-                  Login
-                </button>
-              </Link>
-            )}
+                      <Link href="/orders" className="px-4 py-2 text-sm text-black hover:bg-gray-100 flex items-center">
+                        <FaShoppingBag className="mr-2" /> My Orders
+                      </Link>
+                      {isAdmin && (
+                        <Link href="/admin/dashboard" className="px-4 py-2 text-sm text-black hover:bg-gray-100 flex items-center">
+                          <FaUserCog className="mr-2" /> Admin Dashboard
+                        </Link>
+                      )}
+                      <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 flex items-center">
+                        <FaSignOutAlt className="mr-2" /> Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link href="/auth/login">
+                  <button className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400 transition-colors">
+                    Login
+                  </button>
+                </Link>
+              )}
+            </div>
 
-            {/* Cart */}
+            {/* Mobile: Simplified Menu */}
+            <div className="md:hidden flex items-center space-x-2">
+              {user ? (
+                <button
+                  onClick={() => setMobileMenu(true)}
+                  className="p-2 text-black hover:text-gray-700"
+                >
+                  <FaUser className="h-5 w-5" />
+                </button>
+              ) : (
+                <Link href="/auth/login">
+                  <button className="p-2 text-black hover:text-gray-700">
+                    <FaUser className="h-5 w-5" />
+                  </button>
+                </Link>
+              )}
+            </div>
+
+            {/* Cart - Always visible */}
             <Link href="/cart" className="relative">
               <BsCart className="text-2xl text-black" />
               {cartItems > 0 && (
@@ -144,7 +173,7 @@ const Header = ({ categories }: any) => {
 
       {/* Category Tabs */}
       <div
-        className={`w-full z-40 transition-all duration-300 ${isFixed ? 'fixed top-16 left-0' : ''}`}
+        className={`w-full z-40 transition-all duration-300 ${isFixed ? 'fixed top-20 left-0' : ''}`}
         style={{ marginTop: isFixed ? '0' : `${headerRef.current?.offsetHeight || 0}px` }}
       >
         <CategoryTabs activeCategory={undefined} />
@@ -167,6 +196,12 @@ const Header = ({ categories }: any) => {
             <FaTimes className="h-5 w-5" />
           </button>
         </div>
+
+        {/* Currency Selector in mobile menu */}
+        <div className="px-4 py-3 border-b border-gray-300">
+          <CurrencySelector />
+        </div>
+
         <nav className="px-4 py-2 space-y-1">
           <Link href="/" className="block px-4 py-3 text-gray-900 hover:bg-gray-300 rounded-md" onClick={() => setMobileMenu(false)}>
             Home
@@ -218,7 +253,7 @@ const Header = ({ categories }: any) => {
         )}
       </div>
 
-      {mobileMenu && <div className="fixed inset-0 bg-transparent bg-opacity-50 z-40" onClick={() => setMobileMenu(false)} />}
+      {mobileMenu && <div className="fixed inset-0 bg-transparent bg-opacity-30 z-40" onClick={() => setMobileMenu(false)} />}
     </>
   )
 }

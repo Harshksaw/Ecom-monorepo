@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { cloudinaryServices } = require("../services/cloudinary.service");
-
+const Video = require('../model/Video');
 // add image
 const saveImageCloudinary = async (req, res, next) => {
   // console.log(req.file)
@@ -78,10 +78,40 @@ const cloudinaryDeleteController = async (req, res) => {
     });
   }
 };
-//
+
+const saveVideoCloudinary = async (req, res, next) => {
+  try {
+    
+    const result = await cloudinaryServices.cloudinaryVideoUpload(
+      req.file.buffer
+    );
+
+
+    const newVideo = await Video.create({
+      url: result.secure_url,
+      publicId: result.public_id,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Video uploaded and saved successfully",
+      data: {
+        _id: newVideo._id,
+        url: newVideo.url,
+        publicId: newVideo.publicId,
+        createdAt: newVideo.createdAt,
+      },
+    });
+  } catch (err) {
+    console.error("Video upload error:", err);
+    next(err);
+  }
+};
+
 
 exports.cloudinaryController = {
   cloudinaryDeleteController,
   saveImageCloudinary,
   addMultipleImageCloudinary,
+  saveVideoCloudinary
 };
