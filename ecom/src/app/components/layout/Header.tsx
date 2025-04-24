@@ -177,7 +177,7 @@ const Header = ({ categories }: any) => {
         className={`w-full z-40 transition-all duration-300 ${isFixed ? 'fixed top-20 left-0' : ''}`}
         style={{ marginTop: isFixed ? '0' : `${headerRef.current?.offsetHeight || 0}px` }}
       >
-        <CategoryTabs activeCategory={undefined} />
+        <CategoryTabs activeCategory={undefined} categories={categories} />
       </div>
 
       {/* Mobile Sidebar */}
@@ -215,7 +215,7 @@ const Header = ({ categories }: any) => {
           <ul className="space-y-1">
             {categories?.filter((cat:any )=> cat.isActive).map((category: any) => (
               <li key={category._id}>
-                <Link href={`/category/${category.slug}`} className="block px-4 py-2 text-gray-700 hover:bg-gray-300 rounded-md" onClick={() => setMobileMenu(false)}>
+                <Link href={`/category/${category.slug}?material=gold`} className="block px-4 py-2 text-gray-700 hover:bg-gray-300 rounded-md" onClick={() => setMobileMenu(false)}>
                   {category.name}
                 </Link>
               </li>

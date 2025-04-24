@@ -1,38 +1,52 @@
+
+'use client'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
-// Import providers
 import { Providers } from './store/provider'
 
-// Import components
+
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/authcontext'
 
-// ✅ NEW import for Script
+
 import Script from 'next/script'
+import React, { useEffect } from 'react'
+import { CategoryService } from './lib/api'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'Jewellery Store',
-  description: 'Shop the latest collection of designer Jewellery',
-}
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+
+  const [categories, setCategories] = React.useState<any[]>([]);
+
+
+    useEffect(() => {
+      (async () => {
+        try {
+          const res = await CategoryService.getAllCategories();
+          //@ts-ignore
+          setCategories(res.categories);
+        } catch (e) {
+          console.error('Error fetching categories', e);
+        }
+      })();
+    }, []);
   return (
     <html lang="en">
       <body className={inter.className}>
         <Providers>
           <AuthProvider>
             <div className="flex min-h-screen flex-col">
-              <Header />
+              <Header categories={categories} />
               <main className="">{children}</main>
 
               <Toaster
@@ -59,7 +73,7 @@ export default function RootLayout({
                 }}
               />
 
-              <Footer />
+              <Footer categories={categories} />
             </div>
           </AuthProvider>
         </Providers>

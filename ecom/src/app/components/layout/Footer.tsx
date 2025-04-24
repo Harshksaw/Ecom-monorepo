@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTwitter, FaWhatsapp } from 'react-icons/fa'
 
-const Footer = () => {
+const Footer = ({categories}:any) => {
+
   return (
     <footer className="bg-gray-900 pt-10 pb-6">
       <div className="container mx-auto px-4">
@@ -43,14 +44,16 @@ const Footer = () => {
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">Categories</h3>
             <ul className="space-y-2">
-              <li><Link href="/category/Rings" className="text-gray-400 hover:text-white">Rings</Link></li>
-              <li><Link href="/category/Earrings" className="text-gray-400 hover:text-white">Earrings</Link></li>
-              <li><Link href="/category/Pendant" className="text-gray-400 hover:text-white">Pendant</Link></li>
-              <li><Link href="/category/Bracelet" className="text-gray-400 hover:text-white">Bracelet</Link></li>
-              <li><Link href="/category/Necklace?material=gold" className="text-gray-400 hover:text-white">Necklace</Link></li>
-              <li><Link href="/category/Gifts" className="text-gray-400 hover:text-white">Gifts</Link></li>
-              <li><Link href="/category/Watches" className="text-gray-400 hover:text-white">Watches</Link></li>
-            </ul>
+              {categories?.map((category: any) => (
+                <li key={category.name}>
+                  <Link 
+                    href={`/category/${category.name}?material=gold`} 
+                    className="text-gray-400 hover:text-white"
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}            </ul>
           </div>
         </div>
 
