@@ -1,19 +1,18 @@
-// src/app/checkout/components/OrderSummary.tsx
+// src/app/cart/components/OrderSummary.tsx
 import React from 'react';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { Address } from '../../cart/types';
 import { FaShoppingBag } from 'react-icons/fa';
 import Link from 'next/link';
 
-
 interface OrderSummaryProps {
-  subtotal: any;
+  subtotal: number;
   shipping: number;
   total: number;
   isProcessing: boolean;
   isCheckoutReady: () => boolean;
   handleCheckout: () => void;
-  paymentMethod: string;
+  paymentMethod?: string;
   showAddressRequired: boolean;
   defaultShippingAddress: Address | null;
 }
@@ -24,16 +23,20 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   total,
   isProcessing,
   isCheckoutReady,
-
+  handleCheckout,
   paymentMethod,
   showAddressRequired,
   defaultShippingAddress
 }) => {
   const { formatPrice } = useCurrency();
   
-  // Get the payment method display name
+  // Get the payment method display name if provided
   const getPaymentMethodName = () => {
+    if (!paymentMethod) return null;
+    
     switch(paymentMethod) {
+      case 'razorpay':
+        return 'Razorpay';
       case 'payoneer':
         return 'Payoneer';
       case 'credit-card':
@@ -65,13 +68,15 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <span className="text-lg font-semibold">{formatPrice(total)}</span>
       </div>
       
-      {/* Payment Method Summary */}
-      <div className="bg-gray-50 p-3 rounded mb-6">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Payment Method:</span>
-          <span className="font-medium">{getPaymentMethodName()}</span>
+      {/* Payment Method Summary - Show only on checkout page */}
+      {paymentMethod && (
+        <div className="bg-gray-50 p-3 rounded mb-6">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Payment Method:</span>
+            <span className="font-medium">{getPaymentMethodName()}</span>
+          </div>
         </div>
-      </div>
+      )}
       
       {/* Warning if address is missing */}
       {showAddressRequired && !defaultShippingAddress && (
@@ -81,10 +86,10 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       )}
       
       {/* Checkout Button */}
-      <Link
-        href="/checkout"
-        // disabled={!isCheckoutReady() || isProcessing}
-        className={`w-full py-3 px-4 flex items-center justify-center rounded ${
+      <button
+        onClick={handleCheckout}
+        disabled={!isCheckoutReady() || isProcessing}
+        className={`w-full py-3 px-4 flex items-center justify-center rounded-lg ${
           isCheckoutReady() && !isProcessing
             ? 'bg-blue-600 hover:bg-blue-700 text-white'
             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -101,10 +106,10 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         ) : (
           <>
             <FaShoppingBag className="mr-2 h-5 w-5" />
-            Complete Purchase
+            {paymentMethod ? 'Complete Purchase' : 'Proceed to Checkout'}
           </>
         )}
-      </Link>
+      </button>
       
       {/* Security Notice */}
       <div className="mt-4 text-xs text-gray-500 text-center">

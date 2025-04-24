@@ -24,6 +24,8 @@ import { addToCart } from '../store/slices/cartSlice';
 import { useCurrency } from '../../hooks/useCurrency';
 import { CurrencyCode } from '../store/slices/currencySlice';
 import CustomerReviews from './ProductReviews';
+import { useRouter } from 'next/navigation';
+
 
 // Interfaces (can be moved to a shared types file)
 interface ProductVariant {
@@ -78,7 +80,7 @@ interface Product {
 type ProductDetailsProps = { product: Product };
 
 export default function ProductDetails({ product }: ProductDetailsProps) {
-  console.log("🚀 ~ ProductDetails ~ productcart:", product)
+  const router = useRouter();
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
 
   const dispatch = useDispatch();
@@ -119,31 +121,30 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     return clarityMap[clarity] || clarity;
   };
 
-  const handleBuyNow = () => {
-    if (!selectedVariant) return;
-    
-    // Create cart item and add to cart first
-    const cartItem = {
-      productId: product._id,
-      variantId: selectedVariant._id,
-      name: product.name,
-      metalColor: selectedVariant.metalColor,
-      image: selectedVariant.images[0] || product.images[0] || '',
-      price: selectedVariant.price.default,
-      quantity: 1,
-      sku: product.sku,
-      stock: selectedVariant.stock
-    };
-    
-    // Dispatch to add to cart first
-    dispatch(addToCart(cartItem));
-    
-    // This would typically navigate to checkout page
-    alert('Proceeding to checkout with ' + product?.name);
-    
-    // In a real implementation, you would use router to navigate:
-    // router.push('/checkout');
+ // Enhanced handleBuyNow function for ProductDetails.tsx
+const handleBuyNow = () => {
+  if (!selectedVariant) return;
+  
+  // Create cart item
+  const cartItem = {
+    productId: product._id,
+    variantId: selectedVariant._id,
+    name: product.name,
+    metalColor: selectedVariant.metalColor,
+    image: selectedVariant.images[0] || product.images[0] || '',
+    price: selectedVariant.price.default,
+    quantity: 1,
+    sku: product.sku,
+    stock: selectedVariant.stock,
+    deliveryOptions: product.deliveryOptions
   };
+  
+  // Dispatch to add to cart first
+  dispatch(addToCart(cartItem));
+  
+  // Navigate directly to checkout
+  router.push('/checkout');
+};
   
   return (
     <div className="w-full py-8 px-4 md:px-20 md:py-16 bg-gradient-to-b from-gray-50 to-white">

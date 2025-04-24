@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Wrapper from '../components/Wrapper';
 import EmptyCart from './EmptyCart';
-import Script from "next/script";
 import { useAuth } from '../context/authcontext';
 import { API_URL } from '../lib/api';
 import { useCurrency } from '../../hooks/useCurrency';
@@ -16,12 +15,11 @@ import { useCurrency } from '../../hooks/useCurrency';
 import CartItemsList from './components/CartItemsList';
 import ShippingAddressSection from './components/ShippingAddressSection';
 import OrderSummary from './components/OrderSummary';
-import { loadRazorpay } from '../utils/razorpay';
 
 // Types
 import { UserProfile, Address } from './types';
 import axios from 'axios';
-import { clearCart, selectCartItems } from '../store/slices/cartSlice';
+import { selectCartItems } from '../store/slices/cartSlice';
 import toast from 'react-hot-toast';
 
 const CartPage = () => {
@@ -29,7 +27,7 @@ const CartPage = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
   const { token } = useAuth();
-  const { selectedCurrency, formatPrice } = useCurrency();
+  const { formatPrice } = useCurrency();
   
   // State management
   const [orderState, setOrderState] = useState({
@@ -66,7 +64,6 @@ const CartPage = () => {
   
     return selectedOption ? selectedOption.price : 0;
   }, []);
-
 
   // Calculate delivery cost whenever relevant state changes
   useEffect(() => {
@@ -110,7 +107,6 @@ const CartPage = () => {
         
         // Get user info from localStorage
         const userInfo = localStorage.getItem('user');
-        // console.log("🚀 ~ loadUserProfile ~ userInfo:", userInfo)
         
         if (userInfo) {
           const parsedUser = JSON.parse(userInfo);
@@ -122,7 +118,6 @@ const CartPage = () => {
             
             if (response.status === 200) {
               const userData = response.data;
-              console.log("🚀 ~ loadUserProfile ~ userData:", userData)
               
               if (userData && userData.user) {
                 // Find default addresses
@@ -131,14 +126,13 @@ const CartPage = () => {
                 
                 if (userData.user.addresses && userData.user.addresses.length > 0) {
                   defaultShipping = userData.user.addresses.find(
-                    (addr: Address) =>  addr.isDefault
+                    (addr: Address) => addr.isDefault
                   );
                   
                   // If no default shipping found, use the first shipping address
-                  const firstShipping = userData.user.addresses[0]
+                  const firstShipping = userData.user.addresses[0];
                   
                   defaultShipping = defaultShipping || firstShipping || null;
-                  // console.log("🚀 ~ loadUserProfile ~ defaultShipping:", defaultShipping)
                   isInternational = (defaultShipping?.country !== 'India');
                 }
                 
@@ -163,7 +157,6 @@ const CartPage = () => {
     
     loadUserProfile();
   }, [token]);
-               
 
   // Calculate totals whenever cart items change
   useEffect(() => {
@@ -217,8 +210,8 @@ const CartPage = () => {
     return true;
   }, [cartItems, userState]);
 
-  // Handle checkout - this now uses our loadRazorpay utility
-  const handleCheckout = async () => {
+  // Navigate to checkout page
+  const handleCheckout = () => {
     if (cartItems.length === 0) {
       toast.error('Your cart is empty');
       return;
@@ -230,122 +223,8 @@ const CartPage = () => {
       return;
     }
   
-    setProcessingState({ isProcessing: true });
-    const toastId = toast.loading('Creating your order...');
-  
-    try {
-      const { subtotal, shipping, total } = orderState;
-      const { userId, defaultShippingAddress, userProfile } = userState;
-
-      const formattedItems = cartItems.map((item: any) => ({
-        productId: item.productId,
-        variantId: item.variantId,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price, // Always use INR price in the backend
-        image: item.image,
-      }));
-  
-      // Create order on backend (always using INR price)
-      const response = await fetch(`${API_URL}/orders/create/${userId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-
-        },
-        body: JSON.stringify({
-          total, // Always in INR
-          receipt: `receipt_${Date.now()}`,
-          subtotal, // Always in INR
-          shippingCost: shipping, // Always in INR
-          shippingAddress: defaultShippingAddress,
-          items: formattedItems,
-        })
-      });
-  
-      const orderData = await response.json();
-  
-      // Check response
-      if (!orderData.orderId) {
-        throw new Error(orderData.message || 'Failed to create order');
-      }
-  
-      toast.success('Order created successfully!', { id: toastId });
-  
-      // Load Razorpay
-      // const Razorpay = await loadRazorpay();
-      
-      // // Add currency conversion notice for international customers
-      // if (selectedCurrency !== 'INR') {
-      //   toast.success(`Your card will be charged in INR (${formatPrice(total)} converts to approximately ₹${total.toLocaleString()}).`, {
-      //     duration: 6000,
-      //   });
-      // }
-      
-      // Initialize Razorpay options (always in INR)
-      // const options = {
-      //   key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
-      //   amount: Math.round(total * 100), // in paisa (INR)
-      //   currency: 'INR', // Razorpay requires INR for Indian merchants
-      //   name: 'Jewelry Store',
-      //   description: 'Purchase of fine jewelry',
-      //   order_id: orderData.orderId,
-      //   image: '/logo.PNG',
-      //   handler: (response: any) => handlePaymentSuccess(response),
-      //   prefill: {
-      //     name: userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : '',
-      //     email: userProfile?.email || '',
-      //     contact: userProfile?.phoneNumber || ''
-      //   },
-      //   notes: { 
-      //     address: 'Jewelry Store Corporate Office',
-      //     order_id: orderData.orderId 
-      //   },
-      //   theme: { color: '#3B82F6' }
-      // };
-  
-      // // Create Razorpay instance and open checkout
-      // const razorpayInstance = new Razorpay(options);
-      // razorpayInstance.open();
-
-
-
-    } catch (error: any) {
-      console.error('Checkout error:', error);
-      toast.error(error.message || 'Failed to initiate checkout. Please try again.', { id: toastId });
-    } finally {
-      setProcessingState({ isProcessing: false });
-    }
-  };
-
-  // Handle payment success
-  const handlePaymentSuccess = async (response: any) => {
-    const verifyToastId = toast.loading('Verifying your payment...');
-    
-    try {
-      const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
-      
-      const verifyResponse = await axios.post(`${API_URL}/orders/capturePayment`, {
-        paymentId: razorpay_payment_id,
-        orderId: razorpay_order_id,
-        signature: razorpay_signature
-      });
-      
-      if (verifyResponse.status === 200) {
-        toast.success('Payment successful! Order confirmed.');
-        // Clear the cart after successful payment
-        dispatch(clearCart());
-        
-        // Redirect to order confirmation page
-        router.push(`/orders`);
-      } else {
-        const verifyData = verifyResponse.data;
-        toast.error(`Payment verification failed: ${verifyData.message || 'Please contact support.'}`, { id: verifyToastId });
-      }
-    } catch (error: any) {
-      console.error('Payment verification error:', error);
-      toast.error('An error occurred while verifying your payment.', { id: verifyToastId });
-    }
+    // Navigate to checkout page
+    router.push('/checkout');
   };
 
   // Navigate to profile page to add address
@@ -358,8 +237,6 @@ const CartPage = () => {
     return <EmptyCart />;
   }
 
-
-  console.log(userState.defaultShippingAddress)
   return (
     <>
       <Wrapper>
@@ -398,29 +275,68 @@ const CartPage = () => {
               />
               
               {/* Order Summary */}
-              <OrderSummary 
-                subtotal={orderState.subtotal}
-                shipping={orderState.shipping}
-                total={orderState.total}
-                isProcessing={processingState.isProcessing}
-                isCheckoutReady={isCheckoutReady}
-                handleCheckout={handleCheckout}
-                paymentMethod="payoneer" // Example value for payment method
-                showAddressRequired={userState.showAddressRequired}
-                defaultShippingAddress={userState.defaultShippingAddress}
-              />
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
+                
+                <div className="space-y-3 border-b pb-4 mb-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">{formatPrice(orderState.subtotal)}</span>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Shipping</span>
+                    <span className="font-medium">{formatPrice(orderState.shipping)}</span>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between mb-6">
+                  <span className="text-lg font-semibold">Total</span>
+                  <span className="text-lg font-semibold">{formatPrice(orderState.total)}</span>
+                </div>
+                
+                {/* Proceed to Checkout Button */}
+                <button
+                  onClick={handleCheckout}
+                  disabled={!isCheckoutReady() || processingState.isProcessing}
+                  className={`w-full py-3 px-4 flex items-center justify-center rounded-lg ${
+                    isCheckoutReady() && !processingState.isProcessing
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  } transition-colors duration-200`}
+                >
+                  {processingState.isProcessing ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    <>Proceed to Checkout</>
+                  )}
+                </button>
+                
+                {/* Security Notice */}
+                <div className="mt-4 text-xs text-gray-500 text-center">
+                  <div className="flex items-center justify-center mb-1">
+                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Secure Checkout
+                  </div>
+                  <p>Your payment information is processed securely.</p>
+                </div>
+              </div>
             </div>
           </div>
+
         </div>
       </Wrapper>
-      
-      {/* Load Razorpay script */}
-      <Script
-        src="https://checkout.razorpay.com/v1/checkout.js"
-        strategy="beforeInteractive"
-      />
     </>
   );
-};
+}
+
 
 export default CartPage;
