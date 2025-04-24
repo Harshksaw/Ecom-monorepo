@@ -44,16 +44,17 @@ const Footer = ({categories}:any) => {
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">Categories</h3>
             <ul className="space-y-2">
-              {categories?.map((category: any) => (
-                <li key={category.name}>
-                  <Link 
-                    href={`/category/${category.name}?material=gold`} 
-                    className="text-gray-400 hover:text-white"
-                  >
-                    {category.name}
-                  </Link>
-                </li>
-              ))}            </ul>
+            {categories?.filter((cat:any )=> cat.isActive).sort((a:any, b:any) => {
+       if(a.name === "New Arrivals") return -1;
+       if(b.name === "New Arrivals") return 1;
+       return 0;
+     }).map((category: any) => (
+              <li key={category._id}>
+                <Link href={`/category/${category.slug}?material=gold`} className="text-gray-400 hover:text-white">
+                  {category.name}
+                </Link>
+              </li>
+            ))}         </ul>
           </div>
         </div>
 

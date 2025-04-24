@@ -31,15 +31,17 @@ export default async function Home() {
 
 
 
-  <div className="text-md md:text-xl text-gray-700">
-    Since 2014, Discover Timeless Elegance
-    At Shri Nanu Gems we specialize in crafting high-quality, handcrafted jewelry blending timeless elegance with modern design. Each piece is crafted with care using premium materials for lasting beauty. Whether for a gift or personal use, our unique collection offers something special for every occasion, designed to complement your individual style.
+        <div className="text-md md:text-xl text-gray-700">
+  <div>Since 2014, Discover Timeless Elegance     At Shri Nanu Gems,</div>
+  <div>
+ we specialize in crafting high-quality, handcrafted jewelry blending timeless elegance with modern design. Each piece is crafted with care using premium materials for lasting beauty. Whether for a gift or personal use, our unique collection offers something special for every occasion, designed to complement your individual style.
   </div>
+</div>
 
       </div>
 
       <section className="mb-16">
-        <h2 className="text-2xl font-bold text-center mb-8">Our Collections</h2>
+        <h2 className="text-5xl font-bold text-center mb-8">Our Collections</h2>
 
         {/* Product Grid */}
         <HomeProductGrid products={products} />

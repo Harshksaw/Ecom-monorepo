@@ -23,12 +23,13 @@ export default async function CategoryDetailPage({
 
   
   const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
-  const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'default';
+
   
   try {
-    const category = params.slug;
-    console.log("🚀 ~ params:", await searchParams)
-    // console.log("🚀 ~ category:", category);
+    const category =decodeURIComponent(params.slug);
+    console.log("🚀 ~ category:", category)
+
+
 
     // Fetch products for this category
     const productResponse = await ProductService.getAllProductByCategory({
