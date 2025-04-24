@@ -41,7 +41,7 @@ export default async function Home() {
       </div>
 
       <section className="mb-16">
-        <h2 className="text-5xl font-bold text-center mb-8">Our Collections</h2>
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8">Our Collections</h2>
 
         {/* Product Grid */}
         <HomeProductGrid products={products} />
