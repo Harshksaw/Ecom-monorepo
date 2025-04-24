@@ -177,7 +177,7 @@ const Header = ({ categories }: any) => {
         className={`w-full z-40 transition-all duration-300 ${isFixed ? 'fixed top-20 left-0' : ''}`}
         style={{ marginTop: isFixed ? '0' : `${headerRef.current?.offsetHeight || 0}px` }}
       >
-        <CategoryTabs activeCategory={undefined} />
+        <CategoryTabs activeCategory={undefined} categories={categories} />
       </div>
 
       {/* Mobile Sidebar */}

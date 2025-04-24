@@ -22,10 +22,11 @@ const getCategoryColor = (category: string) => {
 
 interface CategoryTabsProps {
   activeCategory?: string;
+  categories: any[];
 }
 
-const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
-  const [categories, setCategories] = useState<any[]>([]);
+const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory , categories}:any) => {
+  // const [categories, setCategories] = useState<any[]>([]);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -39,17 +40,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory }) => {
     return [...top, ...rest];
   }, [categories]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await CategoryService.getAllCategories();
-        //@ts-ignore
-        setCategories(res.categories);
-      } catch (e) {
-        console.error('Error fetching categories', e);
-      }
-    })();
-  }, []);
+
 
   const scrollLeft = () => scrollRef.current?.scrollBy({ left: -250, behavior: 'smooth' });
   const scrollRight = () => scrollRef.current?.scrollBy({ left: 250, behavior: 'smooth' });
