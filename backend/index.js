@@ -16,7 +16,8 @@ const globalErrorHandler = require("./middleware/global-error-handler");
 const {
   getAllImages,
   getImageById,
-  uploadCarouselImages
+  uploadCarouselImages,
+  deleteImage
 } = require("./controller/image.controller");
 const categoryRoutes = require("./routes/category.routes");
 const productRoutes = require("./routes/product.routes");
@@ -49,6 +50,7 @@ app.use('/api/currency', currencyRoutes);
 app.post("/api/upload-carousel", upload, uploadCarouselImages);
 
 app.get("/api/images", getAllImages);
+app.delete("/api/images/:id", deleteImage);
 app.get("/api/images/:id", getImageById); // Changed from /images/:id to /api/images/:id for consistency
 
 

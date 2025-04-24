@@ -238,7 +238,7 @@ const CreateCategoryPage = () => {
                 <div className="absolute bottom-2 right-2 flex gap-1">
                   <button 
                     onClick={() => handleEdit(category)}
-                    className="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-gray-600 hover:text-pink-600"
+                    className="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-gray-600 hover:text-gray-600"
                   >
                     <FaEdit size={14} />
                   </button>

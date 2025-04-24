@@ -128,7 +128,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
             className="absolute top-2 right-2 bg-white bg-opacity-70 p-2 rounded-full z-10 hover:bg-opacity-100 transition-all"
           >
             {isFavorite ? (
-              <FaHeart className="text-pink-600" />
+              <FaHeart className="text-gray-600" />
             ) : (
               <FaRegHeart className="text-gray-600" />
             )}
@@ -170,7 +170,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
                     ? 'bg-yellow-100 text-yellow-800'
                     : material.toLowerCase().includes('silver')
                       ? 'bg-gray-100 text-gray-800'
-                      : 'bg-gray-100 text-pink-800'
+                      : 'bg-gray-100 text-gray-800'
                   }`}
               >
                 {material}

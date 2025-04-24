@@ -73,9 +73,10 @@ export default function RootLayout({
     __html: `
       var Tawk_API = Tawk_API || {};
       // as soon as it loads, hide the widget
-      Tawk_API.onLoad = function() {
-        Tawk_API.hideWidget();
-      };
+Tawk_API.onLoad = function() {
+  Tawk_API.minimize(); // Ensures chat window is not open
+};
+
       (function(){
         var s1 = document.createElement("script"),
             s0 = document.getElementsByTagName("script")[0];

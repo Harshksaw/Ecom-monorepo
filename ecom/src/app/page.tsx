@@ -23,7 +23,7 @@ export default async function Home() {
           href="/"
 
         >
-          <div className="text-3xl md:text-4xl mb-5 font-bold leading-tight text-pink-800" >
+          <div className="text-3xl md:text-4xl mb-5 font-bold leading-tight text-gray-800" >
 
             Shri Nanu Gems & Jewelers
           </div>

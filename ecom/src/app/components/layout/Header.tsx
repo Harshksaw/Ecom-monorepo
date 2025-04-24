@@ -78,15 +78,16 @@ const Header = ({ categories }: any) => {
             </button>
           </div>
 
-          {/* Center: Logo */}
-          <div className="flex justify-center mx-auto">
+          {/* Center: Logo - Modified to properly center */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex justify-center">
             <Link href="/" className="flex items-center">
               <Image 
                 src="/logo.png" 
                 alt="Logo" 
                 width={160} 
                 height={80} 
-                className="h-16 md:h-24 w-auto" 
+                className="h-16 md:h-20 w-auto" 
+                priority
               />
             </Link>
           </div>
@@ -207,7 +208,7 @@ const Header = ({ categories }: any) => {
             Home
           </Link>
           <Link href="/about" className="block px-4 py-3 text-gray-900 hover:bg-gray-300 rounded-md" onClick={() => setMobileMenu(false)}> About </Link>
-          <Link href="/contact" className="block px-4 py-3 text-gray-900 hover:bg-gray-300 rounded-md" onClick={() => setMobileMenu(false)}> Contact </Link>
+          <Link href="/contact" className="block px-4 py-3 text-gray-900 hover:bg-gray-300 rounded-md" onClick={() => setMobileMenu(false)}> Contact Us </Link>
         </nav>
         <div className="border-t border-gray-300 px-4 py-3">
           <h3 className="font-medium mb-2 text-black">Categories</h3>
