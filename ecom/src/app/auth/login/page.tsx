@@ -59,6 +59,15 @@ const dispatch = useDispatch();
           toast.success(result.message || 'Login successful!');
           // Router navigation happens in the login function after setting the user state
         }
+        await dispatch(setUser({
+          id: result.user?.id || '',
+          name: result.user?.firstName || '',
+          email: result.user?.email || '',
+          phone: result.user?.phoneNumber || '',
+          isLoggedIn: true
+        }));
+
+        localStorage.setItem('user', JSON.stringify(result.user));
       
       // Alternative: Direct navigation to admin login
       router.push('/admin/dashboard');

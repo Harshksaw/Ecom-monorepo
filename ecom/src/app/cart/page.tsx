@@ -25,6 +25,7 @@ import toast from 'react-hot-toast';
 const CartPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+  
   const cartItems = useSelector(selectCartItems);
   const { token } = useAuth();
   const { formatPrice } = useCurrency();

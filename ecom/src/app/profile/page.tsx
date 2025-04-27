@@ -87,29 +87,30 @@ export default function ProfilePage() {
     }
   }, []);
 
+  const fetchProfile = async () => {
+    if (!token || !userId?.id) return;
+    
+    try {
+      setIsLoading(true);
+      
+      const response = await axios.get(`${API_URL}/auth/profile/${userId.id}`);
+      
+      if (response.status === 200) {
+        setProfile(response.data.user);
+      } else {
+        toast.error(response.data.message || 'Failed to load profile');
+      }
+        console.log("🚀 ~ fetchProfile ~ response.data.user:", response.data.user)
+    } catch (error: any) {
+      console.error('Error fetching profile:', error);
+      toast.error(error.response?.data?.message || 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // Fetch user profile with addresses
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!token || !userId?.id) return;
-      
-      try {
-        setIsLoading(true);
-        
-        const response = await axios.get(`${API_URL}/auth/profile/${userId.id}`);
-        
-        if (response.status === 200) {
-          setProfile(response.data.user);
-        } else {
-          toast.error(response.data.message || 'Failed to load profile');
-        }
-          console.log("🚀 ~ fetchProfile ~ response.data.user:", response.data.user)
-      } catch (error: any) {
-        console.error('Error fetching profile:', error);
-        toast.error(error.response?.data?.message || 'An error occurred');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+
     
     fetchProfile();
   }, [token, userId?.id]);
@@ -198,6 +199,7 @@ export default function ProfilePage() {
         setShowAddressModal(false);
         toast.success(editingAddressIndex !== null ? 'Address updated' : 'Address added');
         setShowAddressModal(false);
+        fetchProfile();
         // window.location.reload();
       } else {
         toast.error(response.data.message || 'Failed to save address');
@@ -459,7 +461,7 @@ export default function ProfilePage() {
                   required
                 >
                   <option value="shipping">Shipping</option>
-                  <option value="billing">Billing</option>
+
                 </select>
               </div>
               

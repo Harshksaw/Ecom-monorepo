@@ -9,7 +9,7 @@ type Params = { params: { slug: string } };
 
 export default async function ProductPage({ params }: any) {
   try {
-    const product = await ProductService.getProductBySlug(params.slug);
+    const product = await ProductService.getProductBySlug(params?.slug);
 
     if (!product) {
       return (
