@@ -113,6 +113,14 @@ reviews: [
   }
 ],
 
+size:[
+  {
+    type: { type: String }, // e.g., "standard", "express"
+    size: { type: String }, // e.g., "5-7 business days"
+
+  }
+]
+
 
   
   
