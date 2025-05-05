@@ -29,19 +29,24 @@ export default function RootLayout({
   const [categories, setCategories] = React.useState<any[]>([]);
 
 
-    useEffect(() => {
-      (async () => {
-        try {
-          const res = await CategoryService.getAllCategories();
-          //@ts-ignore
-          setCategories(res.categories);
-        } catch (e) {
-          console.error('Error fetching categories', e);
-        }
-      })();
-    }, []);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await CategoryService.getAllCategories();
+        //@ts-ignore
+        setCategories(res.categories);
+      } catch (e) {
+        console.error('Error fetching categories', e);
+      }
+    })();
+  }, []);
   return (
     <html lang="en">
+      <Head>
+        <title>Shri Nanu Gems | Authentic Gemstones</title>
+        <meta name="description" content="Shri Nanu Gems offers authentic, high-quality gemstones sourced ethically. Explore our collection now!" />
+        <link rel="canonical" href="https://shrinanugems.com" />
+      </Head>
       <body className={inter.className}>
         <Providers>
           <AuthProvider>
@@ -79,12 +84,12 @@ export default function RootLayout({
         </Providers>
 
         {/* ✅ Tawk.to Script added correctly */}
-  {/* ✅ Tawk.to Script added, but hidden on load */}
-<Script
-  id="tawk-to-widget"
-  strategy="afterInteractive"
-  dangerouslySetInnerHTML={{
-    __html: `
+        {/* ✅ Tawk.to Script added, but hidden on load */}
+        <Script
+          id="tawk-to-widget"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
       var Tawk_API = Tawk_API || {};
       // as soon as it loads, hide the widget
 Tawk_API.onLoad = function() {
@@ -101,8 +106,8 @@ Tawk_API.onLoad = function() {
         s0.parentNode.insertBefore(s1, s0);
       })();
     `,
-  }}
-/>
+          }}
+        />
 
       </body>
     </html>
