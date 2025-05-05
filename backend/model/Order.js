@@ -30,6 +30,10 @@ const orderSchema = new Schema({
     price: { type: Number, required: true },
     name: { type: String, required: true },
     image: { type: String },
+    size: {
+      type: { type: String },
+      size: { type: String }
+    },
     // Individual item status
     status: { 
       type: String, 

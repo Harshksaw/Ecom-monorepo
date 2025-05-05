@@ -90,10 +90,17 @@ exports.createProduct = async (req, res) => {
         const variantImages = req.files[`variant_${index}_images`] 
           ? req.files[`variant_${index}_images`].map(file => file.path) 
           : [];
+
+
+          const parsedSize = variant.size ? 
+          (typeof variant.size === 'string' ? JSON.parse(variant.size) : variant.size) : 
+          [];
       
         return {
           ...variant,
           price: new Map(Object.entries(variant.price)),
+          size: parsedSize,
+
           images: variantImages
         };
 
@@ -530,9 +537,15 @@ exports.updateProduct = async (req, res) => {
         priceMap = new Map(Object.entries(variant.price));
       }
       
+      // Process size data
+      const parsedSize = variant.size ? 
+        (typeof variant.size === 'string' ? JSON.parse(variant.size) : variant.size) : 
+        [];
+      
       return {
         ...variant,
-        price: priceMap
+        price: priceMap,
+        size: parsedSize // Add the parsed size to the variant
       };
     });
 

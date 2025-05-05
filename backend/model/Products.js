@@ -69,6 +69,13 @@ variants: [
       of: Number,
       default: {}
     },
+    size:[
+  {
+    type: { type: String }, // e.g., "standard", "express"
+    size: { type: String }, // e.g., "5-7 business days"
+
+  }
+],
     stock: { type: Number, default: 100 },
   }
 ],
@@ -113,13 +120,7 @@ reviews: [
   }
 ],
 
-size:[
-  {
-    type: { type: String }, // e.g., "standard", "express"
-    size: { type: String }, // e.g., "5-7 business days"
 
-  }
-]
 
 
   

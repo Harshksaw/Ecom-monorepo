@@ -21,6 +21,7 @@ export const HeroBanner = () => {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const [currentSlide, setCurrentSlide] = useState(0)
   const slideInterval = useRef<NodeJS.Timeout | null>(null)
+  const [userInteracted, setUserInteracted] = useState(false)
 
   useEffect(() => {
     const fetchMedia = async () => {
@@ -41,6 +42,22 @@ export const HeroBanner = () => {
       }
     }
     fetchMedia()
+    
+    // Add a one-time event listener to detect user interaction
+    const handleInteraction = () => {
+      setUserInteracted(true)
+      // Remove listeners after first interaction
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
+    
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
+    
+    return () => {
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
   }, [])
 
   useEffect(() => {
@@ -74,9 +91,9 @@ export const HeroBanner = () => {
   const handleSlideChange = (index: number) => {
     setCurrentSlide(index)
 
-    // Pause all videos except the current one
-    videoRefs.current.forEach((videoRef, i) => {
-      if (videoRef && i !== index) {
+    // Pause all videos
+    videoRefs.current.forEach((videoRef) => {
+      if (videoRef) {
         videoRef.pause()
       }
     })
@@ -84,14 +101,62 @@ export const HeroBanner = () => {
     // Play the current video if it exists
     const currentVideo = videoRefs.current[index]
     if (currentVideo && media[index]?.type === "video") {
-      currentVideo.muted = false // Enable audio
+      // Always mute videos to comply with autoplay policies
+      currentVideo.muted = true 
+      
+      // Only try to unmute if user has interacted with the page
+      if (userInteracted) {
+        try {
+          currentVideo.muted = false;
+        } catch (e) {
+          console.log("Could not unmute video:", e);
+        }
+      }
+      
+      // Attempt to play the video
       const playPromise = currentVideo.play()
       if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log("Autoplay prevented:", error)
-        })
+        playPromise
+          .then(() => {
+            console.log("Video playing successfully");
+            // If video is playing and user interacted, we can try to unmute
+            if (userInteracted && currentVideo.muted) {
+              try {
+                currentVideo.muted = false;
+              } catch (e) {
+                console.log("Could not unmute after successful play:", e);
+              }
+            }
+          })
+          .catch((error) => {
+            console.log("Autoplay prevented:", error)
+            // If autoplay fails with unmuted, try with muted
+            currentVideo.muted = true
+            currentVideo.play().catch(e => {
+              console.error("Even muted play failed:", e)
+            })
+          })
       }
     }
+  }
+
+  // Add a function to handle user-initiated play
+  const handleVideoClick = (index: number) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      if (video.paused) {
+        video.muted = false;
+        video.play().catch(e => {
+          console.log("Play on click failed:", e);
+          // If unmuted play fails, try muted
+          video.muted = true;
+          video.play();
+        });
+      } else {
+        video.pause();
+      }
+    }
+    setUserInteracted(true);
   }
 
   const handleVideoEnd = (index: number) => {
@@ -149,20 +214,32 @@ export const HeroBanner = () => {
                   priority={index === 0} // Only prioritize the first image
                 />
               ) : (
-                <video
-                  ref={(el) => {
-                    videoRefs.current[index] = el
-                  }}
-                  className="w-full h-full object-cover"
-                  playsInline
-                  muted={false} // Enable audio
-                  loop={false} // Do not loop videos
-                  onEnded={() => handleVideoEnd(index)} // Trigger when video ends
-                  onError={(e) => console.error("Video failed to load:", e)}
-                >
-                  <source src={item.url} type={getMimeType(item.url)} />
-                  Your browser does not support HTML5 video.
-                </video>
+                <div onClick={() => handleVideoClick(index)} className="video-container w-full h-full cursor-pointer">
+                  <video
+                    ref={(el) => {
+                      videoRefs.current[index] = el
+                    }}
+                    className="w-full h-full object-cover"
+                    playsInline
+                    autoPlay={index === currentSlide} // Only autoplay the current slide
+                    muted={false} // Start muted to work with autoplay policies
+                    loop={false} // Do not loop videos
+                    onEnded={() => handleVideoEnd(index)} // Trigger when video ends
+                    onError={(e) => console.error("Video failed to load:", e)}
+                  >
+                    <source src={item.url} type={getMimeType(item.url)} />
+                    Your browser does not support HTML5 video.
+                  </video>
+                  {/* Optional play indicator overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+                    <div className="p-4 bg-black/50 rounded-full">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
             {item.legend && (
