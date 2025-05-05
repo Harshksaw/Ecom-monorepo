@@ -1,23 +1,20 @@
 // lib/api-service.ts
-import axios from 'axios';
+import axios from "axios";
 
 // API base URL
 // export const API_URL = "https://ecom-turborepo.onrender.com/api"
-// export const API_URL = "http://localhost:7003/api"
-export const API_URL = process.env.NEXT_PUBLIC_API_URL
+export const API_URL = "http://localhost:7003/api";
+// export const API_URL = process.env.NEXT_PUBLIC_API_URL
 // export const API_URL = "http://localhost:7003/api"
 // export const API_URL = "https://glowing-orbit-7v95rjwg75j53p4x7-7003.app.github.dev/api"
-
 
 // Create an axios instance with default configuration
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
-
-
 
 // Type Definitions
 export interface Product {
@@ -33,8 +30,8 @@ export interface Product {
       data: {
         attributes: {
           url: string;
-        }
-      }
+        };
+      };
     };
     image: {
       data: Array<{
@@ -42,39 +39,39 @@ export interface Product {
         attributes: {
           url: string;
           name?: string;
-        }
-      }>
+        };
+      }>;
     };
     size: {
       data: Array<{
         size: string;
         enabled: boolean;
-      }>
+      }>;
     };
     categories?: {
       data: Category[];
     };
     featured?: boolean;
     [key: string]: any;
-  }
+  };
 }
 
 export interface Category {
   id: string;
-  categories:any;
+  categories: any;
   attributes: {
-    categories:any;
+    categories: any;
     name: string;
     slug: string;
     products: {
       data: Product[];
     };
     [key: string]: any;
-  }
+  };
 }
 
 export interface ApiResponse<T> {
-  categories:any,
+  categories: any;
   data: T;
   meta?: {
     pagination?: {
@@ -82,9 +79,9 @@ export interface ApiResponse<T> {
       pageCount: number;
       pageSize: number;
       total: number;
-    }
-  },
-  length: number
+    };
+  };
+  length: number;
 }
 
 // Product Service
@@ -92,15 +89,8 @@ export const ProductService = {
   /**
    * Fetch all products with flexible filtering
    */
-  async getAllProducts(
-
-
-
-  ) {
-
-
+  async getAllProducts() {
     const response = await axios.get(`${API_URL}/products`);
-  
 
     return response.data.products;
   },
@@ -112,34 +102,34 @@ export const ProductService = {
     material?: string;
   }) {
     try {
-      const { category, page = 1, pageSize = 12 , material} = options;
-      
+      const { category, page = 1, pageSize = 12, material } = options;
+
       // Make sure category is provided
-      if (!category ) {
-        throw new Error('Category is required');
+      if (!category) {
+        throw new Error("Category is required");
       }
-      
-    
+
       // Make the request with proper parameters
-      const response = await axios.get(`${API_URL}/products/categories/${category}?material=${material}`);
-      
+      const response = await axios.get(
+        `${API_URL}/products/categories/${category}?material=${material}`
+      );
+
       // Return the data from the response
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching products by category:', error);
+      console.error("Error fetching products by category:", error);
       throw error;
     }
   },
-
 
   async getProductBySlug(slug: string) {
     try {
       // Make the API request to fetch product by slug
       const response = await axios.get(`${API_URL}/products/${slug}`);
-      
+
       // Return the product data
       // console.log("🚀 ~ getProductBySlug ~ response.data.product:", response.data.product)
-      return response.data.product
+      return response.data.product;
     } catch (error) {
       console.error(`Error fetching product with slug ${slug}:`, error);
       return null;
@@ -155,7 +145,7 @@ export const ProductService = {
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching featured products:', error);
+      console.error("Error fetching featured products:", error);
       throw error;
     }
   },
@@ -163,7 +153,11 @@ export const ProductService = {
   /**
    * Fetch related products
    */
-  async getRelatedProducts(currentSlug: string, categoryId?: string, limit = 4) {
+  async getRelatedProducts(
+    currentSlug: string,
+    categoryId?: string,
+    limit = 4
+  ) {
     try {
       let url = `/products?populate=*&filters[slug][$ne]=${currentSlug}`;
       if (categoryId) {
@@ -174,7 +168,7 @@ export const ProductService = {
       const response = await apiClient.get<ApiResponse<Product[]>>(url);
       return response.data;
     } catch (error) {
-      console.error('Error fetching related products:', error);
+      console.error("Error fetching related products:", error);
       throw error;
     }
   },
@@ -192,7 +186,7 @@ export const ProductService = {
       console.error(`Error searching products with query "${query}":`, error);
       throw error;
     }
-  }
+  },
 };
 
 // Category Service
@@ -210,14 +204,16 @@ export class CategoryService {
     }
 
     try {
-      const response = await apiClient.get<ApiResponse<Category[]>>('/categories');
+      const response = await apiClient.get<ApiResponse<Category[]>>(
+        "/categories"
+      );
       const data = response.data;
 
       // Cache result
       this._cache = data.categories;
       return { categories: this._cache };
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
       throw error;
     }
   }
@@ -241,14 +237,21 @@ export class CategoryService {
   /**
    * Fetch products in a specific category
    */
-  static async getProductsByCategory(categorySlug: string, page = 1, pageSize = 10) {
+  static async getProductsByCategory(
+    categorySlug: string,
+    page = 1,
+    pageSize = 10
+  ) {
     try {
       const response = await apiClient.get<ApiResponse<Product[]>>(
         `/products?populate=*&filters[categories][slug][$eq]=${categorySlug}&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
       );
       return response.data;
     } catch (error) {
-      console.error(`Error fetching products for category ${categorySlug}:`, error);
+      console.error(
+        `Error fetching products for category ${categorySlug}:`,
+        error
+      );
       throw error;
     }
   }
@@ -259,15 +262,18 @@ export const Helpers = {
   /**
    * Format price with currency
    */
-  formatPrice(price: number, currency = '₹'): string {
+  formatPrice(price: number, currency = "₹"): string {
     return `${currency}${price.toFixed(2)}`;
   },
 
   /**
    * Calculate discount percentage
    */
-  getDiscountPercentage(originalPrice: number, discountedPrice: number): string {
-    if (!originalPrice || !discountedPrice) return '0';
+  getDiscountPercentage(
+    originalPrice: number,
+    discountedPrice: number
+  ): string {
+    if (!originalPrice || !discountedPrice) return "0";
     const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
     return discount.toFixed(2);
   },
@@ -280,30 +286,27 @@ export const Helpers = {
     if (product.attributes.thumbnail?.data?.attributes?.url) {
       return `${API_URL}${product.attributes.thumbnail.data.attributes.url}`;
     }
-    
+
     if (product.attributes.image?.data?.[index]?.attributes?.url) {
       return `${API_URL}${product.attributes.image.data[index].attributes.url}`;
     }
-    
-    return '/placeholder-image.jpg'; // Fallback placeholder
-  }
+
+    return "/placeholder-image.jpg"; // Fallback placeholder
+  },
 };
 
-
 export const User = {
-
-  async getUserProfile(userId: string){
-    const res  = await axios.get(`${API_URL}/auth/profile/${userId}`);
-    return res
-  }
-
-}
+  async getUserProfile(userId: string) {
+    const res = await axios.get(`${API_URL}/auth/profile/${userId}`);
+    return res;
+  },
+};
 // Configure Axios Interceptors
 apiClient.interceptors.request.use(
   (config) => {
     // Add authentication token if available
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -317,25 +320,24 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const { response } = error;
-    
+
     if (response?.status === 401) {
-      console.error('Unauthorized: Please login again');
-      
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
+      console.error("Unauthorized: Please login again");
+
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
         // Optional: redirect to login
         // window.location.href = '/login';
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
-
 
 // Export services
 export default {
   product: ProductService,
   category: CategoryService,
-  helpers: Helpers
+  helpers: Helpers,
 };

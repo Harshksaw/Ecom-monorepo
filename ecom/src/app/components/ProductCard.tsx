@@ -1,17 +1,23 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { FaShoppingCart, FaHeart, FaRegHeart } from 'react-icons/fa';
-import { useSelector, useDispatch } from 'react-redux';
-import { 
-  selectSelectedCurrency, 
+import React, { useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { FaShoppingCart, FaHeart, FaRegHeart } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  selectSelectedCurrency,
   selectExchangeRates,
   CURRENCY_SYMBOLS,
-  CurrencyCode
-} from '@/app/store/slices/currencySlice';
-import { addToCart } from '../store/slices/cartSlice';
+  CurrencyCode,
+  fetchExchangeRates,
+  setExchangeRates,
+} from "@/app/store/slices/currencySlice";
+import { addToCart } from "../store/slices/cartSlice";
+import { useCurrency } from "@/hooks/useCurrency";
+import { AppDispatch } from "../store/store";
+import axios from "axios";
+import { API_URL } from "../lib/api";
 
 interface Gem {
   type: string;
@@ -56,63 +62,109 @@ interface ProductCardProps {
   showFavorite?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false }) => {
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  showFavorite = false,
+}) => {
+  // useCurrency();
+  const dispatch = useDispatch<AppDispatch>();
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        // Dispatch the fetchExchangeRates action
+        // const action = await dispatch(fetchExchangeRates());
+        // if (fetchExchangeRates.fulfilled.match(action)) {
+        //   // Save last updated timestamp
+        //   localStorage.setItem(
+        //     "currencyRatesLastUpdated",
+        //     Date.now().toString()
+        //   );
+        //   console.log("action in fetchExchange", action);
+        // }
+
+        // Fetch currency rates from the API
+        const response = await axios.get(`${API_URL}/currency/rates`);
+        const data = response.data;
+        // console.log("rates is", response);
+        // console.log("rates is", response.data.rates);
+        console.log(data);
+        // console.log(response.data.rates.USD);
+        // Extract just the rates we need
+        const rates = {
+          INR: 1,
+          USD: response.data.data.rates.USD,
+          EUR: response.data.data.rates.EUR,
+          GBP: response.data.data.rates.GBP,
+          AED: response.data.data.rates.AED,
+        };
+        console.log("ratezs is", rates);
+        // Dispatch the setExchangeRates action
+        dispatch(setExchangeRates(rates));
+      } catch (error) {
+        console.error("Error fetching exchange rates:", error);
+      }
+    };
+
+    fetchRates(); // Call the async function
+  }, [dispatch]);
   const [isFavorite, setIsFavorite] = React.useState(false);
   const selectedCurrency = useSelector(selectSelectedCurrency);
   const exchangeRates = useSelector(selectExchangeRates);
-  
+
   // Get first variant or create empty object if not available
   const firstVariant = product?.variants[0] || {};
-  
+
   // Determine material type for styling
-  const materialType = product.materialType ||
+  const materialType =
+    product.materialType ||
     (product.materials && product.materials.length > 0
       ? product.materials[0].toLowerCase()
-      : 'other');
+      : "other");
 
-  const cardBgColor =
-    materialType.includes('gold')
-      ? 'bg-yellow-50'
-      : materialType.includes('silver')
-        ? 'bg-gray-50'
-        : 'bg-white';
-  
+  const cardBgColor = materialType.includes("gold")
+    ? "bg-yellow-50"
+    : materialType.includes("silver")
+    ? "bg-gray-50"
+    : "bg-white";
+
   // Safely get the first image or use a placeholder
-  const primaryImage = 
-    (product.images && product.images[0]) || 
-    (firstVariant.images && firstVariant.images[0]) || 
-    '/placeholder-image.jpg';
-  
+  const primaryImage =
+    (product.images && product.images[0]) ||
+    (firstVariant.images && firstVariant.images[0]) ||
+    "/placeholder-image.jpg";
+
   // Get prices (prefer variant price, fallback to product price)
   const regularPrice = firstVariant.price?.default || product.price || 0;
-  const salePrice = product.salePrice || 
-    (firstVariant.price && firstVariant.price[""] !== undefined && firstVariant.price[""] > 0
+  const salePrice =
+    product.salePrice ||
+    (firstVariant.price &&
+    firstVariant.price[""] !== undefined &&
+    firstVariant.price[""] > 0
       ? firstVariant.price[""]
       : null);
-  
 
-  
   // Format price with selected currency
   const formatPrice = (priceInINR: number | undefined | null): string => {
-    if (priceInINR === undefined || priceInINR === null) return 'N/A';
-    
+    if (priceInINR === undefined || priceInINR === null) return "N/A";
+
     const rate = exchangeRates[selectedCurrency] || 1;
     const convertedPrice = priceInINR * rate;
-    const symbol = CURRENCY_SYMBOLS[selectedCurrency as CurrencyCode] || '₹';
-    
+    const symbol = CURRENCY_SYMBOLS[selectedCurrency as CurrencyCode] || "₹";
+
     return `${symbol}${convertedPrice.toFixed(2)}`;
   };
-  
+
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsFavorite(!isFavorite);
   };
-  const dispatch = useDispatch();
 
   return (
-    <div className={`rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 
-    group ${cardBgColor}`}>
+    <div
+      className={`rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 
+    group ${cardBgColor}`}
+    >
       {/* Product Image */}
       <Link href={`/product/${product._id}`} className="block relative">
         {/* {discountPercentage && discountPercentage > 0 && (
@@ -120,10 +172,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
             {discountPercentage}% OFF
           </div>
         )} */}
-        
+
         {/* Favorite button - only show if enabled */}
         {showFavorite && (
-          <button 
+          <button
             onClick={toggleFavorite}
             className="absolute top-2 right-2 bg-white bg-opacity-70 p-2 rounded-full z-10 hover:bg-opacity-100 transition-all"
           >
@@ -134,10 +186,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
             )}
           </button>
         )}
-        
+
         <div className="relative w-full pt-[100%]">
-          <Image 
-            loading='lazy'
+          <Image
+            loading="lazy"
             src={primaryImage}
             alt={product.name}
             fill
@@ -162,25 +214,30 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showFavorite = false
                 {product.purity}
               </span>
             )}
-            {product.materials && product.materials.slice(0, 1).map((material, idx) => (
-              <span
-                key={idx}
-                className={`inline-block rounded-full px-2 py-1 text-xs ${
-                  material.toLowerCase().includes('gold')
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : material.toLowerCase().includes('silver')
-                      ? 'bg-gray-100 text-gray-800'
-                      : 'bg-gray-100 text-gray-800'
+            {product.materials &&
+              product.materials.slice(0, 1).map((material, idx) => (
+                <span
+                  key={idx}
+                  className={`inline-block rounded-full px-2 py-1 text-xs ${
+                    material.toLowerCase().includes("gold")
+                      ? "bg-yellow-100 text-yellow-800"
+                      : material.toLowerCase().includes("silver")
+                      ? "bg-gray-100 text-gray-800"
+                      : "bg-gray-100 text-gray-800"
                   }`}
-              >
-                {material}
-              </span>
-            ))}
-            {product.gems && product.gems.slice(0, 1).map((gem, idx) => (
-              <span key={idx} className="inline-block bg-purple-50 rounded-full px-2 py-1 text-xs text-purple-700">
-                {gem.type} {gem.carat}ct
-              </span>
-            ))}
+                >
+                  {material}
+                </span>
+              ))}
+            {product.gems &&
+              product.gems.slice(0, 1).map((gem, idx) => (
+                <span
+                  key={idx}
+                  className="inline-block bg-purple-50 rounded-full px-2 py-1 text-xs text-purple-700"
+                >
+                  {gem.type} {gem.carat}ct
+                </span>
+              ))}
           </div>
         )}
 
