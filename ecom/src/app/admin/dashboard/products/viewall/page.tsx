@@ -66,6 +66,7 @@ interface ProductWithCategory extends Product {
 export default function ProductsListPage() {
   // State
   const [products, setProducts] = useState<ProductWithCategory[]>([]);
+  console.log("🚀 ~ ProductsListPage ~ products:", products)
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
