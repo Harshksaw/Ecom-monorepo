@@ -9,7 +9,7 @@ import {
   FaPlus,
   FaTrash,
   FaGem,
-
+  FaSpinner
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import axios from "axios";
@@ -20,7 +20,7 @@ interface Category {
   _id: string;
   name: string;
 }
-// 1) Near the top of the file, add:
+
 interface Review {
   userName: string;
   rating: number;
@@ -28,6 +28,7 @@ interface Review {
   comment: string;
   verified: boolean;
 }
+
 interface Gem {
   type: string;
   carat: string;
@@ -46,22 +47,40 @@ interface Weight {
   unit: string;
 }
 
+interface Size {
+  type: string;
+  size: string;
+  _id?: string;
+}
 
 interface Variant {
+  _id?: string;
   metalColor: string;
   price: Record<string, number>;
   stock: number;
   images?: File[];
   imagePreviews?: string[];
+  existingImages?: string[];
+  sizes?: Size[];
 }
 
 interface DeliveryOption {
   type: string;
   duration: string;
   price: string;
+  _id?: string;
 }
 
-export default function CreateProductPage() {
+interface ProductProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function EditProductPage({ params }: ProductProps) {
+  const productId = params.id;
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
+  
   // Basic product info
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
@@ -94,15 +113,158 @@ export default function CreateProductPage() {
   const [gems, setGems] = useState<Gem[]>([]);
 
   // Variants
-  const [variants, setVariants] = useState<any[]>([{
+  const [variants, setVariants] = useState<Variant[]>([{
     metalColor: "gold",
     price: { "default": 0 },
-    sizes: [],
+    stock: 0,
     images: [],
-    imagePreviews: []
+    imagePreviews: [],
+    existingImages: [],
+    sizes: []
   }]);
 
+  // Reviews
+  const [reviews, setReviews] = useState<Review[]>([
+    { userName: "", rating: 5, title: "", comment: "", verified: false }
+  ]);
 
+  // Delivery options
+  const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOption[]>([{
+    type: "Standard",
+    duration: "5-7 business days",
+    price: "200"
+  }]);
+
+  // Tags
+  const [tags, setTags] = useState<string[]>([""]);
+
+  // Main product images
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+
+  const router = useRouter();
+
+  // Fetch product data on component mount
+  useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        setIsLoadingProduct(true);
+        const response = await axios.get(`${API_URL}/products/${productId}`);
+        const product = response.data.product;
+        
+        // Populate basic info
+        setName(product.name || "");
+        setSku(product.sku || "");
+        setDescription(product.description || "");
+        setCategory(product.categoryId?._id || "");
+        setIsActive(product.isActive !== false);
+        setIsFeatured(product.isFeatured === true);
+        
+        // Populate material properties
+        setMaterialType(product.materialType || "");
+        setPurity(product.purity || "");
+        setShape(product.shape || "");
+        setColor(product.color || "");
+        
+        // Populate materials
+        if (product.materials && product.materials.length > 0) {
+          setMaterials(product.materials);
+        }
+        
+        // Populate weight
+        if (product.weight) {
+          setWeight({
+            value: product.weight.value.toString(),
+            unit: product.weight.unit || "grams"
+          });
+        }
+        
+        // Populate dimensions
+        if (product.dimensions) {
+          setDimensions({
+            length: product.dimensions.length?.toString() || "",
+            width: product.dimensions.width?.toString() || "",
+            height: product.dimensions.height?.toString() || ""
+          });
+        }
+        
+        // Populate gems
+        if (product.gems && product.gems.length > 0) {
+          setGems(product.gems.map((gem: any) => ({
+            type: gem.type || "",
+            carat: gem.carat?.toString() || "",
+            color: gem.color || "",
+            clarity: gem.clarity || ""
+          })));
+        }
+        
+        // Populate variants
+        if (product.variants && product.variants.length > 0) {
+          setVariants(product.variants.map((variant: any) => ({
+            _id: variant._id,
+            metalColor: variant.metalColor || "gold",
+            price: variant.price || { default: 0 },
+            stock: variant.stock || 0,
+            existingImages: variant.images || [],
+            imagePreviews: [],
+            images: [],
+            sizes: variant.size || []
+          })));
+        }
+        
+        // Populate delivery options
+        if (product.deliveryOptions && product.deliveryOptions.length > 0) {
+          setDeliveryOptions(product.deliveryOptions.map((option: any) => ({
+            _id: option._id,
+            type: option.type || "",
+            duration: option.duration || "",
+            price: option.price?.toString() || "0"
+          })));
+        }
+        
+        // Populate tags
+        if (product.tags && product.tags.length > 0) {
+          setTags(product.tags);
+        }
+        
+        // Populate existing images
+        if (product.images && product.images.length > 0) {
+          setExistingImages(product.images.filter((img: string | null) => img !== null));
+        }
+        
+        // Populate reviews if available
+        if (product.reviews && product.reviews.length > 0) {
+          setReviews(product.reviews.map((review: any) => ({
+            userName: review.userName || "",
+            rating: review.rating || 5,
+            title: review.title || "",
+            comment: review.comment || "",
+            verified: review.verified || false
+          })));
+        }
+        
+      } catch (error: any) {
+        toast.error("Failed to fetch product data: " + (error.response?.data?.message || error.message));
+      } finally {
+        setIsLoadingProduct(false);
+      }
+    };
+
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/categories`);
+        setCategories(response.data.categories);
+      } catch (error) {
+        toast.error("Failed to fetch categories");
+      }
+    };
+
+    fetchProductData();
+    fetchCategories();
+  }, [productId]);
+
+  // Size handling functions
   const addSizeToVariant = (variantIndex: number) => {
     const newVariants = [...variants];
     const currentSizes = newVariants[variantIndex].sizes || [];
@@ -117,7 +279,7 @@ export default function CreateProductPage() {
   
   const removeSizeFromVariant = (variantIndex: number, sizeIndex: number) => {
     const newVariants = [...variants];
-    const currentSizes = [...newVariants[variantIndex].sizes];
+    const currentSizes = [...(newVariants[variantIndex].sizes || [])];
     
     currentSizes.splice(sizeIndex, 1);
     newVariants[variantIndex].sizes = currentSizes;
@@ -128,11 +290,11 @@ export default function CreateProductPage() {
   const updateVariantSize = (
     variantIndex: number,
     sizeIndex: number,
-    field: any,
+    field: keyof Size,
     value: string
   ) => {
     const newVariants = [...variants];
-    const currentSizes = [...newVariants[variantIndex].sizes];
+    const currentSizes = [...(newVariants[variantIndex].sizes || [])];
     
     currentSizes[sizeIndex] = {
       ...currentSizes[sizeIndex],
@@ -143,19 +305,7 @@ export default function CreateProductPage() {
     setVariants(newVariants);
   };
 
-
-  // Delivery options
-  const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOption[]>([{
-    type: "Standard",
-    duration: "5-7 business days",
-    price: "200"
-  },
-  {
-    type: "International",
-    duration: "7 -11 business days",
-    price: "1500"
-  }]);
-
+  // Delivery option handlers
   const handleChange = (
     idx: number,
     field: keyof DeliveryOption,
@@ -167,45 +317,22 @@ export default function CreateProductPage() {
     setDeliveryOptions(opts);
   };
 
+  // Image upload handler
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
 
-  // Tags
-  const [tags, setTags] = useState<string[]>([""]);
-
-  // Main product images
-  const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-
-  const router = useRouter();
-
-  // Fetch categories on component mount
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/categories`);
-        const data = await response.data;
-        setCategories(data.categories);
-      } catch (error) {
-        toast.error("Failed to fetch categories");
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  // Generate SKU on name change
-  useEffect(() => {
-    if (name) {
-      // Create SKU from name: first 3 letters + timestamp
-      const prefix = name
-        .replace(/[^a-zA-Z]/g, "")
-        .substring(0, 3)
-        .toUpperCase();
-      const timestamp = new Date().getTime().toString().slice(-6);
-      setSku(`${prefix}${timestamp}`);
+    const validFiles = validateFiles(Array.from(files));
+    if (images.length + validFiles.length > 5) {
+      toast.error("Maximum 5 images allowed");
+      return;
     }
-  }, [name]);
 
+    setImages([...images, ...validFiles]);
+    setImagePreviews([...imagePreviews, ...validFiles.map(file => URL.createObjectURL(file))]);
+  };
 
+  // Variant image upload handler
   const handleVariantImageUpload = (e: React.ChangeEvent<HTMLInputElement>, variantIndex: number) => {
     const files = e.target.files;
     if (!files) return;
@@ -216,8 +343,9 @@ export default function CreateProductPage() {
 
     const currentImages = currentVariant.images || [];
     const currentPreviews = currentVariant.imagePreviews || [];
+    const existingImagesCount = currentVariant.existingImages?.length || 0;
 
-    if (currentImages.length + validFiles.length > 3) {
+    if (existingImagesCount + currentImages.length + validFiles.length > 3) {
       toast.error("Maximum 3 images per variant allowed");
       return;
     }
@@ -265,17 +393,32 @@ export default function CreateProductPage() {
     setImagePreviews(newPreviews);
   };
 
+  // Remove existing image
+  const removeExistingImage = (index: number) => {
+    const newExistingImages = existingImages.filter((_, i) => i !== index);
+    setExistingImages(newExistingImages);
+  };
+
   // Remove variant image
   const removeVariantImage = (variantIndex: number, imageIndex: number) => {
     const currentVariant = variants[variantIndex];
     const currentImages = currentVariant.images || [];
     const currentPreviews = currentVariant.imagePreviews || [];
 
-    const newImages = currentImages.filter((_: any, i: any) => i !== imageIndex);
-    const newPreviews = currentPreviews.filter((_: any, i: any) => i !== imageIndex);
+    const newImages = currentImages.filter((_, i) => i !== imageIndex);
+    const newPreviews = currentPreviews.filter((_, i) => i !== imageIndex);
 
     updateVariant(variantIndex, 'images', newImages);
     updateVariant(variantIndex, 'imagePreviews', newPreviews);
+  };
+
+  // Remove variant existing image
+  const removeVariantExistingImage = (variantIndex: number, imageIndex: number) => {
+    const currentVariant = variants[variantIndex];
+    const currentExistingImages = currentVariant.existingImages || [];
+
+    const newExistingImages = currentExistingImages.filter((_, i) => i !== imageIndex);
+    updateVariant(variantIndex, 'existingImages', newExistingImages);
   };
 
   // Add/remove material input fields
@@ -314,10 +457,12 @@ export default function CreateProductPage() {
   const addVariant = () => {
     setVariants([...variants, {
       metalColor: "gold",
-      price: { "default": "" },
+      price: { "default": 0 },
       stock: 0,
       images: [],
-      imagePreviews: []
+      imagePreviews: [],
+      existingImages: [],
+      sizes: []
     }]);
   };
 
@@ -400,6 +545,21 @@ export default function CreateProductPage() {
     setTags(newTags);
   };
 
+  // Reviews handlers
+  const addReview = () => {
+    setReviews([...reviews, { userName: "", rating: 5, title: "", comment: "", verified: false }]);
+  };
+
+  const removeReview = (idx: number) => {
+    setReviews(reviews.filter((_, i) => i !== idx));
+  };
+
+  const updateReview = (idx: number, field: keyof Review, value: any) => {
+    const newReviews = [...reviews];
+    newReviews[idx] = { ...newReviews[idx], [field]: value };
+    setReviews(newReviews);
+  };
+
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -429,7 +589,6 @@ export default function CreateProductPage() {
       setIsLoading(false);
       return;
     }
-    const defaultPrice = variants[0]?.price?.default || "";
 
     // Create form data
     const formData = new FormData();
@@ -439,9 +598,6 @@ export default function CreateProductPage() {
     formData.append("categoryId", category);
     formData.append("isActive", isActive.toString());
     formData.append("isFeatured", isFeatured.toString());
-    formData.append("price", defaultPrice);
-
-    // Add material properties
     formData.append("materialType", materialType);
     formData.append("purity", purity);
     if (shape) formData.append("shape", shape);
@@ -452,10 +608,6 @@ export default function CreateProductPage() {
       formData.append("weight[value]", weight.value);
       formData.append("weight[unit]", weight.unit);
     }
-
-
-    formData.append("reviews", JSON.stringify(reviews));
-
 
     // Add dimensions
     if (dimensions.length || dimensions.width || dimensions.height) {
@@ -481,24 +633,43 @@ export default function CreateProductPage() {
       }
     });
 
-    // Add variants
+    // Add existing images
+    formData.append("existingImages", JSON.stringify(existingImages));
+
+    // Add variants with existing images
     const variantsToSend = variants.map(variant => {
-      const variantData = {
+      const variantData: any = {
         metalColor: variant.metalColor,
         price: variant.price,
         stock: variant.stock,
-        size: variant.sizes,
       };
+      
+      if (variant._id) {
+        variantData._id = variant._id;
+      }
+      
+      if (variant.sizes && variant.sizes.length > 0) {
+        variantData.size = variant.sizes;
+      }
+      
+      if (variant.existingImages && variant.existingImages.length > 0) {
+        variantData.existingImages = variant.existingImages;
+      }
+      
       return variantData;
     });
+    
     formData.append("variants", JSON.stringify(variantsToSend));
 
     // Add variant images separately
     variants.forEach((variant, variantIndex) => {
-      variant.images?.forEach((image: any, imageIndex: any) => {
+      variant.images?.forEach((image: any, imageIndex: number) => {
         formData.append(`variant_${variantIndex}_images`, image);
       });
     });
+
+    // Add reviews
+    formData.append("reviews", JSON.stringify(reviews));
 
     // Add delivery options
     formData.append("deliveryOptions", JSON.stringify(deliveryOptions));
@@ -510,84 +681,42 @@ export default function CreateProductPage() {
       }
     });
 
-    // Add main product images
+    // Add new main product images
     images.forEach((image) => {
       formData.append("images", image);
     });
 
-    console.log("32233", formData)
     try {
-      console.log("32233", formData)
-      const response = await axios.post(`${API_URL}/products`, formData);
+      const response = await axios.put(`${API_URL}/products/${productId}`, formData);
 
-      if (response.status !== 201) {
-        toast.error("Failed to create product");
+      if (response.status !== 200) {
+        toast.error("Failed to update product");
         return;
       }
 
-      toast.success("Product created successfully");
-      // // Reset form
-      // setName("");
-      // setSku("");
-      // setDescription("");
-      // setCategory("");
-      // setMaterialType("");
-      // setPurity("");
-      // setShape("");
-      // setColor("");
-      // setImages([]);
-      // setImagePreviews([]);
-      // setMaterials([""]);
-      // setGems([]);
-      // setWeight({ value: "", unit: "grams" });
-      // setDimensions({ length: "", width: "", height: "" });
-      // setVariants([{
-      //   metalColor: "gold",
-      //   price: { "default": "" },
-      //   stock: "0",
-      //   images: [],
-      //   imagePreviews: []
-      // }]);
-      // setDeliveryOptions([{
-      //   type: "standard",
-      //   duration: "5-7 business days",
-      //   price: "0"
-      // }]);
-      // setIsFeatured(false);
-      // setIsActive(true);
-      // setTags([""]);
-
-      // router.push("/admin/dashboard/products");
+      toast.success("Product updated successfully");
+      router.push("/admin/dashboard/products");
     } catch (error: any) {
-      toast.error(error.message || "Failed to create product");
+      toast.error(error.message || "Failed to update product");
     } finally {
       setIsLoading(false);
     }
   };
 
-
-  const [reviews, setReviews] = useState<Review[]>([
-    { userName: "", rating: 5, title: "", comment: "", verified: false }
-  ]);
-
-  const addReview = () => {
-    setReviews([...reviews, { userName: "", rating: 5, title: "", comment: "", verified: false }]);
-  };
-
-  const removeReview = (idx: number) => {
-    setReviews(reviews.filter((_, i) => i !== idx));
-  };
-
-  const updateReview = (idx: number, field: keyof Review, value: any) => {
-    const newReviews = [...reviews];
-    newReviews[idx] = { ...newReviews[idx], [field]: value };
-    setReviews(newReviews);
-  };
-
+  if (isLoadingProduct) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-4xl text-indigo-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold">Loading product data...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Create New Product</h1>
+      <h1 className="text-3xl font-bold mb-6">Edit Product</h1>
 
       <form
         onSubmit={handleSubmit}
@@ -619,15 +748,14 @@ export default function CreateProductPage() {
             {/* SKU */}
             <div>
               <label htmlFor="sku" className="block text-gray-700 font-bold mb-2">
-                SKU*
+                SKU
               </label>
               <input
                 type="text"
                 id="sku"
                 value={sku}
-                onChange={(e) => setSku(e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
-                placeholder="Auto-generated SKU"
+                placeholder="SKU"
                 readOnly
               />
             </div>
@@ -706,6 +834,90 @@ export default function CreateProductPage() {
           </div>
         </div>
 
+        {/* Images Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Product Images</h2>
+          
+          {/* Existing Images */}
+          {existingImages.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-gray-700 font-bold mb-2">
+                Current Images
+              </label>
+              <div className="flex flex-wrap gap-4">
+                {existingImages.map((imageUrl, index) => (
+                  <div key={index} className="relative w-32 h-32">
+                    <Image
+                      src={imageUrl}
+                      alt={`Product image ${index + 1}`}
+                      fill
+                      className="object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeExistingImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                    >
+                      <FaTimes size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* New Image Upload */}
+          <div>
+            <label className="block text-gray-700 font-bold mb-2">
+              Add New Images
+            </label>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+              <div className="flex flex-wrap gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative w-32 h-32">
+                    <Image
+                      src={preview}
+                      alt={`New image ${index + 1}`}
+                      fill
+                      className="object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                    >
+                      <FaTimes size={12} />
+                    </button>
+                  </div>
+                ))}
+
+                {(existingImages.length + images.length < 5) && (
+                  <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                    <input
+                      type="file"
+                      id="imageUpload"
+                      accept="image/jpeg,image/png,image/gif"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="imageUpload"
+                      className="cursor-pointer flex flex-col items-center justify-center h-full w-full"
+                    >
+                      <FaCloudUploadAlt className="text-2xl text-gray-400 mb-1" />
+                      <span className="text-sm text-gray-500">Upload Image</span>
+                    </label>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Upload up to 5 images. JPEG, PNG or GIF only. Max 5MB each.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Material Properties Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 pb-2 border-b">Material Properties</h2>
@@ -729,10 +941,11 @@ export default function CreateProductPage() {
                 <option value="">Select Material Type</option>
                 <option value="gold">Gold</option>
                 <option value="silver">Silver</option>
+                <option value="platinum">Platinum</option>
+                <option value="titanium">Titanium</option>
               </select>
             </div>
 
-            {/* Purity */}
             {/* Purity */}
             <div>
               <label
@@ -769,10 +982,6 @@ export default function CreateProductPage() {
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
-
-            {/* Color */}
-
           </div>
 
           {/* Materials */}
@@ -859,7 +1068,7 @@ export default function CreateProductPage() {
           {/* Dimensions */}
           <div>
             <label className="block text-gray-700 font-bold mb-2">
-              Dimensions (cm)
+              Dimensions (mm)
             </label>
             <div className="grid md:grid-cols-3 gap-6">
               <div>
@@ -1025,7 +1234,6 @@ export default function CreateProductPage() {
                     <option value="yellowgold">Yellow Gold</option>
                     <option value="rosegold">Rose Gold</option>
                     <option value="whitegold">White Gold</option>
-                    <option value="silver">Silver</option>
                     <option value="sterlingsilver">Sterling Silver</option>
                     <option value="platinum">Platinum</option>
                     <option value="bronze">Bronze</option>
@@ -1036,20 +1244,20 @@ export default function CreateProductPage() {
                 </div>
 
                 {/* Stock */}
-                {/* <div>
+                <div>
                   <label className="block text-gray-700 text-sm font-bold mb-1">
                     Stock Quantity*
                   </label>
                   <input
                     type="number"
                     value={variant.stock}
-                    onChange={(e) => updateVariant(variantIndex, "stock",Number(e.target.value))}
+                    onChange={(e) => updateVariant(variantIndex, "stock", Number(e.target.value))}
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Available stock"
-
+                    min="0"
                     required
                   />
-                </div> */}
+                </div>
               </div>
 
               {/* Pricing */}
@@ -1069,7 +1277,7 @@ export default function CreateProductPage() {
                           const newVariants = [...variants];
                           const oldPrice = { ...newVariants[variantIndex].price };
                           delete oldPrice[priceKey];
-                          oldPrice[e.target.value] = priceValue as string;
+                          oldPrice[e.target.value] = priceValue;
                           newVariants[variantIndex].price = oldPrice;
                           setVariants(newVariants);
                         }
@@ -1077,7 +1285,7 @@ export default function CreateProductPage() {
                     />
                     <input
                       type="number"
-                      value={priceValue as string | number}
+                      value={priceValue}
                       onChange={(e) => updateVariantPrice(variantIndex, priceKey, Number(e.target.value))}
                       className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Price"
@@ -1105,70 +1313,96 @@ export default function CreateProductPage() {
                 </button>
               </div>
 
-{/* Size Options */}
- <div className="mb-4">
-   <label className="block text-gray-700 text-sm font-bold mb-2">
-     Size Options
-   </label>
-  
-   {variant.sizes && variant.sizes.map((sizeOption, sizeIndex) => (
-    <div key={sizeIndex} className="flex items-center space-x-2 mb-2 p-2 bg-gray-100 rounded">
-      <select
-        value={sizeOption.type}
-        onChange={(e) => updateVariantSize(variantIndex, sizeIndex, "type", e.target.value)}
-        className="w-1/3 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="standard">Standard</option>
-        <option value="custom">Custom</option>
+              {/* Size Options */}
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Size Options
+                </label>
+                
+                {variant.sizes && variant.sizes.map((sizeOption, sizeIndex) => (
+                  <div key={sizeIndex} className="flex items-center space-x-2 mb-2 p-2 bg-gray-100 rounded">
+                    <select
+                      value={sizeOption.type}
+                      onChange={(e) => updateVariantSize(variantIndex, sizeIndex, "type", e.target.value)}
+                      className="w-1/3 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="standard">Standard</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                    
+                    <input
+                      type="text"
+                      value={sizeOption.size}
+                      onChange={(e) => updateVariantSize(variantIndex, sizeIndex, "size", e.target.value)}
+                      className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Size value (e.g., S, M, L, XL, 12cm, etc.)"
+                    />
+                    
+                    <button
+                      type="button"
+                      onClick={() => removeSizeFromVariant(variantIndex, sizeIndex)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                ))}
+                
+                <button
+                  type="button"
+                  onClick={() => addSizeToVariant(variantIndex)}
+                  className="mt-2 flex items-center text-blue-500 hover:text-blue-700 text-sm"
+                >
+                  <FaPlus className="mr-1" /> Add Size Option
+                </button>
+              </div>
 
-
-      </select>
-      
-      <input
-        type="text"
-        value={sizeOption.size}
-        onChange={(e) => updateVariantSize(variantIndex, sizeIndex, "size", e.target.value)}
-        className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Size value (e.g., S, M, L, XL, 12cm, etc.)"
-      />
-      
-      <button
-        type="button"
-        onClick={() => removeSizeFromVariant(variantIndex, sizeIndex)}
-        className="text-red-500 hover:text-red-700"
-      >
-        <FaTrash />
-      </button>
-    </div>
-  ))}
-  
-  <button
-    type="button"
-    onClick={() => addSizeToVariant(variantIndex)}
-    className="mt-2 flex items-center text-blue-500 hover:text-blue-700 text-sm"
-  >
-    <FaPlus className="mr-1" /> Add Size Option
-  </button>
-</div>
-
-
-
-              {/* Variant Images - THIS IS THE KEY PART FOR METAL COLOR ASSOCIATION */}
+              {/* Variant Images */}
               <div>
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   {variant.metalColor.charAt(0).toUpperCase() + variant.metalColor.slice(1)} Images
                 </label>
-                <div className={`border-2 border-dashed rounded-lg p-4 ${variant.metalColor === 'gold' ? 'bg-yellow-50 border-yellow-300' :
-                    variant.metalColor === 'silver' ? 'bg-gray-50 border-gray-300' :
-                      variant.metalColor === 'rosegold' ? 'bg-gray-50 border-pink-300' :
-                        'bg-gray-100 border-pink-400'
-                  }`}>
+
+                {/* Existing Variant Images */}
+                {variant.existingImages && variant.existingImages.length > 0 && (
+                  <div className="mb-2">
+                    <div className="text-sm text-gray-600 mb-1">Current Images:</div>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {variant.existingImages.map((imageUrl, imgIndex) => (
+                        <div key={`existing-${imgIndex}`} className="relative">
+                          <Image
+                            src={imageUrl}
+                            alt={`${variant.metalColor} variant image ${imgIndex + 1}`}
+                            width={80}
+                            height={80}
+                            className="rounded-lg object-cover h-20 w-20"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeVariantExistingImage(variantIndex, imgIndex)}
+                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 text-xs"
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* New Variant Images */}
+                <div className={`border-2 border-dashed rounded-lg p-4 ${
+                  variant.metalColor === 'gold' ? 'bg-yellow-50 border-yellow-300' :
+                  variant.metalColor === 'silver' ? 'bg-gray-50 border-gray-300' :
+                  variant.metalColor === 'rosegold' ? 'bg-gray-50 border-pink-300' :
+                  'bg-gray-100 border-gray-300'
+                }`}>
                   <div className="grid grid-cols-3 gap-3">
-                    {variant.imagePreviews?.map((preview: any, imgIndex: any) => (
+                    {variant.imagePreviews?.map((preview, imgIndex) => (
                       <div key={imgIndex} className="relative">
                         <Image
                           src={preview}
-                          alt={`${variant.metalColor} variant image ${imgIndex + 1}`}
+                          alt={`${variant.metalColor} new variant image ${imgIndex + 1}`}
                           width={100}
                           height={100}
                           className="rounded-lg object-cover h-24 w-24"
@@ -1180,13 +1414,10 @@ export default function CreateProductPage() {
                         >
                           <FaTimes />
                         </button>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 rounded-b-lg text-center capitalize">
-                          {variant.metalColor}
-                        </div>
                       </div>
                     ))}
 
-                    {(!variant.images || variant.images.length < 3) && (
+                    {((variant.existingImages?.length || 0) + (variant.images?.length || 0) < 3) && (
                       <div className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-24 w-24">
                         <input
                           type="file"
@@ -1223,9 +1454,85 @@ export default function CreateProductPage() {
           </button>
         </div>
 
+        {/* Delivery Options Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Delivery Options</h2>
+          
+          {deliveryOptions.map((opt, idx) => (
+            <div
+              key={idx}
+              className="flex flex-col md:flex-row md:items-center gap-4 border p-4 rounded-lg mb-4"
+            >
+              {/* Type */}
+              <div className="flex-1">
+                <label className="block text-gray-700 text-sm font-bold mb-1">
+                  Type
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Standard, Express"
+                  value={opt.type}
+                  onChange={(e) => handleChange(idx, 'type', e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Duration */}
+              <div className="flex-1">
+                <label className="block text-gray-700 text-sm font-bold mb-1">
+                  Duration
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 5-7 business days"
+                  value={opt.duration}
+                  onChange={(e) => handleChange(idx, 'duration', e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Price */}
+              <div className="w-28">
+                <label className="block text-gray-700 text-sm font-bold mb-1">
+                  Price
+                </label>
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={opt.price}
+                  onChange={(e) => handleChange(idx, 'price', e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min="0"
+                />
+              </div>
+
+              {/* Remove Button */}
+              <div className="flex items-end justify-center pb-2">
+                <button
+                  type="button"
+                  onClick={() => removeDeliveryOption(idx)}
+                  className="text-red-500 hover:text-red-700"
+                  disabled={deliveryOptions.length <= 1}
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+          ))}
+          
+          <button
+            type="button"
+            onClick={addDeliveryOption}
+            className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
+          >
+            <FaPlus className="mr-2" /> Add Delivery Option
+          </button>
+        </div>
+
         {/* Tags */}
-        <div className="mt-6">
-          <label className="block text-gray-700 font-bold mb-2">Tags</label>
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Tags</h2>
+          
           {tags.map((tag, index) => (
             <div key={index} className="flex items-center space-x-2 mb-2">
               <input
@@ -1246,6 +1553,7 @@ export default function CreateProductPage() {
               )}
             </div>
           ))}
+          
           <button
             type="button"
             onClick={addTag}
@@ -1254,52 +1562,11 @@ export default function CreateProductPage() {
             <FaPlus className="mr-2" /> Add Tag
           </button>
         </div>
-        <div className="flex flex-col gap-10 mt-6">
 
-
-
-          {deliveryOptions.map((opt, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col md:flex-row md:items-center gap-4 border p-4 rounded-lg  "
-            >
-              {/* Type */}
-              <input
-                type="text"
-                placeholder="e.g. standard • express"
-                value={opt.type}
-                onChange={(e) => handleChange(idx, 'type', e.target.value)}
-                className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-
-              {/* Duration */}
-              <input
-                type="text"
-                placeholder="e.g. 5-7 business days"
-                value={opt.duration}
-                onChange={(e) => handleChange(idx, 'duration', e.target.value)}
-                className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-
-              {/* Price */}
-              <input
-                type="number"
-                placeholder="Price"
-                value={opt.price}
-                onChange={(e) =>
-                  handleChange(idx, 'price', parseFloat(e.target.value) || 0)
-                }
-                className="w-24 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-
-
-            </div>
-          ))}
-        </div>
-
-
+        {/* Reviews Section */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Fake Reviews</h2>
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Reviews</h2>
+          
           {reviews.map((rev, i) => (
             <div key={i} className="p-4 border rounded-lg mb-4 bg-gray-50">
               <div className="flex justify-between items-center mb-2">
@@ -1321,7 +1588,6 @@ export default function CreateProductPage() {
                     onChange={(e) => updateReview(i, "userName", e.target.value)}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="User name"
-                    required
                   />
                 </div>
                 <div>
@@ -1344,7 +1610,6 @@ export default function CreateProductPage() {
                     onChange={(e) => updateReview(i, "title", e.target.value)}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="Review title"
-                    required
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -1355,7 +1620,6 @@ export default function CreateProductPage() {
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                     rows={3}
                     placeholder="Review text"
-                    required
                   />
                 </div>
                 <div className="md:col-span-2 flex items-center space-x-2">
@@ -1373,6 +1637,7 @@ export default function CreateProductPage() {
               </div>
             </div>
           ))}
+          
           <button
             type="button"
             onClick={addReview}
@@ -1382,25 +1647,36 @@ export default function CreateProductPage() {
           </button>
         </div>
 
-        {/* Submit Button */}
-        <div className="mt-8">
+        {/* Action Buttons */}
+        <div className="flex flex-col md:flex-row gap-4 mt-8">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="md:w-1/3 py-3 rounded-lg text-gray-700 font-medium border border-gray-300 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-3 rounded-lg text-white font-bold 
-              ${isLoading
+            className={`flex-1 py-3 rounded-lg text-white font-bold ${
+              isLoading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-500 hover:bg-blue-600"
-              }`}
+            }`}
           >
-            {isLoading ? "Creating Product..." : "Create Product"}
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <FaSpinner className="animate-spin mr-2" />
+                Updating Product...
+              </span>
+            ) : (
+              "Update Product"
+            )}
           </button>
         </div>
       </form>
-
-      
-      
     </div>
   );
 }
-
