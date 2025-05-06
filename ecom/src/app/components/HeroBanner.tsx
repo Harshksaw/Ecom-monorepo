@@ -6,7 +6,6 @@ import axios from "axios"
 import { API_URL } from "../lib/api"
 import Image from "next/image"
 
-// Extend your interface to include a `type`:
 interface BannerMedia {
   _id: string
   url: string
@@ -15,7 +14,7 @@ interface BannerMedia {
 }
 
 export const HeroBanner = () => {
-  const [media, setMedia] = useState<any[]>([])
+  const [media, setMedia] = useState<BannerMedia[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
@@ -33,9 +32,9 @@ export const HeroBanner = () => {
           type: /\.(mp4|webm|ogg|mov|quicktime)$/i.test(item.url) ? "video" : "image",
         }))
         setMedia(withType)
-        videoRefs.current = withType.map(() => null) // Initialize refs
+        videoRefs.current = withType.map(() => null)
       } catch (err) {
-        console.error(err)
+        console.error("Banner fetch error:", err)
         setError("Failed to load banner media")
       } finally {
         setIsLoading(false)
@@ -43,36 +42,44 @@ export const HeroBanner = () => {
     }
     fetchMedia()
     
-    // Add a one-time event listener to detect user interaction
+    // Handle user interaction
     const handleInteraction = () => {
       setUserInteracted(true)
-      // Remove listeners after first interaction
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
-    };
+      document.removeEventListener('click', handleInteraction)
+      document.removeEventListener('touchstart', handleInteraction)
+    }
     
-    document.addEventListener('click', handleInteraction);
-    document.addEventListener('touchstart', handleInteraction);
+    document.addEventListener('click', handleInteraction)
+    document.addEventListener('touchstart', handleInteraction)
     
     return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
-    };
+      document.removeEventListener('click', handleInteraction)
+      document.removeEventListener('touchstart', handleInteraction)
+      if (slideInterval.current) {
+        clearInterval(slideInterval.current)
+      }
+    }
   }, [])
 
   useEffect(() => {
-    // Start the interval for auto-changing slides
+    // Start slide interval for images
     if (media.length > 0) {
       startSlideInterval()
     }
 
     return () => {
-      // Clear the interval when the component unmounts
       if (slideInterval.current) {
         clearInterval(slideInterval.current)
       }
     }
   }, [media, currentSlide])
+
+  // Handle video when slide changes
+  useEffect(() => {
+    if (media.length && currentSlide >= 0) {
+      handleVideoForCurrentSlide()
+    }
+  }, [currentSlide, media, userInteracted])
 
   const startSlideInterval = () => {
     if (slideInterval.current) {
@@ -82,93 +89,93 @@ export const HeroBanner = () => {
     slideInterval.current = setInterval(() => {
       const currentMedia = media[currentSlide]
       if (currentMedia?.type === "image") {
-        // Move to the next slide after 5 seconds for images
         setCurrentSlide((prev) => (prev + 1) % media.length)
       }
-    }, 5000) // 5 seconds interval
+    }, 5000)
   }
 
-  const handleSlideChange = (index: number) => {
-    setCurrentSlide(index)
-
-    // Pause all videos
-    videoRefs.current.forEach((videoRef) => {
-      if (videoRef) {
-        videoRef.pause()
+  const handleVideoForCurrentSlide = () => {
+    // Pause all videos first
+    videoRefs.current.forEach(video => {
+      if (video) {
+        try {
+          video.pause()
+        } catch (e) {
+          console.error("Error pausing video:", e)
+        }
       }
     })
 
-    // Play the current video if it exists
-    const currentVideo = videoRefs.current[index]
-    if (currentVideo && media[index]?.type === "video") {
-      // Always mute videos to comply with autoplay policies
-      currentVideo.muted = true 
+    // Handle current video
+    const currentVideo = videoRefs.current[currentSlide]
+    if (currentVideo && media[currentSlide]?.type === "video") {
+      // Always start with muted to allow autoplay
+      currentVideo.muted = true
       
-      // Only try to unmute if user has interacted with the page
-      if (userInteracted) {
-        try {
-          currentVideo.muted = false;
-        } catch (e) {
-          console.log("Could not unmute video:", e);
-        }
-      }
-      
-      // Attempt to play the video
-      const playPromise = currentVideo.play()
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            console.log("Video playing successfully");
-            // If video is playing and user interacted, we can try to unmute
-            if (userInteracted && currentVideo.muted) {
+      try {
+        const playPromise = currentVideo.play()
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            console.log("Video playing successfully")
+            // Only try to unmute if user has interacted with the page
+            if (userInteracted) {
               try {
-                currentVideo.muted = false;
+                currentVideo.muted = false
               } catch (e) {
-                console.log("Could not unmute after successful play:", e);
+                console.warn("Could not unmute video:", e)
               }
             }
-          })
-          .catch((error) => {
-            console.log("Autoplay prevented:", error)
-            // If autoplay fails with unmuted, try with muted
+          }).catch(error => {
+            console.warn("Autoplay prevented:", error)
+            // Keep muted for autoplay policy
             currentVideo.muted = true
             currentVideo.play().catch(e => {
               console.error("Even muted play failed:", e)
             })
           })
+        }
+      } catch (error) {
+        console.error("Video play error:", error)
       }
     }
   }
 
-  // Add a function to handle user-initiated play
+  const handleSlideChange = (index: number) => {
+    setCurrentSlide(index)
+  }
+
   const handleVideoClick = (index: number) => {
-    const video = videoRefs.current[index];
-    if (video) {
-      if (video.paused) {
-        video.muted = false;
+    const video = videoRefs.current[index]
+    if (!video) return
+    
+    setUserInteracted(true)
+    
+    if (video.paused) {
+      try {
+        video.muted = false
         video.play().catch(e => {
-          console.log("Play on click failed:", e);
-          // If unmuted play fails, try muted
-          video.muted = true;
-          video.play();
-        });
-      } else {
-        video.pause();
+          console.warn("Play on click failed:", e)
+          video.muted = true
+          video.play()
+        })
+      } catch (e) {
+        console.error("Video interaction error:", e)
       }
+    } else {
+      video.pause()
     }
-    setUserInteracted(true);
   }
 
   const handleVideoEnd = (index: number) => {
-    // Move to the next slide when the video ends
     const nextSlide = (index + 1) % media.length
     setCurrentSlide(nextSlide)
   }
 
   const getMimeType = (url: string) => {
-    if (/\.(mov|quicktime)$/i.test(url)) return "video/quicktime"
-    if (/\.(webm)$/i.test(url)) return "video/webm"
-    if (/\.(ogg)$/i.test(url)) return "video/ogg"
+    if (/\.mov$/i.test(url)) return "video/quicktime"
+    if (/\.webm$/i.test(url)) return "video/webm"
+    if (/\.ogg$/i.test(url)) return "video/ogg"
     return "video/mp4" // Default
   }
 
@@ -191,7 +198,7 @@ export const HeroBanner = () => {
   return (
     <div className="relative w-full max-w-[1360px] mx-auto z-10">
       <Carousel
-        autoPlay={false} // Disable default autoplay
+        autoPlay={false}
         infiniteLoop
         showThumbs={false}
         showIndicators
@@ -211,26 +218,31 @@ export const HeroBanner = () => {
                   fill
                   sizes="(max-width: 768px) 100vw, 1360px"
                   style={{ objectFit: "cover" }}
-                  priority={index === 0} // Only prioritize the first image
+                  priority={index === 0}
                 />
               ) : (
-                <div onClick={() => handleVideoClick(index)} className="video-container w-full h-full cursor-pointer">
+                <div 
+                  onClick={() => handleVideoClick(index)} 
+                  className="video-container w-full h-full cursor-pointer relative"
+                >
+                  {/* Use explicit width and height instead of w-full h-full */}
                   <video
                     ref={(el) => {
                       videoRefs.current[index] = el
                     }}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                     playsInline
-                    autoPlay={index === currentSlide} // Only autoplay the current slide
-                    muted={false} // Start muted to work with autoplay policies
-                    loop={false} // Do not loop videos
-                    onEnded={() => handleVideoEnd(index)} // Trigger when video ends
+                    muted={true} // Always start muted to comply with autoplay policies
+                    controls={false}
+                    loop={false}
+                    onEnded={() => handleVideoEnd(index)}
                     onError={(e) => console.error("Video failed to load:", e)}
                   >
                     <source src={item.url} type={getMimeType(item.url)} />
                     Your browser does not support HTML5 video.
                   </video>
-                  {/* Optional play indicator overlay */}
+                  
+                  {/* Play indicator */}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
                     <div className="p-4 bg-black/50 rounded-full">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
