@@ -14,14 +14,14 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Shri Nanu Gems | Authentic Gemstones',
-  description: 'Shri Nanu Gems offers authentic, high-quality gemstones sourced ethically. Explore our collection now!',
+  description: 'Shri Nanu Gems offers authentic, certified gemstones crafted with premium quality. Discover timeless jewelry and stunning gemstones that elevate your elegance. Shop our exclusive collection today and experience true brilliance',
   metadataBase: new URL('https://shrinanugems.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'Shri Nanu Gems | Authentic Gemstones',
-    description: 'Explore ethically sourced high-quality gemstones at Shri Nanu Gems. Find your perfect gem today!',
+    description:  'Shri Nanu Gems offers authentic, certified gemstones crafted with premium quality. Discover timeless jewelry and stunning gemstones that elevate your elegance. Shop our exclusive collection today and experience true brilliance',
     url: 'https://shrinanugems.com',
     siteName: 'Shri Nanu Gems',
     images: [
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Shri Nanu Gems | Authentic Gemstones',
-    description: 'Explore ethically sourced high-quality gemstones at Shri Nanu Gems. Find your perfect gem today!',
+    description: 'Shri Nanu Gems offers authentic, certified gemstones crafted with premium quality.',
     images: ['https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png'], // <-- Same image for Twitter
   },
 };
