@@ -437,6 +437,7 @@ exports.getProductMaterials = async (req, res) => {
 // Update product
 exports.updateProduct = async (req, res) => {
   try {
+    console.log("🚀 ~ exports.updateProduct= ~ req.body:", req.body)
     const {
       name,
       sku,
@@ -458,6 +459,7 @@ exports.updateProduct = async (req, res) => {
       variants,
       deliveryOptions
     } = req.body;
+
 
     // Check if updated SKU conflicts with another product
     if (sku) {
@@ -544,7 +546,7 @@ exports.updateProduct = async (req, res) => {
       const parsedSize = variant.size ? 
         (typeof variant.size === 'string' ? JSON.parse(variant.size) : variant.size) : 
         [];
-      
+
       return {
         ...variant,
         price: priceMap,
@@ -574,6 +576,8 @@ exports.updateProduct = async (req, res) => {
       updatedAt: Date.now(),
     };
 
+          
+    console.log("🚀 ~ exports.updateProduct= ~ updateData:", updateData)
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       updateData,
