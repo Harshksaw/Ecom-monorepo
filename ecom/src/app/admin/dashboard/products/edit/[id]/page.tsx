@@ -77,7 +77,7 @@ interface ProductProps {
   };
 }
 
-export default function EditProductPage({ params }: ProductProps) {
+export default function EditProductPage({ params }: any) {
   const productId = params.id;
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   

@@ -1111,7 +1111,7 @@ export default function CreateProductPage() {
      Size Options
    </label>
   
-   {variant.sizes && variant.sizes.map((sizeOption, sizeIndex) => (
+   {variant.sizes && variant.sizes.map((sizeOption :any, sizeIndex:any) => (
     <div key={sizeIndex} className="flex items-center space-x-2 mb-2 p-2 bg-gray-100 rounded">
       <select
         value={sizeOption.type}

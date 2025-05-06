@@ -60,7 +60,17 @@ interface ProductWithCategory extends Product {
   category?: {
     _id: string;
     name: string;
+
   };
+
+  variants: {
+    _id: any;
+    name: any;
+    sku: any;
+    price:any;
+    images:any;
+    salePrice?: any;
+  }
 }
 
 export default function ProductsListPage() {
@@ -415,7 +425,7 @@ export default function ProductsListPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 relative">
-                          {product?.variants && product?.variants[0]?.images.length > 0 ? (
+                          {product?.variants &&Array.isArray(product.variants)  && product?.variants[0]?.images.length > 0 ? (
                             <Image
                               src={product?.variants[0]?.images[0] }
                               alt={product.name}
