@@ -39,6 +39,9 @@ exports.createProduct = async (req, res) => {
       reviews
     } = req.body;
 
+    console.log(variants,"-----")
+
+
     // Validate input
     const { errors, isValid } = validateProductInput(req.body);
     if (!isValid) {

@@ -48,10 +48,11 @@ interface Product {
 
 interface AddToCartButtonProps {
   product: Product;
-  variant: any
+  variant: any;
+  selectedSizeId?: string;
 }
 
-export default function AddToCartButton({ product, variant }: AddToCartButtonProps) {
+export default function AddToCartButton({ product, variant, selectedSizeId }: AddToCartButtonProps) {
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -81,6 +82,8 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
     const cartItem = {
       productId: product._id,
       variantId: variant._id,
+
+      sizeId: selectedSizeId,
       name: product.name,
       metalColor: variant.metalColor,
       image: variant.images[0] || product.images[0] || '',
@@ -92,7 +95,7 @@ export default function AddToCartButton({ product, variant }: AddToCartButtonPro
 
     };
     
-    console.log("🚀 Dispatching addToCart with:", cartItem);
+
     dispatch(addToCart(cartItem));
     
     // Show success feedback

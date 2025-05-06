@@ -66,7 +66,7 @@ interface ProductWithCategory extends Product {
 export default function ProductsListPage() {
   // State
   const [products, setProducts] = useState<ProductWithCategory[]>([]);
-  console.log("🚀 ~ ProductsListPage ~ products:", products)
+  console.log("🚀 ~ ProductsListPage ~ products:", products[0])
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -204,6 +204,8 @@ export default function ProductsListPage() {
     console.log("🚀 ~ getCategoryName ~ category:", category)
     return category ? category.name : 'Unknown';
   };
+
+
 
   return (
 
@@ -375,7 +377,7 @@ export default function ProductsListPage() {
                     onClick={() => handleSortChange('price')}
                   >
                     <div className="flex items-center">
-                      Price
+                    EDIT
                       {sortBy === 'price' && (
                         <FaSort className="ml-1 text-gray-400" />
                       )}
@@ -413,12 +415,12 @@ export default function ProductsListPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 relative">
-                          {product.images && product.images.length > 0 ? (
+                          {product?.variants && product?.variants[0]?.images.length > 0 ? (
                             <Image
-                              src={product.images[0]}
+                              src={product?.variants[0]?.images[0] }
                               alt={product.name}
-                              width={40}
-                              height={40}
+                              width={60}
+                              height={60}
                               className="rounded-md object-cover"
                             />
                           ) : (
@@ -445,9 +447,11 @@ export default function ProductsListPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                    
-                        <div className="text-sm text-gray-900">
-                          {formatPrice(product.price)}
-                        </div>
+                        <Link
+                        href={`/admin/dashboard/products/edit/${product._id}`}
+                        className="text-lg text-gray-900">
+                         <FaEdit className="mr-2" /> 
+                        </Link>
 
                     </td>
                     {/* <td className="px-6 py-4 whitespace-nowrap">

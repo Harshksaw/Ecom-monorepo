@@ -1,7 +1,7 @@
 // src/components/ProductDetails.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   FaRuler, 
   FaWeight, 
@@ -15,7 +15,8 @@ import {
   FaCut, 
   FaBox,
   FaEuroSign,
-  FaPoundSign
+  FaPoundSign,
+  FaTshirt
 } from 'react-icons/fa';
 import ProductDetailsCarousel from './ProductDetailsCarousel';
 import AddToCartButton from './AddToCartButton';
@@ -26,7 +27,11 @@ import { CurrencyCode } from '../store/slices/currencySlice';
 import CustomerReviews from './ProductReviews';
 import { useRouter } from 'next/navigation';
 
-
+interface Size {
+  type: string;
+  size: string;
+  _id: string;
+}
 // Interfaces (can be moved to a shared types file)
 interface ProductVariant {
   _id: string;
@@ -34,6 +39,7 @@ interface ProductVariant {
   images: (string | null)[];
   price: { default: number; USD?: number };
   stock: number;
+  size?: Size[];
 }
 
 interface Dimensions {
@@ -82,11 +88,21 @@ type ProductDetailsProps = { product: Product };
 export default function ProductDetails({ product }: ProductDetailsProps) {
   const router = useRouter();
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
-
+  const [selectedSizeId, setSelectedSizeId] = useState<any>(null);
   const dispatch = useDispatch();
   const { selectedCurrency, changeCurrency, formatPrice, currencySymbol } = useCurrency();
   const selectedVariant = product?.variants?.[selectedVariantIndex] || product?.variants?.[0];
   console.log("🚀 ~ ProductDetails ~ selectedVariant:", selectedVariant)
+
+  useEffect(() => {
+    if (selectedVariant?.size && selectedVariant.size.length > 0) {
+      setSelectedSizeId(selectedVariant.size[0]._id);
+    } else {
+      setSelectedSizeId(null);
+    }
+  }, [selectedVariantIndex, selectedVariant]);
+
+  const selectedSize = selectedVariant?.size?.find(size => size._id === selectedSizeId);
 
   const displayImages = [
     ...(selectedVariant?.images || []),
@@ -129,6 +145,7 @@ const handleBuyNow = () => {
   const cartItem = {
     productId: product._id,
     variantId: selectedVariant._id,
+    sizeId: selectedSizeId,
     name: product.name,
     metalColor: selectedVariant.metalColor,
     image: selectedVariant.images[0] || product.images[0] || '',
@@ -345,11 +362,44 @@ const handleBuyNow = () => {
               </div>
             </div>
           )}
+            {/* Size Selection */}
+            {selectedVariant?.size && selectedVariant.size.length > 0 && (
+            <div className="mb-6">
+              <h3 className="font-semibold mb-3 flex items-center">
+                <FaTshirt className="mr-2 text-indigo-600" />
+                Select Size
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {selectedVariant.size.map((sizeOption) => (
+                  <button
+                    key={sizeOption._id}
+                    onClick={() => setSelectedSizeId(sizeOption._id)}
+                    className={`relative w-12 h-12 flex items-center justify-center rounded-full text-sm font-medium transition-all ${
+                      sizeOption._id === selectedSizeId
+                        ? 'bg-indigo-100 text-indigo-900 ring-2 ring-indigo-300 ring-offset-2'
+                        : 'bg-gray-100 text-gray-800 hover:bg-gray-50'
+                    }`}
+                  >
+                    {sizeOption.size}
+                    {sizeOption._id === selectedSizeId && (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-500 rounded-full flex items-center justify-center">
+                        <FaCheck className="text-white text-xs" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2 text-sm text-gray-500">
+                {selectedSize ? `Selected: ${selectedSize.type} size ${selectedSize.size}` : 'Please select a size'}
+              </div>
+            </div>
+          )}
+
 
           {/* Add to cart button */}
           <div className="flex flex-col gap-3 mb-8">
             <div className="flex-grow">
-              <AddToCartButton product={product} variant={selectedVariant} />
+              <AddToCartButton product={product}  selectedSizeId={selectedSizeId} variant={selectedVariant} />
             </div>
             <button 
               className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:shadow-md transition-all"

@@ -19,7 +19,30 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
+  openGraph: {
+    title: 'Shri Nanu Gems | Authentic Gemstones',
+    description: 'Explore ethically sourced high-quality gemstones at Shri Nanu Gems. Find your perfect gem today!',
+    url: 'https://shrinanugems.com',
+    siteName: 'Shri Nanu Gems',
+    images: [
+      {
+        url: 'https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png', // <-- Your real image link (replace)
+        width: 1200,
+        height: 630,
+        alt: 'Shri Nanu Gems Collection',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Shri Nanu Gems | Authentic Gemstones',
+    description: 'Explore ethically sourced high-quality gemstones at Shri Nanu Gems. Find your perfect gem today!',
+    images: ['https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png'], // <-- Same image for Twitter
+  },
 };
+
 
 // Server component function to fetch categories
 async function fetchCategories() {
