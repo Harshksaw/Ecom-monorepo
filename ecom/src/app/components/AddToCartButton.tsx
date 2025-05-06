@@ -61,9 +61,9 @@ export default function AddToCartButton({ product, variant, selectedSizeId }: Ad
 
   // Handle quantity increase/decrease
   const handleIncreaseQuantity = () => {
-    if (variant.stock > quantity) {
+    // if (variant.stock > quantity) {
       setQuantity(quantity + 1);
-    }
+    // }
   };
 
   const handleDecreaseQuantity = () => {
@@ -118,7 +118,7 @@ export default function AddToCartButton({ product, variant, selectedSizeId }: Ad
         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden shadow-sm">
           <button
             onClick={handleDecreaseQuantity}
-            disabled={quantity <= 1 || isDisabled}
+            // disabled={quantity <= 1 || isDisabled}
             className="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             -
@@ -128,7 +128,7 @@ export default function AddToCartButton({ product, variant, selectedSizeId }: Ad
           </span>
           <button
             onClick={handleIncreaseQuantity}
-            disabled={quantity >= variant?.stock || isDisabled}
+            // disabled={quantity >= variant?.stock || isDisabled}
             className="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             +
