@@ -3,8 +3,8 @@ import axios from "axios";
 
 // API base URL
 // export const API_URL = "https://ecom-turborepo.onrender.com/api"
-export const API_URL = "http://localhost:7003/api";
-// export const API_URL = process.env.NEXT_PUBLIC_API_URL
+// export const API_URL = "http://localhost:7003/api";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL
 // export const API_URL = "http://localhost:7003/api"
 // export const API_URL = "https://glowing-orbit-7v95rjwg75j53p4x7-7003.app.github.dev/api"
 
