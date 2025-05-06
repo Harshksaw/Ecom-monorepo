@@ -76,7 +76,7 @@ variants: [
 
   }
 ],
-    stock: { type: Number, default: 100 },
+
   }
 ],
 
