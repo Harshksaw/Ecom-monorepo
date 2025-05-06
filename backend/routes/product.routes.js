@@ -16,8 +16,10 @@ router.get('/sku/:sku', productController.getProductBySlug);
 router.get('/:id/related', productController.getRelatedProducts);
 
 // Admin routes
+
+router.post('/:id',handleUpload , productController.updateProduct)
+router.put('/edit/:id', productController.updateProduct);
 router.post('/',handleUpload , productController.createProduct);
-router.put('/:id', productController.updateProduct);
 router.delete('/:id',  productController.deleteProduct);
 router.patch('/:id/stock', authenticate, isAdmin, productController.updateStock);
 router.post('/bulk-status', authenticate, isAdmin, productController.bulkUpdateStatus);

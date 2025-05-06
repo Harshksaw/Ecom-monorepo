@@ -83,6 +83,7 @@ export default function EditProductPage({ params }: ProductProps) {
   
   // Basic product info
   const [name, setName] = useState("");
+  console.log("🚀 ~ EditProductPage ~ name:", name)
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -560,38 +561,26 @@ export default function EditProductPage({ params }: ProductProps) {
     setReviews(newReviews);
   };
 
-  // Form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
 
-    // Validate required inputs
-    if (!name.trim()) {
-      toast.error("Product name is required");
-      setIsLoading(false);
-      return;
-    }
 
-    if (!category) {
-      toast.error("Please select a category");
-      setIsLoading(false);
-      return;
-    }
+// Fixed handleSubmit function for the EditProductPage
 
-    if (!materialType) {
-      toast.error("Material type is required");
-      setIsLoading(false);
-      return;
-    }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    if (!purity) {
-      toast.error("Purity is required");
+  try {
+    // Basic validation
+    if (!name.trim() || !category || !materialType || !purity) {
+      toast.error("Please fill all required fields");
       setIsLoading(false);
       return;
     }
 
     // Create form data
     const formData = new FormData();
+    
+    // Add basic fields
     formData.append("name", name);
     formData.append("sku", sku);
     formData.append("description", description);
@@ -600,109 +589,105 @@ export default function EditProductPage({ params }: ProductProps) {
     formData.append("isFeatured", isFeatured.toString());
     formData.append("materialType", materialType);
     formData.append("purity", purity);
+    
+    // Optional fields
     if (shape) formData.append("shape", shape);
     if (color) formData.append("color", color);
 
-    // Add weight
+    // Weight as JSON
     if (weight.value) {
-      formData.append("weight[value]", weight.value);
-      formData.append("weight[unit]", weight.unit);
+      formData.append("weight", JSON.stringify(weight));
     }
 
-    // Add dimensions
+    // Dimensions as JSON
     if (dimensions.length || dimensions.width || dimensions.height) {
-      if (dimensions.length) formData.append("dimensions[length]", dimensions.length);
-      if (dimensions.width) formData.append("dimensions[width]", dimensions.width);
-      if (dimensions.height) formData.append("dimensions[height]", dimensions.height);
+      formData.append("dimensions", JSON.stringify(dimensions));
     }
 
-    // Add materials
-    materials.forEach((material, index) => {
-      if (material.trim()) {
-        formData.append(`materials[${index}]`, material);
-      }
-    });
+    // Materials as JSON
+    if (materials.length > 0) {
+      formData.append("materials", JSON.stringify(materials.filter(m => m.trim())));
+    }
 
-    // Add gems
-    gems.forEach((gem, index) => {
-      if (gem.type.trim()) {
-        formData.append(`gems[${index}][type]`, gem.type);
-        formData.append(`gems[${index}][carat]`, gem.carat);
-        formData.append(`gems[${index}][color]`, gem.color);
-        formData.append(`gems[${index}][clarity]`, gem.clarity);
-      }
-    });
+    // Gems as JSON
+    if (gems.length > 0) {
+      formData.append("gems", JSON.stringify(gems.filter(g => g.type.trim())));
+    }
 
-    // Add existing images
+    // Existing images as JSON
     formData.append("existingImages", JSON.stringify(existingImages));
 
-    // Add variants with existing images
+    // Prepare variants data
     const variantsToSend = variants.map(variant => {
-      const variantData: any = {
+      // Create a new object with only the data we want to send
+      return {
+        _id: variant._id,
         metalColor: variant.metalColor,
         price: variant.price,
         stock: variant.stock,
+        existingImages: variant.existingImages,
+        size: variant.sizes // The backend expects 'size' not 'sizes'
       };
-      
-      if (variant._id) {
-        variantData._id = variant._id;
-      }
-      
-      if (variant.sizes && variant.sizes.length > 0) {
-        variantData.size = variant.sizes;
-      }
-      
-      if (variant.existingImages && variant.existingImages.length > 0) {
-        variantData.existingImages = variant.existingImages;
-      }
-      
-      return variantData;
     });
     
+    // Add variants as JSON
     formData.append("variants", JSON.stringify(variantsToSend));
 
-    // Add variant images separately
-    variants.forEach((variant, variantIndex) => {
-      variant.images?.forEach((image: any, imageIndex: number) => {
-        formData.append(`variant_${variantIndex}_images`, image);
-      });
-    });
-
-    // Add reviews
-    formData.append("reviews", JSON.stringify(reviews));
-
-    // Add delivery options
-    formData.append("deliveryOptions", JSON.stringify(deliveryOptions));
-
-    // Add tags
-    tags.forEach((tag, index) => {
-      if (tag.trim()) {
-        formData.append(`tags[${index}]`, tag);
-      }
-    });
-
-    // Add new main product images
-    images.forEach((image) => {
+    // Add new product images
+    images.forEach(image => {
       formData.append("images", image);
     });
 
-    try {
-      const response = await axios.put(`${API_URL}/products/${productId}`, formData);
-
-      if (response.status !== 200) {
-        toast.error("Failed to update product");
-        return;
+    // Add variant images
+    variants.forEach((variant, variantIndex) => {
+      if (variant.images && variant.images.length > 0) {
+        variant.images.forEach(image => {
+          formData.append(`variant_${variantIndex}_images`, image);
+        });
       }
+    });
 
+    // Add reviews as JSON
+    formData.append("reviews", JSON.stringify(reviews));
+
+    // Add delivery options as JSON
+    formData.append("deliveryOptions", JSON.stringify(deliveryOptions));
+
+    // Add tags as JSON
+    formData.append("tags", JSON.stringify(tags.filter(t => t.trim())));
+
+    // Debug output - what's in the FormData
+    console.log("FormData entries:");
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key} → ${value instanceof File ? `File: ${value.name}` : value}`);
+    }
+
+    // IMPORTANT: Send the correct HTTP method and use the actual FormData object
+    const response = await axios({
+      method: 'post', // Your backend uses POST for the edit endpoint
+      url: `${API_URL}/products/${productId}`,
+      data: formData, // Send the actual FormData object, not formDataEntries
+      headers: {
+        // Let axios set this automatically for multipart/form-data
+        // Don't manually set Content-Type for FormData
+      }
+    });
+
+    console.log("API Response:", response.data);
+
+    if (response.status === 200) {
       toast.success("Product updated successfully");
       router.push("/admin/dashboard/products");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update product");
-    } finally {
-      setIsLoading(false);
+    } else {
+      toast.error("Failed to update product");
     }
-  };
-
+  } catch (error: any) {
+    console.error("API Error:", error.response?.data || error.message);
+    toast.error(error.message || "Failed to update product");
+  } finally {
+    setIsLoading(false);
+  }
+};
   if (isLoadingProduct) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-screen">
@@ -719,7 +704,7 @@ export default function EditProductPage({ params }: ProductProps) {
       <h1 className="text-3xl font-bold mb-6">Edit Product</h1>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={(e)=> handleSubmit(e)}
         className="mx-auto bg-white shadow-md rounded-lg p-8"
       >
         {/* Basic Information Section */}
@@ -867,7 +852,7 @@ export default function EditProductPage({ params }: ProductProps) {
           )}
           
           {/* New Image Upload */}
-          <div>
+          {/* <div>
             <label className="block text-gray-700 font-bold mb-2">
               Add New Images
             </label>
@@ -915,7 +900,7 @@ export default function EditProductPage({ params }: ProductProps) {
                 Upload up to 5 images. JPEG, PNG or GIF only. Max 5MB each.
               </p>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Material Properties Section */}
@@ -1391,7 +1376,7 @@ export default function EditProductPage({ params }: ProductProps) {
                 )}
 
                 {/* New Variant Images */}
-                <div className={`border-2 border-dashed rounded-lg p-4 ${
+                {/* <div className={`border-2 border-dashed rounded-lg p-4 ${
                   variant.metalColor === 'gold' ? 'bg-yellow-50 border-yellow-300' :
                   variant.metalColor === 'silver' ? 'bg-gray-50 border-gray-300' :
                   variant.metalColor === 'rosegold' ? 'bg-gray-50 border-pink-300' :
@@ -1440,7 +1425,7 @@ export default function EditProductPage({ params }: ProductProps) {
                   <p className="text-xs text-gray-500 mt-2 text-center">
                     Upload images showing this product in <span className="font-medium capitalize">{variant.metalColor}</span> color
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
           ))}
