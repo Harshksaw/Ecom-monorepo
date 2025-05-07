@@ -234,10 +234,14 @@ const updateOrderStatus = async (req, res) => {
     // Update order status
     const updatedOrder = await Order.findByIdAndUpdate(
       appOrderId,
-      { status : status, 
+      { status : "processing", 
 
-        paymentDate: new Date(),
-        transactionId : paymentId,
+
+        payment:{
+          status: status,
+          paymentDate: new Date(),
+          transactionId: paymentId
+        }
        },
       { new: true }
     );

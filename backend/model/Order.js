@@ -98,7 +98,7 @@ const orderSchema = new Schema({
   // Overall order status
   status: { 
     type: String, 
-    enum: ["pending", "processing", "partially_shipped", "shipped", "partially_delivered", "delivered", "cancelled", "refunded"], 
+    enum: ["pending","shipping", "processing", "partially_shipped", "shipped", "partially_delivered", "delivered", "cancelled", "refunded"], 
     default: "pending" 
   },
   
