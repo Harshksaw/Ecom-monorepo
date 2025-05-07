@@ -37,8 +37,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     switch(paymentMethod) {
       case 'razorpay':
         return 'Razorpay';
-      case 'payoneer':
-        return 'Payoneer';
+   
       case 'credit-card':
         return 'Credit Card';
       case 'bank-transfer':

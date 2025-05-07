@@ -24,7 +24,7 @@ router.get('/:orderId', orderController.getOrderById);
 // router.get('/:id', orderController.getOrderById);
 
 // Update order status
-router.patch('/:orderId/status', orderController.updateOrderStatus);
+router.post('/payment/status', orderController.updateOrderStatus);
 // // Update order status (admin only)
 // router.put('/:id/status',  orderController.updateOrderStatus);
 

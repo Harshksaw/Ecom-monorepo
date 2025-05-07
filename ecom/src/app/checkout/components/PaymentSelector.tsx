@@ -14,9 +14,9 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 }) => {
   const paymentMethods = [
     {
-      id: 'payoneer',
-      name: 'Payoneer',
-      description: 'Secure payment processing with Payoneer',
+      id: 'Razorpay',
+      name: 'Razorpay',
+      description: 'Secure payment processing with Razorpay',
     //   icon: <Globe className="w-6 h-6 text-blue-500" />
     }  ];
 
@@ -53,11 +53,11 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         </div>
       ))}
       
-      {selectedMethod === 'payoneer' && (
+      {selectedMethod === 'Razorpay' && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="font-medium mb-2">About Payoneer Payment</h3>
+          <h3 className="font-medium mb-2">About Razorpay Payment</h3>
           <p className="text-sm text-gray-600">
-            You'll be redirected to Payoneer's secure payment page to complete your purchase. 
+            You'll be redirected to Razorpay's secure payment page to complete your purchase. 
             Once the payment is confirmed, you'll be returned to our website.
           </p>
         </div>

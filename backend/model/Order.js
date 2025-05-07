@@ -79,19 +79,19 @@ const orderSchema = new Schema({
   payment: {
     gateway: { 
       type: String, 
-      enum: ["payoneer", "credit_card", "bank_transfer", "other"], 
-      default: "payoneer" 
+      enum: ["razorpay", "credit_card", "bank_transfer", "other"], 
+      default: "razorpay" 
     },
     transactionId: { type: String },
     amount: { type: Number, required: true },
-    currency: { type: String, required: true, default: "USD" },
+    currency: { type: String, required: true, default: "INR" },
     status: { 
       type: String, 
-      enum: ["pending", "completed", "failed", "refunded", "partially_refunded", "cancelled", "refund_pending"], 
+      enum: ["pending", "paid", "completed", "failed", "refunded", "partially_refunded", "cancelled", "refund_pending"], 
       default: "pending" 
     },
     paymentDate: { type: Date },
-    payoneerReference: { type: String },
+
     paymentDetails: { type: Map, of: String }
   },
   

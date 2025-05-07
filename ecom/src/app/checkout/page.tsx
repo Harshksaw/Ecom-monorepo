@@ -281,7 +281,7 @@ const CheckoutPage = () => {
       
       // Initialize Razorpay options (always in INR)
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_V9Ooyg8VJ0O4YT', // Fallback to test key
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID , // Fallback to test key
         amount: Math.round(total * 100), // in paisa (INR)
         currency: 'INR', // Razorpay requires INR for Indian merchants
         name: 'Shri Nanu Gems',
@@ -321,12 +321,14 @@ const CheckoutPage = () => {
     
     try {
       const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
+      console.log("🚀 ~ handlePaymentSuccess ~ response:", response)
       
-      const verifyResponse = await axios.post(`${API_URL}/orders/verify-payment`, {
+      const verifyResponse = await axios.post(`${API_URL}/orders/payment/status`, {
         paymentId: razorpay_payment_id,
         orderId: razorpay_order_id,
         signature: razorpay_signature,
-        appOrderId: orderId
+        appOrderId: orderId,
+        status:'paid'
       });
       
       if (verifyResponse.status === 200) {

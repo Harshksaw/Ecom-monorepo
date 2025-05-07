@@ -40,7 +40,7 @@ const createOrder = async (req, res) => {
       total,
       shippingAddress,
       items,
-      paymentMethod = 'payoneer',
+      paymentMethod = 'razorpay',
       status = 'pending'
     } = req.body;
     
@@ -213,35 +213,32 @@ const getOrderById = async (req, res) => {
  * - status: New status for the order
  */
 const updateOrderStatus = async (req, res) => {
-  if (req.method !== 'PATCH') {
-    return res.status(405).json({ success: false, message: 'Method not allowed' });
-  }
+
   
   try {
     // Extract order ID from request params
-    const { orderId } = req.params;
-    const { status } = req.body;
+
+    const { appOrderId , paymentId, status } = req.body;
     
-    if (!orderId || !status) {
-      return res.status(400).json({
-        success: false,
-        message: 'Order ID and status are required'
-      });
-    }
+
     
     // Validate status
-    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status value'
-      });
-    }
+    // const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
+    // if (!validStatuses.includes(status)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Invalid status value'
+    //   });
+    // }
     
     // Update order status
     const updatedOrder = await Order.findByIdAndUpdate(
-      orderId,
-      { status },
+      appOrderId,
+      { status : status, 
+
+        paymentDate: new Date(),
+        transactionId : paymentId,
+       },
       { new: true }
     );
     
