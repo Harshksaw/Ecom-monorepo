@@ -337,7 +337,7 @@ const CheckoutPage = () => {
         dispatch(clearCart());
         
         // Redirect to order confirmation page
-        router.push(`/orders/${orderId}`);
+        router.push(`/orders`);
       } else {
         const verifyData = verifyResponse.data;
         toast.error(`Payment verification failed: ${verifyData.message || 'Please contact support.'}`, { id: verifyToastId });

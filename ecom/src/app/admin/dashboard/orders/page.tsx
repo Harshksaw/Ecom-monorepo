@@ -86,11 +86,14 @@ const OrdersAdmin: React.FC = () => {
 
   const fetchOrders = async (): Promise<void> => {
     try {
+      const userId = localStorage.getItem('userId');
+      const id = JSON.parse(userId).id
+      console.log("🚀 ~ fetchOrders ~ id:", id)
       setLoading(true);
-      let url = `${API_URL}/orders?page=${currentPage}`;
-      if (statusFilter) {
-        url += `&status=${statusFilter}`;
-      }
+      let url = `${API_URL}/orders/user/${id}`;
+      // if (statusFilter) {
+      //   url += `&status=${statusFilter}`;
+      // }
       
       const response = await fetch(url);
       const data = await response.json() as ApiResponse;

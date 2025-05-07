@@ -15,7 +15,8 @@ import {
   FaUser,
   FaPhone,
   FaEnvelope,
-  FaCreditCard
+  FaCreditCard,
+  FaSync
 } from 'react-icons/fa';
 import axios from 'axios';
 import { API_URL } from '../lib/api';
@@ -26,32 +27,31 @@ import { useSelector } from 'react-redux';
 
 // Define order status type for type safety
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+type PaymentStatus = 'pending' | 'paid' | 'failed' | 'completed';
 
-// Updated OrderItem interface
+// Updated OrderItem interface to match the API response
 interface OrderItem {
   _id: string;
-  productId: {
-    _id: string;
-    name: string;
-    sku: string;
-    images: string[];
-    price: number;
-  };
+  productId: string;
+  variantId: string;
   quantity: number;
   price: number;
+  name: string;
+  image: string;
+  status: string;
 }
 
-// Updated Order interface
+// Updated Order interface to match the API response
 interface Order {
   _id: string;
-  orderNumber: string;
+  orderId: string;
   userId: string;
   items: OrderItem[];
   subtotal: number;
+  shippingCost: number;
   tax: number;
+  discount: number;
   total: number;
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'completed';
-  orderStatus: OrderStatus;
   shippingAddress: {
     addressLine1: string;
     addressLine2: string;
@@ -60,52 +60,71 @@ interface Order {
     postalCode: string;
     country: string;
   };
-  createdAt: string;
+  payment: {
+    status: PaymentStatus;
+    paymentDate: string;
+    transactionId: string;
+  };
+  status: OrderStatus;
+  orderDate: string;
   updatedAt: string;
-  razorpayOrderId: string;
-  razorpayPaymentId?: string;
-  razorpaySignature?: string;
 }
 
-export default function OrderDetailPage({ params }: any) {
+// Response interface to match the API response structure
+interface OrdersResponse {
+  success: boolean;
+  count: number;
+  orders: Order[];
+}
+
+export default function OrderDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrderIndex, setSelectedOrderIndex] = useState(0);
 
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      // Only proceed if we have a user ID
-      if (!user?.id) {
-        setIsLoading(false);
-        setError("Please log in to view order details");
-        return;
-      }
-      
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const response = await axios.get(`${API_URL}/orders/my-orders/${user?.id}`);
-        
-        if (response?.status === 200) {
-          setOrders(response?.data?.orders);
-        } else {
-          setError(response?.data?.message || 'Failed to fetch order details');
-        }
-      } catch (error: any) {
-        console.error('Error fetching order details:', error);
-        setError(error?.response?.data?.message || 'An error occurred while fetching order details');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchOrderDetails = async () => {
+    // Only proceed if we have a user ID
+    if (!user?.id) {
+      setIsLoading(false);
+      setError("Please log in to view order details");
+      return;
+    }
     
+    try {
+      if (!isRefreshing) {
+        setIsLoading(true);
+      }
+      setError(null);
+      
+      const response = await axios.get<OrdersResponse>(`${API_URL}/orders/user/${user?.id}`);
+      
+      if (response?.data?.success) {
+        setOrders(response.data.orders);
+      } else {
+        setError('Failed to fetch order details');
+      }
+    } catch (error: any) {
+      console.error('Error fetching order details:', error);
+      setError(error?.response?.data?.message || 'An error occurred while fetching order details');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchOrderDetails();
   }, [user?.id]);
+  
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchOrderDetails();
+  };
   
   // Format date - with null safety
   const formatDate = (dateString?: string) => {
@@ -148,6 +167,33 @@ export default function OrderDetailPage({ params }: any) {
           icon: <FaCheck className="mr-1" /> 
         };
       case 'cancelled':
+        return { 
+          color: 'bg-red-100 text-red-800', 
+          icon: <FaTimes className="mr-1" /> 
+        };
+      default:
+        return { 
+          color: 'bg-gray-100 text-gray-800', 
+          icon: null 
+        };
+    }
+  };
+
+  // Get payment status color and icon
+  const getPaymentStatusInfo = (status?: PaymentStatus) => {
+    switch (status) {
+      case 'paid':
+      case 'completed':
+        return { 
+          color: 'bg-green-100 text-green-800', 
+          icon: <FaMoneyBillWave className="mr-1" /> 
+        };
+      case 'pending':
+        return { 
+          color: 'bg-yellow-100 text-yellow-800', 
+          icon: <FaCreditCard className="mr-1" /> 
+        };
+      case 'failed':
         return { 
           color: 'bg-red-100 text-red-800', 
           icon: <FaTimes className="mr-1" /> 
@@ -204,7 +250,8 @@ export default function OrderDetailPage({ params }: any) {
   const selectedOrder = orders[selectedOrderIndex] || orders[0];
   
   // Get status styling for selected order
-  const statusInfo = getStatusInfo(selectedOrder?.orderStatus);
+  const orderStatusInfo = getStatusInfo(selectedOrder?.status);
+  const paymentStatusInfo = getPaymentStatusInfo(selectedOrder?.payment?.status);
   
   // Capitalize first letter safely
   const capitalize = (text?: string) => {
@@ -215,7 +262,17 @@ export default function OrderDetailPage({ params }: any) {
   return (
     <Wrapper>
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">My Orders</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">My Orders</h1>
+          <button 
+            onClick={handleRefresh} 
+            className="flex items-center text-blue-600 hover:text-blue-800"
+            disabled={isRefreshing}
+          >
+            <FaSync className={`mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh Orders'}
+          </button>
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Order List */}
@@ -234,17 +291,16 @@ export default function OrderDetailPage({ params }: any) {
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-medium">{order.orderNumber}</p>
-                        <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
+                        <p className="font-medium">{order.orderId}</p>
+                        <p className="text-sm text-gray-500">{formatDate(order.orderDate)}</p>
                         <p className="text-sm text-gray-500 mt-1">
                           {getTotalItems(order.items)} {getTotalItems(order.items) === 1 ? 'item' : 'items'} • ₹{order.total.toFixed(2)}
                         </p>
                       </div>
                       
-                      <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusInfo(order.orderStatus).color}`}>
-                        {getStatusInfo(order.orderStatus).icon}
-                        {capitalize(order.orderStatus)}
-                   
+                      <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusInfo(order.status).color}`}>
+                        {getStatusInfo(order.status).icon}
+                        {capitalize(order.status)}
                       </div>
                     </div>
                   </div>
@@ -257,21 +313,21 @@ export default function OrderDetailPage({ params }: any) {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
               <div className="p-6 border-b">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-bold">Order #{selectedOrder.orderNumber}</h2>
-                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>
-                    {statusInfo.icon}
-                    Order-
-                    {capitalize(selectedOrder.orderStatus)}
-                  </div>
-                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-400 `}>
-                    {statusInfo.icon}
-                    Payment-
-                 {selectedOrder.paymentStatus}
+                <div className="flex flex-wrap justify-between items-center gap-2">
+                  <h2 className="text-xl font-bold">Order #{selectedOrder.orderId}</h2>
+                  <div className="flex flex-wrap gap-2">
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${orderStatusInfo.color}`}>
+                      {orderStatusInfo.icon}
+                      {capitalize(selectedOrder.status)}
+                    </div>
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${paymentStatusInfo.color}`}>
+                      {paymentStatusInfo.icon}
+                      {capitalize(selectedOrder.payment.status)}
+                    </div>
                   </div>
                 </div>
                 <p className="text-gray-600 mt-1">
-                  Placed on {formatDate(selectedOrder.createdAt)}
+                  Placed on {formatDate(selectedOrder.orderDate)}
                 </p>
               </div>
               
@@ -284,10 +340,10 @@ export default function OrderDetailPage({ params }: any) {
                     <div key={item._id} className="py-4 flex">
                       {/* Product Image */}
                       <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative">
-                        {item.productId.images && item.productId.images.length > 0 ? (
+                        {item.image ? (
                           <Image
-                            src={item.productId.images[0]}
-                            alt={item.productId.name || 'Product image'}
+                            src={item.image}
+                            alt={item.name || 'Product image'}
                             fill
                             className="object-cover"
                           />
@@ -301,7 +357,7 @@ export default function OrderDetailPage({ params }: any) {
                       {/* Product Details */}
                       <div className="ml-4 flex-grow">
                         <div className="flex justify-between">
-                          <h4 className="font-medium">{item.productId.name}</h4>
+                          <h4 className="font-medium">{item.name}</h4>
                           <p className="font-medium">
                             ₹{(item.quantity * item.price).toFixed(2)}
                           </p>
@@ -311,12 +367,23 @@ export default function OrderDetailPage({ params }: any) {
                           Qty: {item.quantity} × ₹{item.price.toFixed(2)}
                         </p>
                         
-                        <p className="text-xs text-gray-400 mt-1">
-                          SKU: {item.productId.sku}
-                        </p>
+                        <div className="flex items-center mt-2">
+                          <div className={`h-2 w-2 rounded-full mr-2 ${
+                            item.status === 'delivered' 
+                              ? 'bg-green-500' 
+                              : item.status === 'processing'
+                                ? 'bg-blue-500'
+                                : item.status === 'shipped'
+                                  ? 'bg-purple-500'
+                                  : 'bg-yellow-500'
+                          }`}></div>
+                          <p className="text-xs text-gray-500">
+                            Status: {capitalize(item.status)}
+                          </p>
+                        </div>
                         
-                        {item.productId._id && (
-                          <Link href={`/product/${item.productId._id}`} className="text-sm text-blue-600 hover:underline mt-2 inline-block">
+                        {item.productId && (
+                          <Link href={`/product/${item.productId}`} className="text-sm text-blue-600 hover:underline mt-2 inline-block">
                             View Product
                           </Link>
                         )}
@@ -336,10 +403,26 @@ export default function OrderDetailPage({ params }: any) {
                     <span>₹{selectedOrder.subtotal.toFixed(2)}</span>
                   </div>
                   
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Tax</span>
-                    <span>₹{selectedOrder.tax.toFixed(2)}</span>
-                  </div>
+                  {selectedOrder.shippingCost > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Shipping</span>
+                      <span>₹{selectedOrder.shippingCost.toFixed(2)}</span>
+                    </div>
+                  )}
+                  
+                  {selectedOrder.tax > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Tax</span>
+                      <span>₹{selectedOrder.tax.toFixed(2)}</span>
+                    </div>
+                  )}
+                  
+                  {selectedOrder.discount > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Discount</span>
+                      <span>-₹{selectedOrder.discount.toFixed(2)}</span>
+                    </div>
+                  )}
                   
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between font-bold">
@@ -351,20 +434,26 @@ export default function OrderDetailPage({ params }: any) {
                   <div className="mt-4 pt-4 border-t">
                     <div className="mt-2 flex items-center">
                       <div className={`h-2 w-2 rounded-full mr-2 ${
-                     selectedOrder.paymentStatus === 'completed'
+                        selectedOrder.payment.status === 'paid' || selectedOrder.payment.status === 'completed'
                           ? 'bg-green-500' 
-                          : selectedOrder.paymentStatus === 'pending'
+                          : selectedOrder.payment.status === 'pending'
                             ? 'bg-yellow-500'
                             : 'bg-red-500'
                       }`}></div>
                       <p className="text-sm">
-                        Payment Status: <span className="font-medium">{capitalize(selectedOrder.paymentStatus)}</span>
+                        Payment Status: <span className="font-medium">{capitalize(selectedOrder.payment.status)}</span>
                       </p>
                     </div>
                     
-                    {selectedOrder.razorpayOrderId && (
+                    {selectedOrder.payment.transactionId && (
                       <p className="text-xs text-gray-500 mt-1">
-                        Razorpay Order ID: {selectedOrder.razorpayOrderId}
+                        Transaction ID: {selectedOrder.payment.transactionId}
+                      </p>
+                    )}
+                    
+                    {selectedOrder.payment.paymentDate && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Payment Date: {formatDate(selectedOrder.payment.paymentDate)}
                       </p>
                     )}
                   </div>
