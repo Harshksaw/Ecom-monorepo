@@ -6,14 +6,14 @@ const orderController = require('../controller/order.controller');
 
 // Create a new order
 router.post('/create/:userId', orderController.createOrder);
-router.post('/create/:userId',  orderController.createOrder);
+// router.post('/create/:userId',  orderController.createOrder);
 
 // Get all orders for a user
 router.get('/user/:userId', orderController.getUserOrders);
 // router.post('/capturePayment',  orderController.capturePayment);
 
 // Get all orders (admin only)
-// router.get('/', orderController.getAllOrders);
+router.get('/admin/orders', orderController.getAllAdminOrders);
 
 // Get customer orders
 // router.get('/my-orders/:id', orderController.getCustomerOrders);

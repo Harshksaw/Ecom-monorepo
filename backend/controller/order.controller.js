@@ -359,11 +359,32 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+
+
+const getAllAdminOrders = async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ orderDate: -1 }).lean();
+    return res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error fetching orders',
+      error: error.message
+    });
+  }
+};
+
 // Export handlers for API routes
 module.exports = {
   createOrder,
   getUserOrders,
   getOrderById,
   updateOrderStatus,
-  cancelOrder
+  cancelOrder,
+  getAllAdminOrders
 };
