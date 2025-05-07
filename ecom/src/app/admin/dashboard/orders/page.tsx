@@ -67,6 +67,7 @@ const OrdersAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  console.log("🚀 ~ OrdersAdmin ~ selectedOrder:", selectedOrder)
   const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
@@ -105,17 +106,15 @@ const OrdersAdmin = () => {
   };
 
   const updateOrderStatus = async (id: string, status: Order['status']) => {
+    console.log("🚀 ~ updateOrderStatus ~ id:", id)
+    console.log("🚀 ~ updateOrderStatus ~ u:", status)
     try {
       setUpdateLoading(true);
-      const response = await fetch(`${API_URL}/orders/${id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: status })
-      });
+
+
+      const response = await axios.post(`${API_URL}/orders/edit/${id}`, { status: status });
       
-      const data = await response.json();
+      const data = response.data;
       
       if (data.order) {
         setOrders(orders.map(order => 
@@ -330,6 +329,7 @@ const OrdersAdmin = () => {
                       </div>
                     </div>
                   ))}
+
                 </div>
                 
                 {/* Order Summary */}

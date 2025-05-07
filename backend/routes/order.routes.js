@@ -26,7 +26,7 @@ router.get('/:orderId', orderController.getOrderById);
 // Update order status
 router.post('/payment/status', orderController.updateOrderStatus);
 // // Update order status (admin only)
-router.post('/edit/:id/',  orderController.updateOrderStatus);
+router.post('/edit/:orderId',  orderController.editOrder);
 
 // Cancel an order
 router.post('/:orderId/cancel', orderController.cancelOrder);

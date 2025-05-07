@@ -382,6 +382,7 @@ const getAllAdminOrders = async (req, res) => {
 const editOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
+    console.log("🚀 ~ editOrder ~ orderId:", orderId)
     const { status } = req.body;
 
     const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
@@ -412,6 +413,7 @@ const editOrder = async (req, res) => {
 module.exports = {
   createOrder,
   getUserOrders,
+  editOrder,
   getOrderById,
   updateOrderStatus,
   cancelOrder,
