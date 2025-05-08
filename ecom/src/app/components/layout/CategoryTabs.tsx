@@ -88,7 +88,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory , categories
                   {hoveredCategory === cat.slug && cat.slug !== 'Gemstone'  && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center space-x-3 rounded-full">
                       <Link
-                        href={`/category/${cat.slug}`}
+                        href={`/category/${cat.slug}?material=gold`}
                         className="flex flex-col items-center p-2 bg-yellow-100 rounded-md hover:scale-110 transition"
                       >
                         <FaGem className="text-yellow-600 text-xl" />

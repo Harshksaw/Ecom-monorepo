@@ -206,7 +206,7 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
                     </div>
                   </div>
                   <div className="mt-1 text-sm font-medium text-gray-900">
-                    //@ts-ignore
+
                     Total: ₹{(typeof item?.price === 'number' && typeof item?.quantity === 'number' ? (item.price * item.quantity).toFixed(2) : 'N/A')}
                   </div>
                   <div className="mt-1">
