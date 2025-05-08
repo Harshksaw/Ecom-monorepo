@@ -133,32 +133,7 @@ const OrdersAdmin = () => {
     }
   };
 
-  const cancelOrder = async (id: string) => {
-    try {
-      if (!window.confirm('Are you sure you want to cancel this order?')) return;
-      
-      setUpdateLoading(true);
-      const response = await fetch(`${API_URL}/orders/${id}/cancel`, {
-        method: 'POST'
-      });
-      
-      const data = await response.json();
-      
-      if (data.order) {
-        setOrders(orders.map(order => 
-          order._id === id ? { ...order, status: 'cancelled' } : order
-        ));
-        
-        if (selectedOrder && selectedOrder._id === id) {
-          setSelectedOrder({ ...selectedOrder, status: 'cancelled' });
-        }
-      }
-    } catch (err) {
-      console.error('Error cancelling order:', err);
-    } finally {
-      setUpdateLoading(false);
-    }
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();

@@ -180,7 +180,13 @@ const getOrderById = async (req, res) => {
     }
     
     // Find order
-    const order = await Order.findById(orderId).lean();
+    const order = await Order.findById(orderId)
+    .populate('userId', 'firstName email phoneNumber')
+    .populate({
+      path: 'items.productId',
+      model: 'Products',
+      select: 'name price image slug variants',  // grab variants too
+    })
     
     if (!order) {
       return res.status(404).json({
@@ -366,12 +372,7 @@ const getAllAdminOrders = async (req, res) => {
     const orders = await Order
     .find()
     .sort({ orderDate: -1 })
-    .populate('userId', 'firstName email phoneNumber')
-    .populate({
-      path: 'items.productId',
-      model: 'Products',
-      select: 'name price image slug variants',  // grab variants too
-    })
+
     .lean();
     
     return res.status(200).json({

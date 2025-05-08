@@ -7,8 +7,9 @@ import axios from "axios";
 import { API_URL } from "@/app/lib/api";
 
 const OrderDetailsPanel = ({ selectedOrder, refreshOrders }) => {
+console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
+
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [expandedSection, setExpandedSection] = useState("items");
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -58,55 +59,50 @@ const OrderDetailsPanel = ({ selectedOrder, refreshOrders }) => {
     }
   };
 
-  // Toggle section visibility
-  const toggleSection = (section) => {
-    if (expandedSection === section) {
-      setExpandedSection(null);
-    } else {
-      setExpandedSection(section);
-    }
-  };
-
   // Get selected size name from variant
   const getSelectedSizeName = (item) => {
-    if (!item?.sizeId) return "";
+    console.log("🚀 ~ getSelectedSizeName ~ item:", item)
+    if (!item?.sizeId) return null;
     
     const variant = item?.productId?.variants?.find(v => v?._id === item.variantId);
-    if (!variant?.size) return "";
+    console.log("🚀 ~ getSelectedSizeName ~ variant:", variant)
+    if (!variant?.size) return null;
     
     const selectedSize = variant.size.find(s => s?._id === item.sizeId);
-    return selectedSize?.size || "";
+    console.log("🚀 ~ getSelectedSizeName ~ selectedSize:", selectedSize)
+    return selectedSize?.size || null;
   };
 
-  // Get variant color display name
-  const getVariantColor = (item) => {
-    if (!item?.variantId) return "";
+  // Get metal color display name
+  const getMetalColorName = (item) => {
+    if (!item?.variantId) return null;
     
     const variant = item?.productId?.variants?.find(v => v?._id === item.variantId);
-    if (!variant) return "";
+    if (!variant?.metalColor) return null;
     
-    const colorNames = {
+    // Format the metalColor for display
+    const colorMap = {
+      "sterlingsilver": "Sterling Silver",
       "yellowgold": "Yellow Gold",
       "rosegold": "Rose Gold",
       "whitegold": "White Gold",
-      "sterlingsilver": "Sterling Silver",
       "gold": "Gold",
       "silver": "Silver",
       "platinum": "Platinum",
       "titanium": "Titanium"
     };
     
-    return colorNames[variant.metalColor] || variant.metalColor || "";
+    return colorMap[variant.metalColor] || variant.metalColor;
   };
 
-  // Handle updating order status
+
   const updateOrderStatus = async (orderId, newStatus) => {
     if (!orderId) return;
     
     try {
       setUpdateLoading(true);
       
-      const response = await axios.put(`${API_URL}/orders/${orderId}/status`, {
+      const response = await axios.post(`${API_URL}/orders/edit/${orderId}`, {
         status: newStatus
       });
       
@@ -144,240 +140,161 @@ const OrderDetailsPanel = ({ selectedOrder, refreshOrders }) => {
 
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
-      <div className="p-4 border-b bg-gray-50">
-        <h2 className="font-medium flex items-center">
-          <FaListUl className="mr-2 text-gray-500" /> Order Details
-        </h2>
-      </div>
-
+      <h2 className="p-4 border-b font-medium">Order Details</h2>
+      
       <div className="p-4">
         {/* Order Header */}
-        <div className="flex justify-between items-start mb-4 pb-4 border-b">
+        <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="font-bold text-lg">{selectedOrder.orderId}</h3>
-            <p className="text-sm text-gray-500 mt-1">
-              <FaCalendarAlt className="inline mr-1 text-gray-400" />
-              {formatDate(selectedOrder?.orderDate)}
-            </p>
+            <h3 className="font-bold text-lg">{selectedOrder?.orderId}</h3>
+            <p className="text-sm text-gray-500">{formatDate(selectedOrder?.orderDate)}</p>
           </div>
           
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedOrder?.status)}`}>
-            {selectedOrder?.status?.charAt(0).toUpperCase() + selectedOrder?.status?.slice(1)}
+          <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(selectedOrder?.status)}`}>
+            {selectedOrder?.status}
           </span>
         </div>
         
         {/* Customer Info */}
-        <div 
-          className="mb-4 pb-2 cursor-pointer" 
-          onClick={() => toggleSection("customer")}
-        >
-          <div className="flex justify-between items-center">
-            <h4 className="text-sm font-medium text-gray-700 flex items-center">
-              <FaUser className="mr-2 text-gray-500" /> Customer Information
-            </h4>
-            <span className="text-gray-400 text-xs">
-              {expandedSection === "customer" ? "▼" : "▶"}
-            </span>
-          </div>
-          
-          {expandedSection === "customer" && (
-            <div className="mt-2 pl-6 text-sm">
-              <p className="font-medium">{selectedOrder?.userId?.email}</p>
-              {selectedOrder?.userId?.firstName && (
-                <p className="text-gray-600 mt-1">
-                  {selectedOrder?.userId?.firstName} {selectedOrder?.userId?.lastName || ''}
-                </p>
-              )}
-              {selectedOrder?.userId?.phone && (
-                <p className="text-gray-600 mt-1">{selectedOrder?.userId?.phone}</p>
-              )}
-            </div>
+        <div className="mb-3 pb-3 border-b">
+          <h4 className="text-sm font-medium text-gray-500 mb-1">Customer</h4>
+          <p>{selectedOrder?.userId?.email}</p>
+          {selectedOrder?.userId?.firstName && (
+            <p className="text-sm text-gray-500">Name: {selectedOrder.userId.firstName}</p>
+          )}
+          {selectedOrder?.userId?.phoneNumber && (
+            <p className="text-sm text-gray-500">Phone: {selectedOrder.userId.phoneNumber}</p>
           )}
         </div>
         
         {/* Order Items */}
-        <div 
-          className="mb-4 pb-2 cursor-pointer" 
-          onClick={() => toggleSection("items")}
-        >
-          <div className="flex justify-between items-center">
-            <h4 className="text-sm font-medium text-gray-700 flex items-center">
-              <FaBox className="mr-2 text-gray-500" /> Order Items
-            </h4>
-            <span className="text-gray-400 text-xs">
-              {expandedSection === "items" ? "▼" : "▶"}
-            </span>
-          </div>
-          
-          {expandedSection === "items" && (
-            <div className="mt-3">
-              {selectedOrder?.items?.map(item => {
-                const sizeName = getSelectedSizeName(item);
-                const variantColor = getVariantColor(item);
-                
-                return (
-                  <div key={item?._id} className="flex items-start gap-4 py-3 border-b last:border-b-0">
-                    <div className="w-20 h-20 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
-                      <img 
-                        src={item?.image} 
-                        alt={item?.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.src = "https://placehold.co/80x80?text=No+Image";
-                        }}
-                      />
+        <div className="mb-3 pb-3 border-b">
+          <h4 className="text-sm font-medium text-gray-500 mb-2">Order Items</h4>
+          {selectedOrder?.items?.map(item => {
+            const sizeName = getSelectedSizeName(item);
+            const metalColor = getMetalColorName(item);
+            
+            return (
+              <div key={item?._id} className="flex items-start gap-4 py-3 border-b last:border-b-0">
+                <div className="w-20 h-20 flex-shrink-0">
+                  <img 
+                    src={item?.image} 
+                    alt={item?.name}
+                    className="w-full h-full object-cover rounded"
+                    onError={(e) => {
+                      e.target.src = "https://placehold.co/80x80?text=No+Image";
+                    }}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-gray-900">{item?.name}</div>
+                  <div className="mt-1 text-sm text-gray-500">
+                    {metalColor && (
+                      <div>Metal: {metalColor}</div>
+                    )}
+                    {sizeName && (
+                      <div>Size: {sizeName}</div>
+                    )}
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      Quantity: {item?.quantity}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900">{item?.name}</div>
-                      <div className="mt-1 text-xs text-gray-500">
-                        <div>Product ID: {item?.productId?._id}</div>
-                        {item?.variantId && (
-                          <div>Variant: {variantColor || item?.variantId}</div>
-                        )}
-                        {sizeName && <div>Size: {sizeName}</div>}
-                      </div>
-                      <div className="mt-2 flex items-center justify-between">
-                        <div className="text-sm text-gray-600">
-                          Quantity: {item?.quantity}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          Price: ₹{item?.price?.toFixed(2)}
-                        </div>
-                      </div>
-                      <div className="mt-1 text-sm font-medium text-gray-900">
-                        Total: ₹{(item?.price * item?.quantity).toFixed(2)}
-                      </div>
-                      <div className="mt-1">
-                        <span className={`inline-flex text-xs px-2 py-1 rounded-full ${getStatusColor(item?.status)}`}>
-                          {item?.status?.charAt(0).toUpperCase() + item?.status?.slice(1)}
-                        </span>
-                      </div>
+                    <div className="text-sm text-gray-500">
+                      Price: ₹{item?.price?.toFixed(2)}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                  <div className="mt-1 text-sm font-medium text-gray-900">
+                    Total: ₹{(item?.price * item?.quantity)?.toFixed(2)}
+                  </div>
+                  <div className="mt-1">
+                    <span className={`inline-flex text-xs px-2 py-1 rounded-full ${getStatusColor(item?.status)}`}>
+                      {item?.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
         
         {/* Order Summary */}
-        <div 
-          className="mb-4 pb-2 cursor-pointer" 
-          onClick={() => toggleSection("summary")}
-        >
-          <div className="flex justify-between items-center">
-            <h4 className="text-sm font-medium text-gray-700 flex items-center">
-              <FaMoneyBill className="mr-2 text-gray-500" /> Order Summary
-            </h4>
-            <span className="text-gray-400 text-xs">
-              {expandedSection === "summary" ? "▼" : "▶"}
-            </span>
-          </div>
-          
-          {expandedSection === "summary" && (
-            <div className="mt-3 pl-6 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Subtotal</span>
-                <span className="font-medium">₹{selectedOrder?.subtotal?.toFixed(2)}</span>
-              </div>
-              {selectedOrder?.shippingCost > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Shipping</span>
-                  <span className="font-medium">₹{selectedOrder?.shippingCost?.toFixed(2)}</span>
-                </div>
-              )}
-              {selectedOrder?.tax > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Tax</span>
-                  <span className="font-medium">₹{selectedOrder?.tax?.toFixed(2)}</span>
-                </div>
-              )}
-              {selectedOrder?.discount > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Discount</span>
-                  <span className="font-medium text-red-600">-₹{selectedOrder?.discount?.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-base font-medium pt-2 border-t">
-                <span>Total</span>
-                <span>₹{selectedOrder?.total?.toFixed(2)}</span>
-              </div>
+        <div className="mb-3 pb-3 border-b">
+          <h4 className="text-sm font-medium text-gray-500 mb-2">Order Summary</h4>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Subtotal</span>
+              <span className="font-medium">₹{selectedOrder?.subtotal?.toFixed(2)}</span>
             </div>
-          )}
+            {selectedOrder?.shippingCost > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Shipping</span>
+                <span className="font-medium">₹{selectedOrder?.shippingCost?.toFixed(2)}</span>
+              </div>
+            )}
+            {selectedOrder?.tax > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Tax</span>
+                <span className="font-medium">₹{selectedOrder?.tax?.toFixed(2)}</span>
+              </div>
+            )}
+            {selectedOrder?.discount > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Discount</span>
+                <span className="font-medium text-red-600">-₹{selectedOrder?.discount?.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-base font-medium pt-2 border-t">
+              <span>Total</span>
+              <span>₹{selectedOrder?.total?.toFixed(2)}</span>
+            </div>
+          </div>
         </div>
         
         {/* Payment Info */}
-        <div 
-          className="mb-4 pb-2 cursor-pointer" 
-          onClick={() => toggleSection("payment")}
-        >
-          <div className="flex justify-between items-center">
-            <h4 className="text-sm font-medium text-gray-700 flex items-center">
-              <FaMoneyBill className="mr-2 text-gray-500" /> Payment Information
-            </h4>
-            <span className="text-gray-400 text-xs">
-              {expandedSection === "payment" ? "▼" : "▶"}
-            </span>
-          </div>
-          
-          {expandedSection === "payment" && (
-            <div className="mt-3 pl-6 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Status</span>
-                <span className={`inline-flex text-xs px-2 py-1 rounded-full ${getPaymentColor(selectedOrder?.payment?.status)}`}>
-                  {selectedOrder?.payment?.status?.charAt(0).toUpperCase() + selectedOrder?.payment?.status?.slice(1)}
-                </span>
-              </div>
-              {selectedOrder?.payment?.transactionId && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Transaction ID</span>
-                  <span className="font-medium">{selectedOrder?.payment?.transactionId}</span>
-                </div>
-              )}
-              {selectedOrder?.payment?.paymentDate && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Payment Date</span>
-                  <span className="font-medium">{formatDate(selectedOrder?.payment?.paymentDate)}</span>
-                </div>
-              )}
+        <div className="mb-3 pb-3 border-b">
+          <h4 className="text-sm font-medium text-gray-500 mb-2">Payment Information</h4>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-500">Status</span>
+              <span className={`inline-flex text-xs px-2 py-1 rounded-full ${getPaymentColor(selectedOrder?.payment?.status)}`}>
+                {selectedOrder?.payment?.status}
+              </span>
             </div>
-          )}
+            {selectedOrder?.payment?.transactionId && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Transaction ID</span>
+                <span className="font-medium">{selectedOrder?.payment?.transactionId}</span>
+              </div>
+            )}
+            {selectedOrder?.payment?.paymentDate && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Payment Date</span>
+                <span className="font-medium">{formatDate(selectedOrder?.payment?.paymentDate)}</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Shipping Info */}
-        <div 
-          className="mb-4 pb-2 cursor-pointer" 
-          onClick={() => toggleSection("shipping")}
-        >
-          <div className="flex justify-between items-center">
-            <h4 className="text-sm font-medium text-gray-700 flex items-center">
-              <FaShippingFast className="mr-2 text-gray-500" /> Shipping Information
-            </h4>
-            <span className="text-gray-400 text-xs">
-              {expandedSection === "shipping" ? "▼" : "▶"}
-            </span>
+        {/* Shipping Address */}
+        <div className="mb-3 pb-3 border-b">
+          <h4 className="text-sm font-medium text-gray-500 mb-2">Shipping Address</h4>
+          <div className="text-sm">
+            <p className="font-medium">{selectedOrder?.shippingAddress?.addressLine1}</p>
+            {selectedOrder?.shippingAddress?.addressLine2 && (
+              <p>{selectedOrder?.shippingAddress?.addressLine2}</p>
+            )}
+            <p>
+              {selectedOrder?.shippingAddress?.city}, {selectedOrder?.shippingAddress?.state}
+            </p>
+            <p>{selectedOrder?.shippingAddress?.postalCode}</p>
+            <p>{selectedOrder?.shippingAddress?.country}</p>
           </div>
-          
-          {expandedSection === "shipping" && (
-            <div className="mt-3 pl-6">
-              <div className="text-sm mb-3">
-                <p className="font-medium">{selectedOrder?.shippingAddress?.addressLine1}</p>
-                {selectedOrder?.shippingAddress?.addressLine2 && (
-                  <p>{selectedOrder?.shippingAddress?.addressLine2}</p>
-                )}
-                <p>
-                  {selectedOrder?.shippingAddress?.city}, {selectedOrder?.shippingAddress?.state}
-                </p>
-                <p>{selectedOrder?.shippingAddress?.postalCode}</p>
-                <p>{selectedOrder?.shippingAddress?.country}</p>
-              </div>
-            </div>
-          )}
         </div>
         
         {/* Actions */}
-        <div className="mt-6 border-t pt-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">Actions</h4>
+        <div>
+          <h4 className="text-sm font-medium text-gray-500 mb-2">Actions</h4>
           <div className="flex flex-wrap gap-2">
             {updateLoading ? (
               <div className="text-blue-500">Updating...</div>
