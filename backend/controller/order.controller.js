@@ -44,8 +44,7 @@ const createOrder = async (req, res) => {
       status = 'pending'
     } = req.body;
     
-    console.log("🚀 ~ createOrder ~ shippingAddress:", shippingAddress);
-    console.log("🚀 ~ createOrder ~ items:", items);
+
     
     // Extract user ID from request params
     const { userId } = req.params;
@@ -81,7 +80,8 @@ const createOrder = async (req, res) => {
         name: item.name,
         quantity: item.quantity,
         price: item.price,
-        image: item.image
+        image: item.image,
+        sizeId: item.sizeId,
       })),
       subtotal,
       shippingCost,
@@ -366,7 +366,7 @@ const getAllAdminOrders = async (req, res) => {
     const orders = await Order
     .find()
     .sort({ orderDate: -1 })
-    .populate('userId', 'name email')
+    .populate('userId', 'firstName email phoneNumber')
     .populate({
       path: 'items.productId',
       model: 'Products',

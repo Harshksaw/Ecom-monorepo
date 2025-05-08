@@ -3,6 +3,7 @@ import { API_URL } from '@/app/lib/api';
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { FaEye } from 'react-icons/fa';
+import OrderDetailsPanel from './orderDetails';
 
 interface Address {
   addressLine1: string;
@@ -262,216 +263,16 @@ const OrdersAdmin = () => {
             )}
           </div>
         </div>
+
+
+        <OrderDetailsPanel
+//@ts-ignore
+selectedOrder={selectedOrder}
+ refreshOrders={fetchOrders}
+        />
         
         {/* Order Details */}
-        <div className="md:col-span-1">
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <h2 className="p-4 border-b font-medium">Order Details</h2>
-            
-            {!selectedOrder ? (
-              <div className="p-6 text-center text-gray-500">
-                Select an order to view details
-              </div>
-            ) : (
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-bold text-lg">{selectedOrder.orderId}</h3>
-                    <p className="text-sm text-gray-500">{formatDate(selectedOrder.orderDate)}</p>
-                  </div>
-                  
-                  <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(selectedOrder.status)}`}>
-                    {selectedOrder.status}
-                  </span>
-                </div>
-                
-                {/* Customer Info */}
-                <div className="mb-3 pb-3 border-b">
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">Customer</h4>
-                  <p>{selectedOrder.userId.firstName} {selectedOrder.userId.lastName}</p>
-                  <p className="text-sm">{selectedOrder.userId.email}</p>
-                </div>
-                
-                {/* Order Items */}
-                <div className="mb-3 pb-3 border-b">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Order Items</h4>
-                  {selectedOrder.items.map(item => (
-                    <div key={item._id} className="flex items-start gap-4 py-3 border-b last:border-b-0">
-                      <div className="w-20 h-20 flex-shrink-0">
-                        <img 
-                          src={item.image} 
-                          alt={item.name}
-                          className="w-full h-full object-cover rounded"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900">{item.name}</div>
-                        <div className="mt-1 text-sm text-gray-500">
-                          <div>Product ID: {item.productId._id}</div>
-                          <div>Variant ID: {item.variantId}</div>
-                        </div>
-                        <div className="mt-2 flex items-center justify-between">
-                          <div className="text-sm text-gray-500">
-                            Quantity: {item.quantity}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            Price: ₹{item.price.toFixed(2)}
-                          </div>
-                        </div>
-                        <div className="mt-1 text-sm font-medium text-gray-900">
-                          Total: ₹{(item.price * item.quantity).toFixed(2)}
-                        </div>
-                        <div className="mt-1">
-                          <span className={`inline-flex text-xs px-2 py-1 rounded-full ${getStatusColor(item.status)}`}>
-                            {item.status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                </div>
-                
-                {/* Order Summary */}
-                <div className="mb-3 pb-3 border-b">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Order Summary</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Subtotal</span>
-                      <span className="font-medium">₹{selectedOrder.subtotal.toFixed(2)}</span>
-                    </div>
-                    {selectedOrder.shippingCost > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Shipping</span>
-                        <span className="font-medium">₹{selectedOrder.shippingCost.toFixed(2)}</span>
-                      </div>
-                    )}
-                    {selectedOrder.tax > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Tax</span>
-                        <span className="font-medium">₹{selectedOrder.tax.toFixed(2)}</span>
-                      </div>
-                    )}
-                    {selectedOrder.discount > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Discount</span>
-                        <span className="font-medium text-red-600">-₹{selectedOrder.discount.toFixed(2)}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-base font-medium pt-2 border-t">
-                      <span>Total</span>
-                      <span>₹{selectedOrder.total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Payment Info */}
-                <div className="mb-3 pb-3 border-b">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Payment Information</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Status</span>
-                      <span className={`inline-flex text-xs px-2 py-1 rounded-full ${getPaymentColor(selectedOrder.payment.status)}`}>
-                        {selectedOrder.payment.status}
-                      </span>
-                    </div>
-                    {selectedOrder.payment.gateway && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Gateway</span>
-                        <span className="font-medium">{selectedOrder.payment.gateway}</span>
-                      </div>
-                    )}
-                    {selectedOrder.payment.transactionId && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Transaction ID</span>
-                        <span className="font-medium">{selectedOrder.payment.transactionId}</span>
-                      </div>
-                    )}
-                    {selectedOrder.payment.paymentDate && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Payment Date</span>
-                        <span className="font-medium">{new Date(selectedOrder.payment.paymentDate).toLocaleString()}</span>
-                      </div>
-                    )}
-                    {selectedOrder.payment.amount && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Amount</span>
-                        <span className="font-medium">₹{selectedOrder.payment.amount.toFixed(2)}</span>
-                      </div>
-                    )}
-                    {selectedOrder.payment.currency && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Currency</span>
-                        <span className="font-medium">{selectedOrder.payment.currency}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Shipping Address */}
-                <div className="mb-3 pb-3 border-b">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Shipping Address</h4>
-                  <div className="text-sm">
-                    <p className="font-medium">{selectedOrder.shippingAddress.addressLine1}</p>
-                    {selectedOrder.shippingAddress.addressLine2 && (
-                      <p>{selectedOrder.shippingAddress.addressLine2}</p>
-                    )}
-                    <p>
-                      {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state}
-                    </p>
-                    <p>{selectedOrder.shippingAddress.postalCode}</p>
-                    <p>{selectedOrder.shippingAddress.country}</p>
-                  </div>
-                </div>
-                
-                {/* Actions */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Actions</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {updateLoading ? (
-                      <div className="text-blue-500">Updating...</div>
-                    ) : (
-                      <>
-                        {selectedOrder.status === 'pending' && (
-                          <button
-                            onClick={() => updateOrderStatus(selectedOrder._id, 'processing')}
-                            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-                          >
-                            Process
-                          </button>
-                        )}
-                        {selectedOrder.status === 'processing' && (
-                          <button
-                            onClick={() => updateOrderStatus(selectedOrder._id, 'shipped')}
-                            className="px-3 py-1 bg-purple-500 text-white text-sm rounded hover:bg-purple-600"
-                          >
-                            Ship
-                          </button>
-                        )}
-                        {selectedOrder.status === 'shipped' && (
-                          <button
-                            onClick={() => updateOrderStatus(selectedOrder._id, 'delivered')}
-                            className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600"
-                          >
-                            Deliver
-                          </button>
-                        )}
-                        {['pending', 'processing'].includes(selectedOrder.status) && (
-                          <button
-                            onClick={() => cancelOrder(selectedOrder._id)}
-                            className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
-                          >
-                            Cancel
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+     
       </div>
     </div>
   );

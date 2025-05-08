@@ -27,6 +27,7 @@ const CheckoutPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
+  console.log("🚀 ~ CheckoutPage ~ cartItems:", cartItems)
   const { token, user } = useAuth();
   const { selectedCurrency, formatPrice } = useCurrency();
   
