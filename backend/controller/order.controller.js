@@ -369,7 +369,7 @@ const getAllAdminOrders = async (req, res) => {
     .populate('userId', 'name email')
     .populate({
       path: 'items.productId',
-      model: 'Product',
+      model: 'Products',
       select: 'name price image slug variants',  // grab variants too
     })
     .lean();
