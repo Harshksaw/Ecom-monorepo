@@ -97,7 +97,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           GBP: response.data.data.rates.GBP,
           AED: response.data.data.rates.AED,
         };
-        console.log("ratezs is", rates);
+        // console.log("ratezs is", rates);
         // Dispatch the setExchangeRates action
         dispatch(setExchangeRates(rates));
       } catch (error) {
