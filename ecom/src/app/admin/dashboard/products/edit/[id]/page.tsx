@@ -1423,13 +1423,13 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           ))}
 
-          <button
+          {/* <button
             type="button"
             onClick={addVariant}
             className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
           >
             <FaPlus className="mr-2" /> Add Variant
-          </button>
+          </button> */}
         </div>
 
         {/* Delivery Options Section */}
