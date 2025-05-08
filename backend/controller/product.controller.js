@@ -1,4 +1,3 @@
-
 const Product = require("../model/Products");
 const Category = require("../model/Category");
 const { deleteImage, getPublicIdFromUrl } = require("../utils/cloudinary");
@@ -170,64 +169,69 @@ exports.getAllProducts = async (req, res) => {
       color
     } = req.query;
 
+    // Check if any filter parameters are provided
+    const hasFilters = category || minPrice || maxPrice || search || featured || materials || inStock || materialType || purity || shape || color;
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build filter
     const filter = { isActive: true };
     
-    if (materialType) filter.materialType = materialType;
-    if (purity) filter.purity = purity;
-    if (shape) filter.shape = shape;
-    if (color) filter.color = color;
-    if (category) filter.categoryId = category;
+    // Only apply filters if any filter parameters are provided
+    if (hasFilters) {
+      if (materialType) filter.materialType = materialType;
+      if (purity) filter.purity = purity;
+      if (shape) filter.shape = shape;
+      if (color) filter.color = color;
+      if (category) filter.categoryId = category;
 
-    if (minPrice || maxPrice) {
-      // For price filtering with variants, we need a more complex query
-      const priceFilter = [];
-      
-      if (minPrice) {
-        priceFilter.push({
-          variants: {
-            $elemMatch: {
-              "price": { $elemMatch: { $gte: parseFloat(minPrice) } }
+      if (minPrice || maxPrice) {
+        const priceFilter = [];
+        
+        if (minPrice) {
+          priceFilter.push({
+            variants: {
+              $elemMatch: {
+                "price": { $elemMatch: { $gte: parseFloat(minPrice) } }
+              }
             }
-          }
-        });
-      }
-      
-      if (maxPrice) {
-        priceFilter.push({
-          variants: {
-            $elemMatch: {
-              "price": { $elemMatch: { $lte: parseFloat(maxPrice) } }
+          });
+        }
+        
+        if (maxPrice) {
+          priceFilter.push({
+            variants: {
+              $elemMatch: {
+                "price": { $elemMatch: { $lte: parseFloat(maxPrice) } }
+              }
             }
-          }
-        });
+          });
+        }
+        
+        if (priceFilter.length > 0) {
+          filter.$and = priceFilter;
+        }
       }
-      
-      if (priceFilter.length > 0) {
-        filter.$and = priceFilter;
+
+      if (search) {
+        filter.$or = [
+          { name: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+          { sku: { $regex: search, $options: "i" } },
+          { tags: { $in: [new RegExp(search, "i")] } },
+        ];
       }
-    }
 
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { sku: { $regex: search, $options: "i" } },
-        { tags: { $in: [new RegExp(search, "i")] } },
-      ];
-    }
+      if (featured === "true") filter.isFeatured = true;
 
-    if (featured === "true") filter.isFeatured = true;
+      if (materials) {
+        const materialsList = Array.isArray(materials) ? materials : [materials];
+        filter.materials = { $in: materialsList };
+      }
 
-    if (materials) {
-      const materialsList = Array.isArray(materials) ? materials : [materials];
-      filter.materials = { $in: materialsList };
-    }
-
-    if (inStock === "true") {
-      filter["variants.stock"] = { $gt: 0 };
+      if (inStock === "true") {
+        filter["variants.stock"] = { $gt: 0 };
+      }
     }
 
     // Build sort

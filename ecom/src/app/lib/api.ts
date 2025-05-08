@@ -109,13 +109,20 @@ export const ProductService = {
         throw new Error("Category is required");
       }
 
-      // Make the request with proper parameters
-      const response = await axios.get(
-        `${API_URL}/products/categories/${category}?material=${material}`
-      );
+      if(material) {
+        const response = await axios.get(
+          `${API_URL}/products/categories/${category}?material=${material}`
+        );
+        return response.data.data;
+      }else{
+        const response = await axios.get(
+          `${API_URL}/products/categories/${category}`
+        );
+        return response.data.data;
+      }
 
       // Return the data from the response
-      return response.data.data;
+
     } catch (error) {
       console.error("Error fetching products by category:", error);
       throw error;

@@ -219,7 +219,7 @@ const Header = ({ categories }: any) => {
        return 0;
      }).map((category: any) => (
               <li key={category._id}>
-                <Link href={`/category/${category.slug}?material=gold`} className="block px-4 py-2 text-gray-700 hover:bg-gray-300 rounded-md" onClick={() => setMobileMenu(false)}>
+                <Link href={`/category/${category.slug}`} className="block px-4 py-2 text-gray-700 hover:bg-gray-300 rounded-md" onClick={() => setMobileMenu(false)}>
                   {category.name}
                 </Link>
               </li>

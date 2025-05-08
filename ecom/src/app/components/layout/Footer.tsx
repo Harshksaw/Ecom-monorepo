@@ -50,7 +50,7 @@ const Footer = ({categories}:any) => {
        return 0;
      }).map((category: any) => (
               <li key={category._id}>
-                <Link href={`/category/${category.slug}?material=gold`} className="text-gray-400 hover:text-white">
+                <Link href={`/category/${category.slug}`} className="text-gray-400 hover:text-white">
                   {category.name}
                 </Link>
               </li>
