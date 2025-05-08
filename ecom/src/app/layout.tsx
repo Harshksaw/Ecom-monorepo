@@ -21,12 +21,13 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: '/favicon.ico',
-    // Add logo for Google search results
+    icon: [
+      { url: '/logo.png', type: 'image/png', sizes: 'any' }
+    ],
     other: [
       {
         rel: 'logo',
-        url: 'https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png',
+        url: '/logo.png',
         type: 'image/png'
       }
     ]
@@ -79,6 +80,44 @@ export default async function RootLayout({
   
   return (
     <html lang="en">
+      <head>
+        <title>Shri Nanu Gems | Jewellery and Gemstone</title>
+        <meta name="description" content="Shri Nanu Gems offers Jewellery and Gemstone, certified gemstones crafted with premium quality. Discover timeless jewelry and stunning gemstones that elevate your elegance." />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Shri Nanu Gems",
+              "url": "https://shrinanugems.com",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png",
+                "width": "512",
+                "height": "512"
+              },
+              "image": {
+                "@type": "ImageObject",
+                "url": "https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png",
+                "width": "512",
+                "height": "512"
+              },
+              "description": "Shri Nanu Gems offers Jewellery and Gemstone, certified gemstones crafted with premium quality. Discover timeless jewelry and stunning gemstones that elevate your elegance.",
+              "sameAs": [
+                "https://www.facebook.com/shrinanugems",
+                "https://www.instagram.com/shrinanugems"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer service",
+                "areaServed": "IN",
+                "availableLanguage": ["English", "Hindi"]
+              }
+            })
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <Providers>
           <AuthProvider>

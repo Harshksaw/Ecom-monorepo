@@ -902,7 +902,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               </p>
             </div>
           </div> */}
-        </div>
+      </div>
 
         {/* Material Properties Section */}
         <div className="mb-8">
