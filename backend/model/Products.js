@@ -40,8 +40,158 @@ const productSchema = new mongoose.Schema({
 
   materialType: {
     type: String,
-    enum: ["gold", "silver"],
+    enum: [
+      "gold",
+      "silver",
+      "platinum",
+      "rose_gold",
+      "white_gold",
+      "yellow_gold",
+      "diamond",
+      "pearl",
+      "gemstone",
+      "brass",
+      "bronze",
+      "titanium",
+      "stainless_steel",
+      "palladium",
+      "rhodium",
+      "sterling",
+      "kundan",
+      "polki",
+      "meenakari",
+      "jadau",
+      "antique",
+      "oxidized",
+      "filigree",
+      "enamel",
+      "lac",
+      "wood",
+      "bone",
+      "ivory",
+      "coral",
+      "amber",
+      "turquoise",
+      "lapis_lazuli",
+      "onyx",
+      "agate",
+      "jade",
+      "ruby",
+      "emerald",
+      "sapphire",
+      "aquamarine",
+      "garnet",
+      "amethyst",
+      "topaz",
+      "zircon",
+      "moonstone",
+      "opal",
+      "peridot",
+      "tanzanite",
+      "alexandrite",
+      "spinel",
+      "tourmaline"
+    ],
     required: true,
+  },
+  materialFinish: {
+    type: String,
+    enum: [
+      "polished",
+      "matte",
+      "brushed",
+      "hammered",
+      "sandblasted",
+      "oxidized",
+      "satin",
+      "mirror",
+      "textured",
+      "engraved"
+    ]
+  },
+  materialGrade: {
+    type: String,
+    enum: [
+      "premium",
+      "standard",
+      "commercial",
+      "luxury",
+      "exclusive"
+    ]
+  },
+  materialCertification: {
+    type: String,
+    enum: [
+      "hallmark",
+      "bureau_of_indian_standards",
+      "international_standards_organization",
+      "american_gem_society",
+      "gemological_institute_of_america",
+      "international_gemological_institute",
+      "european_gemological_laboratory"
+    ]
+  },
+  materialOrigin: {
+    type: String,
+    enum: [
+      "india",
+      "italy",
+      "switzerland",
+      "germany",
+      "japan",
+      "thailand",
+      "china",
+      "usa",
+      "uk",
+      "france",
+      "australia",
+      "south_africa",
+      "russia",
+      "brazil",
+      "colombia"
+    ]
+  },
+  materialPurity: {
+    type: String,
+    enum: [
+      "24k",
+      "22k",
+      "18k",
+      "14k",
+      "10k",
+      "925",
+      "950",
+      "900",
+      "800",
+      "750",
+      "585",
+      "375"
+    ]
+  },
+  materialTreatment: {
+    type: String,
+    enum: [
+      "none",
+      "heat_treated",
+      "irradiated",
+      "coated",
+      "filled",
+      "dyed",
+      "bleached",
+      "diffusion_treated"
+    ]
+  },
+  materialSustainability: {
+    type: String,
+    enum: [
+      "recycled",
+      "ethically_sourced",
+      "fair_trade",
+      "conflict_free",
+      "sustainable_mining",
+      "lab_grown",
+      "vintage"
+    ]
   },
   purity: {
     type: String,

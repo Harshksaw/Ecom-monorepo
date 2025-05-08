@@ -728,7 +728,15 @@ export default function CreateProductPage() {
               >
                 <option value="">Select Material Type</option>
                 <option value="gold">Gold</option>
+                <option value="rosegold">Rose Gold</option>
                 <option value="silver">Silver</option>
+                <option value="titanium">Titanium</option>
+
+
+
+                <option value="platinum">Platinum</option>
+                <option value="diamond">Diamond</option>
+                <option value="sterling">Sterling Silver</option>
               </select>
             </div>
 
