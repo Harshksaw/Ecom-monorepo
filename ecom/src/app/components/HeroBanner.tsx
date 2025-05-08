@@ -86,7 +86,6 @@ export const HeroBanner = () => {
             v.pause()
           }
         })
-        
         // Always start muted to comply with autoplay policies
         video.muted = true
         video.currentTime = 0 // Start from beginning
@@ -233,7 +232,7 @@ export const HeroBanner = () => {
                     className="w-full h-full object-cover"
                     playsInline
                     preload="metadata"
-                    muted={true}
+                    muted={false}
                     controls={false}
                     loop={false}
                     onPlay={() => handleVideoPlay(index)}
