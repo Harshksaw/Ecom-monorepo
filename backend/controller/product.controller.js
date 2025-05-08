@@ -535,24 +535,26 @@ exports.updateProduct = async (req, res) => {
     const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
 
     // Process variants to ensure they have proper structure
-    const processedVariants = parsedVariants?.map(variant => {
-      // Convert price from JSON to Map if needed
-      let priceMap = variant.price;
-      if (!(variant.price instanceof Map) && typeof variant.price === 'object') {
-        priceMap = new Map(Object.entries(variant.price));
-      }
-      
-      // Process size data
-      const parsedSize = variant.size ? 
-        (typeof variant.size === 'string' ? JSON.parse(variant.size) : variant.size) : 
-        [];
+// Process variants to ensure they have proper structure
+const processedVariants = parsedVariants?.map(variant => {
+  // Convert price from JSON to Map if needed
+  let priceMap = variant.price;
+  if (!(variant.price instanceof Map) && typeof variant.price === 'object') {
+    priceMap = new Map(Object.entries(variant.price));
+  }
+  
+  // Process size data
+  const parsedSize = variant.size ? 
+    (typeof variant.size === 'string' ? JSON.parse(variant.size) : variant.size) : 
+    [];
 
-      return {
-        ...variant,
-        price: priceMap,
-        size: parsedSize // Add the parsed size to the variant
-      };
-    });
+  return {
+    ...variant,
+    price: priceMap,
+    size: parsedSize, // Add the parsed size to the variant
+    images: variant.existingImages || variant.images || [] // CRITICAL: Preserve existing images
+  };
+});
 
     const updateData = {
       ...(name && { name }),
