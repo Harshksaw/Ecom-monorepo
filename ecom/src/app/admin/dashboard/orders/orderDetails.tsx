@@ -6,12 +6,13 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 import { API_URL } from "@/app/lib/api";
 
-const OrderDetailsPanel = ({ selectedOrder, refreshOrders }) => {
+const OrderDetailsPanel = ({ selectedOrder, refreshOrders }:any) => {
 console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
 
   const [updateLoading, setUpdateLoading] = useState(false);
 
   // Format date for display
+  //@ts-ignore
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const options = {
@@ -21,10 +22,12 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
       hour: "2-digit",
       minute: "2-digit",
     };
+    //@ts-ignore
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   // Get status badge color
+  //@ts-ignore
   const getStatusColor = (status) => {
     switch (status) {
       case "pending":
@@ -43,7 +46,7 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
   };
 
   // Get payment status badge color
-  const getPaymentColor = (status) => {
+  const getPaymentColor = (status: any) => {
     switch (status) {
       case "pending":
         return "bg-yellow-100 text-yellow-800";
@@ -60,24 +63,24 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
   };
 
   // Get selected size name from variant
-  const getSelectedSizeName = (item) => {
+  const getSelectedSizeName = (item: any) => {
     console.log("🚀 ~ getSelectedSizeName ~ item:", item)
     if (!item?.sizeId) return null;
     
-    const variant = item?.productId?.variants?.find(v => v?._id === item.variantId);
+    const variant = item?.productId?.variants?.find((v: { _id: any; }) => v?._id === item.variantId);
     console.log("🚀 ~ getSelectedSizeName ~ variant:", variant)
     if (!variant?.size) return null;
     
-    const selectedSize = variant.size.find(s => s?._id === item.sizeId);
+    const selectedSize = variant.size.find((s: { _id: any; }) => s?._id === item.sizeId);
     console.log("🚀 ~ getSelectedSizeName ~ selectedSize:", selectedSize)
     return selectedSize?.size || null;
   };
 
   // Get metal color display name
-  const getMetalColorName = (item) => {
+  const getMetalColorName = (item:any) => {
     if (!item?.variantId) return null;
     
-    const variant = item?.productId?.variants?.find(v => v?._id === item.variantId);
+    const variant = item?.productId?.variants?.find((v: { _id: any; }) => v?._id === item.variantId);
     if (!variant?.metalColor) return null;
     
     // Format the metalColor for display
@@ -92,11 +95,11 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
       "titanium": "Titanium"
     };
     
-    return colorMap[variant.metalColor] || variant.metalColor;
+    return colorMap[variant.metalColor as keyof typeof colorMap] || variant.metalColor;
   };
 
 
-  const updateOrderStatus = async (orderId, newStatus) => {
+  const updateOrderStatus = async (orderId: any, newStatus: string) => {
     if (!orderId) return;
     
     try {
@@ -121,7 +124,7 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
   };
 
   // Handle cancelling an order
-  const cancelOrder = async (orderId) => {
+  const cancelOrder = async (orderId: any) => {
     if (window.confirm("Are you sure you want to cancel this order?")) {
       await updateOrderStatus(orderId, "cancelled");
     }
@@ -170,7 +173,7 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
         {/* Order Items */}
         <div className="mb-3 pb-3 border-b">
           <h4 className="text-sm font-medium text-gray-500 mb-2">Order Items</h4>
-          {selectedOrder?.items?.map(item => {
+          {selectedOrder?.items?.map((item: { _id: React.Key | null | undefined; image: string | undefined; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; quantity: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; price: number; status: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }) => {
             const sizeName = getSelectedSizeName(item);
             const metalColor = getMetalColorName(item);
             
@@ -179,11 +182,9 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
                 <div className="w-20 h-20 flex-shrink-0">
                   <img 
                     src={item?.image} 
-                    alt={item?.name}
+
                     className="w-full h-full object-cover rounded"
-                    onError={(e) => {
-                      e.target.src = "https://placehold.co/80x80?text=No+Image";
-                    }}
+                  
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -205,7 +206,8 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
                     </div>
                   </div>
                   <div className="mt-1 text-sm font-medium text-gray-900">
-                    Total: ₹{(item?.price * item?.quantity)?.toFixed(2)}
+                    //@ts-ignore
+                    Total: ₹{(typeof item?.price === 'number' && typeof item?.quantity === 'number' ? (item.price * item.quantity).toFixed(2) : 'N/A')}
                   </div>
                   <div className="mt-1">
                     <span className={`inline-flex text-xs px-2 py-1 rounded-full ${getStatusColor(item?.status)}`}>
