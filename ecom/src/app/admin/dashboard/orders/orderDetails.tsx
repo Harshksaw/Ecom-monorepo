@@ -324,6 +324,14 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
                     Deliver
                   </button>
                 )}
+                {selectedOrder?.status === 'delivered' && (
+                  <button
+                    // onClick={() => updateOrderStatus(selectedOrder?._id, 'delivered')}
+                    className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600"
+                  >
+                    Completed
+                  </button>
+                )}
                 {['pending', 'processing'].includes(selectedOrder?.status) && (
                   <button
                     onClick={() => cancelOrder(selectedOrder?._id)}
@@ -332,7 +340,16 @@ console.log("🚀 ~ OrderDetailsPanel ~ selectedOrder:", selectedOrder)
                     Cancel
                   </button>
                 )}
-              </>
+
+                <button
+  onClick={refreshOrders}
+  className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 flex items-center gap-2"
+>
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+  </svg>
+  Refresh
+</button>                              </>
             )}
           </div>
         </div>
