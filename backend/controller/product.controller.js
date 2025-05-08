@@ -38,8 +38,20 @@ exports.createProduct = async (req, res) => {
       reviews
     } = req.body;
 
-    console.log(variants,"-----")
+    console.log("Reviews before parsing:", reviews);
 
+    // Parse JSON strings if they are sent as strings from the frontend
+    const parsedWeight = typeof weight === 'string' ? JSON.parse(weight) : weight;
+    const parsedDimensions = typeof dimensions === 'string' ? JSON.parse(dimensions) : dimensions;
+    const parsedGems = typeof gems === 'string' ? JSON.parse(gems) : gems;
+    const parsedMaterials = typeof materials === 'string' ? JSON.parse(materials) : materials;
+    const parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
+    const parsedDeliveryOptions = typeof deliveryOptions === 'string' ? 
+      JSON.parse(deliveryOptions) : deliveryOptions;
+    const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+    const parsedReviews = typeof reviews === 'string' ? JSON.parse(reviews) : reviews;
+
+    console.log("Reviews after parsing:", parsedReviews);
 
     // Validate input
     const { errors, isValid } = validateProductInput(req.body);
@@ -61,16 +73,6 @@ exports.createProduct = async (req, res) => {
       return res.status(400).json({ message: "Invalid category" });
     }
 
-    // Parse JSON strings if they are sent as strings from the frontend
-    const parsedWeight = typeof weight === 'string' ? JSON.parse(weight) : weight;
-    const parsedDimensions = typeof dimensions === 'string' ? JSON.parse(dimensions) : dimensions;
-    const parsedGems = typeof gems === 'string' ? JSON.parse(gems) : gems;
-    const parsedMaterials = typeof materials === 'string' ? JSON.parse(materials) : materials;
-    const parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
-    const parsedDeliveryOptions = typeof deliveryOptions === 'string' ? 
-      JSON.parse(deliveryOptions) : deliveryOptions;
-    const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
-
     // Process variants to ensure they have proper structure and assign variant images
     const processedVariants = parsedVariants?.map((variant, index) => {
       const parsedStock = Number(variant.stock);
@@ -84,32 +86,22 @@ exports.createProduct = async (req, res) => {
       if (!parsedPrice.default || parsedPrice.default <= 0) {
         throw new Error("Product price is required");
       }
-      // if (isNaN(parsedStock) || parsedStock < 0) {
-      //   throw new Error("Stock quantity must be a non-negative number");
-      // }
-    
 
-        const variantImages = req.files[`variant_${index}_images`] 
-          ? req.files[`variant_${index}_images`].map(file => file.path) 
-          : [];
+      const variantImages = req.files[`variant_${index}_images`] 
+        ? req.files[`variant_${index}_images`].map(file => file.path) 
+        : [];
 
-
-          const parsedSize = variant.size ? 
-          (typeof variant.size === 'string' ? JSON.parse(variant.size) : variant.size) : 
-          [];
+      const parsedSize = variant.size ? 
+        (typeof variant.size === 'string' ? JSON.parse(variant.size) : variant.size) : 
+        [];
       
-        return {
-          ...variant,
-          price: new Map(Object.entries(variant.price)),
-          size: parsedSize,
-
-          images: variantImages
-        };
-
-      
+      return {
+        ...variant,
+        price: new Map(Object.entries(variant.price)),
+        size: parsedSize,
+        images: variantImages
+      };
     });
-    const parsedReviews =
-    typeof reviews === "string" ? JSON.parse(reviews) : reviews;
 
     const newProduct = new Product({
       name,
@@ -130,8 +122,10 @@ exports.createProduct = async (req, res) => {
       isActive,
       isFeatured,
       tags: parsedTags,
-      reviews:parsedReviews
+      reviews: parsedReviews
     });
+
+    console.log("Final product object:", newProduct);
 
     await newProduct.save();
 
@@ -461,9 +455,22 @@ exports.updateProduct = async (req, res) => {
       shape,
       color,
       variants,
-      deliveryOptions
+      deliveryOptions,
+      reviews
     } = req.body;
 
+    // Parse JSON strings if they are sent as strings from the frontend
+    const parsedWeight = typeof weight === 'string' ? JSON.parse(weight) : weight;
+    const parsedDimensions = typeof dimensions === 'string' ? JSON.parse(dimensions) : dimensions;
+    const parsedGems = typeof gems === 'string' ? JSON.parse(gems) : gems;
+    const parsedMaterials = typeof materials === 'string' ? JSON.parse(materials) : materials;
+    const parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
+    const parsedDeliveryOptions = typeof deliveryOptions === 'string' ? 
+      JSON.parse(deliveryOptions) : deliveryOptions;
+    const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+    const parsedReviews = typeof reviews === 'string' ? JSON.parse(reviews) : reviews;
+
+    console.log("Reviews after parsing:", parsedReviews);
 
     // Check if updated SKU conflicts with another product
     if (sku) {
@@ -528,37 +535,26 @@ exports.updateProduct = async (req, res) => {
       ];
     }
 
-    // Parse complex objects if they are strings
-    const parsedWeight = typeof weight === 'string' ? JSON.parse(weight) : weight;
-    const parsedDimensions = typeof dimensions === 'string' ? JSON.parse(dimensions) : dimensions;
-    const parsedGems = typeof gems === 'string' ? JSON.parse(gems) : gems;
-    const parsedMaterials = typeof materials === 'string' ? JSON.parse(materials) : materials;
-    const parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
-    const parsedDeliveryOptions = typeof deliveryOptions === 'string' ? 
-      JSON.parse(deliveryOptions) : deliveryOptions;
-    const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
-
     // Process variants to ensure they have proper structure
-// Process variants to ensure they have proper structure
-const processedVariants = parsedVariants?.map(variant => {
-  // Convert price from JSON to Map if needed
-  let priceMap = variant.price;
-  if (!(variant.price instanceof Map) && typeof variant.price === 'object') {
-    priceMap = new Map(Object.entries(variant.price));
-  }
-  
-  // Process size data
-  const parsedSize = variant.size ? 
-    (typeof variant.size === 'string' ? JSON.parse(variant.size) : variant.size) : 
-    [];
+    const processedVariants = parsedVariants?.map(variant => {
+      // Convert price from JSON to Map if needed
+      let priceMap = variant.price;
+      if (!(variant.price instanceof Map) && typeof variant.price === 'object') {
+        priceMap = new Map(Object.entries(variant.price));
+      }
+      
+      // Process size data
+      const parsedSize = variant.size ? 
+        (typeof variant.size === 'string' ? JSON.parse(variant.size) : variant.size) : 
+        [];
 
-  return {
-    ...variant,
-    price: priceMap,
-    size: parsedSize, // Add the parsed size to the variant
-    images: variant.existingImages || variant.images || [] // CRITICAL: Preserve existing images
-  };
-});
+      return {
+        ...variant,
+        price: priceMap,
+        size: parsedSize,
+        images: variant.existingImages || variant.images || []
+      };
+    });
 
     const updateData = {
       ...(name && { name }),
@@ -579,11 +575,12 @@ const processedVariants = parsedVariants?.map(variant => {
       ...(typeof isActive === "boolean" && { isActive }),
       ...(typeof isFeatured === "boolean" && { isFeatured }),
       ...(parsedTags && { tags: parsedTags }),
+      ...(parsedReviews && { reviews: parsedReviews }),
       updatedAt: Date.now(),
     };
 
+    console.log("Final update data:", updateData);
           
-    console.log("🚀 ~ exports.updateProduct= ~ updateData:", updateData)
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       updateData,
