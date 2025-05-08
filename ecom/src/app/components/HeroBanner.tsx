@@ -6,6 +6,7 @@ import axios from "axios"
 import { API_URL } from "../lib/api"
 import Image from "next/image"
 
+// Extend your interface to include a `type`:
 interface BannerMedia {
   _id: string
   url: string
@@ -14,16 +15,17 @@ interface BannerMedia {
 }
 
 export const HeroBanner = () => {
-  const [media, setMedia] = useState<BannerMedia[]>([])
+  const [media, setMedia] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const [currentSlide, setCurrentSlide] = useState(0)
   const slideInterval = useRef<NodeJS.Timeout | null>(null)
   const [userInteracted, setUserInteracted] = useState(false)
-  const [playOverlays, setPlayOverlays] = useState<boolean[]>([])
+  const [showPlayOverlay, setShowPlayOverlay] = useState(true)
+  const initialPlayTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const playAttemptedRef = useRef(false)
 
-  // Fetch media on component mount
   useEffect(() => {
     const fetchMedia = async () => {
       try {
@@ -33,12 +35,10 @@ export const HeroBanner = () => {
           ...item,
           type: /\.(mp4|webm|ogg|mov|quicktime)$/i.test(item.url) ? "video" : "image",
         }))
-        //@ts-ignore
         setMedia(withType)
-        videoRefs.current = withType.map(() => null)
-        setPlayOverlays(withType.map(() => true)) // Initialize all overlays as visible
+        videoRefs.current = withType.map(() => null) // Initialize refs
       } catch (err) {
-        console.error("Banner fetch error:", err)
+        console.error(err)
         setError("Failed to load banner media")
       } finally {
         setIsLoading(false)
@@ -46,57 +46,99 @@ export const HeroBanner = () => {
     }
     fetchMedia()
     
-    // Track user interaction for autoplay policy
+    // Add a one-time event listener to detect user interaction
     const handleInteraction = () => {
       setUserInteracted(true)
-      document.removeEventListener('click', handleInteraction)
-      document.removeEventListener('touchstart', handleInteraction)
-    }
+      // Remove listeners after first interaction
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
     
-    document.addEventListener('click', handleInteraction)
-    document.addEventListener('touchstart', handleInteraction)
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
+    
+    // Set up the initial delayed play timer
+    initialPlayTimerRef.current = setTimeout(() => {
+      attemptAutoplayWithSound();
+    }, 2000); // 2 second delay
     
     return () => {
-      document.removeEventListener('click', handleInteraction)
-      document.removeEventListener('touchstart', handleInteraction)
-    }
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+      if (initialPlayTimerRef.current) {
+        clearTimeout(initialPlayTimerRef.current);
+      }
+    };
   }, [])
 
-  // Handle slide interval
-  useEffect(() => {
-    if (media.length > 0) {
-      startSlideInterval()
-    }
-
-    return () => {
-      if (slideInterval.current) {
-        clearInterval(slideInterval.current)
-      }
-    }
-  }, [media, currentSlide])
-
-  // Initialize or handle video on current slide
-  useEffect(() => {
-    if (media.length > 0 && media[currentSlide]?.type === "video") {
-      const video = videoRefs.current[currentSlide]
-      if (video) {
-        // Pause all other videos first
-        videoRefs.current.forEach((v, i) => {
-          if (i !== currentSlide && v) {
-            v.pause()
-          }
-        })
-        // Always start muted to comply with autoplay policies
-        video.muted = true
-        video.currentTime = 0 // Start from beginning
+  // Function to attempt autoplay with sound after the delay
+  const attemptAutoplayWithSound = () => {
+    if (playAttemptedRef.current) return; // Only try once
+    
+    playAttemptedRef.current = true;
+    const currentVideo = videoRefs.current[currentSlide];
+    
+    if (currentVideo && media[currentSlide]?.type === "video") {
+      // Create a user gesture simulation
+      const simulateUserGesture = () => {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
         
-        // Try to play the video
-        video.play().catch(err => {
-          console.warn("Video autoplay failed:", err)
-        })
-      }
+        // Try to unmute the video
+        currentVideo.muted = false;
+        currentVideo.volume = 1;
+        
+        // Try to play with sound
+        const playPromise = currentVideo.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            console.log("Delayed autoplay with sound successful");
+            setShowPlayOverlay(false);
+          }).catch(error => {
+            console.log("Delayed autoplay with sound failed:", error);
+            // Fall back to muted if needed
+            currentVideo.muted = true;
+            currentVideo.play().catch(e => console.error("Even muted play failed:", e));
+          });
+        }
+      };
+      
+      // Execute the user gesture simulation
+      simulateUserGesture();
     }
-  }, [currentSlide, media])
+  };
+
+// after your fetch‑media useEffect, but before your slide‑interval useEffect
+useEffect(() => {
+  if (media.length > 0 && media[currentSlide]?.type === "video") {
+    const timer = setTimeout(() => {
+      const vid = videoRefs.current[currentSlide];
+      if (!vid) return;
+      
+      // 1. unmute & full volume
+      vid.muted = false;
+      vid.volume = 1;
+      
+      // 2. try to play with audio
+      vid.play()
+        .then(() => {
+          console.log("✅ Autoplay with audio succeeded");
+          setShowPlayOverlay(false);
+        })
+        .catch(err => {
+          console.warn("🔇 Autoplay with audio blocked:", err);
+          // fallback to muted autoplay
+          vid.muted = true;
+          vid.play().catch(e => console.error("Muted fallback failed:", e));
+        });
+    }, 1000); // 1 second delay
+
+    return () => clearTimeout(timer);
+  }
+}, [media, currentSlide]);
+
 
   const startSlideInterval = () => {
     if (slideInterval.current) {
@@ -106,78 +148,104 @@ export const HeroBanner = () => {
     slideInterval.current = setInterval(() => {
       const currentMedia = media[currentSlide]
       if (currentMedia?.type === "image") {
+        // Move to the next slide after 5 seconds for images
         setCurrentSlide((prev) => (prev + 1) % media.length)
       }
-    }, 5000)
+    }, 5000) // 5 seconds interval
   }
 
   const handleSlideChange = (index: number) => {
     setCurrentSlide(index)
-  }
+    setShowPlayOverlay(true) // Reset play overlay on slide change
 
-  const handleVideoClick = (index: number) => {
-    const video = videoRefs.current[index]
-    if (!video) return
-    
-    setUserInteracted(true)
-    
-    if (video.paused) {
-      // Try to play unmuted if user has interacted
-      try {
-        video.muted = false
-        video.play().catch(err => {
-          console.warn("Unmuted play failed, trying muted:", err)
-          video.muted = true
-          video.play().catch(e => console.error("Even muted play failed:", e))
-        })
-      } catch (e) {
-        console.error("Video play error:", e)
+    // Pause all videos
+    videoRefs.current.forEach((videoRef) => {
+      if (videoRef) {
+        videoRef.pause()
       }
+    })
+
+    // Play the current video if it exists
+    const currentVideo = videoRefs.current[index]
+    if (currentVideo && media[index]?.type === "video") {
+      // Try to play unmuted first
+      currentVideo.muted = false
+      currentVideo.volume = 1
       
-      // Hide play overlay when video starts playing
-      const newOverlays = [...playOverlays]
-      newOverlays[index] = false
-      setPlayOverlays(newOverlays)
-    } else {
-      video.pause()
-      
-      // Show play overlay when video is paused
-      const newOverlays = [...playOverlays]
-      newOverlays[index] = true
-      setPlayOverlays(newOverlays)
+      const playPromise = currentVideo.play()
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log("Video playing with sound");
+            setShowPlayOverlay(false);
+          })
+          .catch((error) => {
+            console.log("Unmuted autoplay prevented:", error)
+            // If unmuted play fails, try muted
+            currentVideo.muted = true
+            currentVideo.play().then(() => {
+              console.log("Video playing muted");
+              setShowPlayOverlay(false);
+            }).catch(e => {
+              console.error("Even muted play failed:", e)
+              setShowPlayOverlay(true);
+            })
+          })
+      }
     }
   }
 
-  const handleVideoPlay = (index: number) => {
-    // Hide play overlay when video starts playing
-    const newOverlays = [...playOverlays]
-    newOverlays[index] = false
-    setPlayOverlays(newOverlays)
-  }
-
-  const handleVideoPause = (index: number) => {
-    // Show play overlay when video is paused
-    const newOverlays = [...playOverlays]
-    newOverlays[index] = true
-    setPlayOverlays(newOverlays)
+  // Add a function to handle user-initiated play
+  const handleVideoClick = (index: number) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      if (video.paused) {
+        // Try to play with sound
+        video.muted = false;
+        video.volume = 1;
+        
+        video.play().then(() => {
+          console.log("User-initiated play successful");
+          setShowPlayOverlay(false);
+        }).catch(e => {
+          console.log("Play on click failed:", e);
+          // If unmuted play fails, try muted
+          video.muted = true;
+          video.play().then(() => {
+            setShowPlayOverlay(false);
+          }).catch(e => {
+            console.error("Even muted play failed:", e);
+          });
+        });
+      } else {
+        video.pause();
+        setShowPlayOverlay(true);
+      }
+    }
+    setUserInteracted(true);
   }
 
   const handleVideoEnd = (index: number) => {
-    // Show play overlay when video ends
-    const newOverlays = [...playOverlays]
-    newOverlays[index] = true
-    setPlayOverlays(newOverlays)
-    
-    // Move to next slide
+    // Move to the next slide when the video ends
     const nextSlide = (index + 1) % media.length
     setCurrentSlide(nextSlide)
   }
 
   const getMimeType = (url: string) => {
-    if (/\.mov$/i.test(url)) return "video/quicktime"
-    if (/\.webm$/i.test(url)) return "video/webm"
-    if (/\.ogg$/i.test(url)) return "video/ogg"
-    return "video/mp4"
+    if (/\.(mov|quicktime)$/i.test(url)) return "video/quicktime"
+    if (/\.(webm)$/i.test(url)) return "video/webm"
+    if (/\.(ogg)$/i.test(url)) return "video/ogg"
+    return "video/mp4" // Default
+  }
+
+  // Function to handle playing events
+  const handleVideoPlay = () => {
+    setShowPlayOverlay(false);
+  }
+  
+  // Function to handle pausing events
+  const handleVideoPause = () => {
+    setShowPlayOverlay(true);
   }
 
   if (isLoading) {
@@ -199,7 +267,7 @@ export const HeroBanner = () => {
   return (
     <div className="relative w-full max-w-[1360px] mx-auto z-10">
       <Carousel
-        autoPlay={false}
+        autoPlay={false} // Disable default autoplay
         infiniteLoop
         showThumbs={false}
         showIndicators
@@ -219,33 +287,30 @@ export const HeroBanner = () => {
                   fill
                   sizes="(max-width: 768px) 100vw, 1360px"
                   style={{ objectFit: "cover" }}
-                  priority={index === 0}
+                  priority={index === 0} // Only prioritize the first image
                 />
               ) : (
-                <div 
-                  onClick={() => handleVideoClick(index)}
-                  className="video-container w-full h-full cursor-pointer"
-                >
+                <div onClick={() => handleVideoClick(index)} className="video-container w-full h-full cursor-pointer">
                   <video
-                  //@ts-ignore
-                    ref={el => videoRefs.current[index] = el}
+                    ref={(el) => {
+                      videoRefs.current[index] = el
+                    }}
                     className="w-full h-full object-cover"
                     playsInline
-                    preload="metadata"
-                    muted={false}
+                    preload="auto"
+                    loop={false} // Do not loop videos
                     controls={false}
-                    loop={false}
-                    onPlay={() => handleVideoPlay(index)}
-                    onPause={() => handleVideoPause(index)}
-                    onEnded={() => handleVideoEnd(index)}
-                    onError={e => console.error("Video failed:", e)}
+                    onEnded={() => handleVideoEnd(index)} // Trigger when video ends
+                    onPlay={handleVideoPlay}
+                    onPause={handleVideoPause}
+                    onError={(e) => console.error("Video failed to load:", e)}
                   >
                     <source src={item.url} type={getMimeType(item.url)} />
                     Your browser does not support HTML5 video.
                   </video>
                   
-                  {/* Play overlay - only show when video is paused */}
-                  {playOverlays[index] && (
+                  {/* Play indicator overlay - only show when video is paused */}
+                  {showPlayOverlay && index === currentSlide && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
                       <div className="p-4 bg-black/50 rounded-full">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -253,6 +318,23 @@ export const HeroBanner = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
+                    </div>
+                  )}
+                  
+                  {/* Sound indicator - show when playing */}
+                  {!showPlayOverlay && index === currentSlide && (
+                    <div className="absolute bottom-4 right-4 p-2 bg-black/50 rounded-full">
+                      {!videoRefs.current[index]?.muted ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M12 6a7.39 7.39 0 00-5.657 2.343M15.535 15.536a9 9 0 001.535-5.536 9 9 0 00-1.535-5.536" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012 12M12 12v.01" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clipRule="evenodd" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                        </svg>
+                      )}
                     </div>
                   )}
                 </div>

@@ -13,7 +13,7 @@ import { CategoryService } from './lib/api'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Shri Nanu Gems | Authentic Gemstones',
+  title: 'Shri Nanu Gems |Jewellery and Gemstone',
   description: 'Shri Nanu Gems offers Jewellery and Gemstone, certified gemstones crafted with premium quality. Discover timeless jewelry and stunning gemstones that elevate your elegance. Shop our exclusive collection today and experience true brilliance',
   metadataBase: new URL('https://shrinanugems.com'),
   alternates: {
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
 
    openGraph: {
-    title: 'Shri Nanu Gems | Authentic Gemstones',
+    title: 'Shri Nanu Gems | Jewellery and Gemstone',
     description:  'Shri Nanu Gems offers Jewellery and Gemstone, certified gemstones crafted with premium quality. Discover timeless jewelry and stunning gemstones that elevate your elegance. Shop our exclusive collection today and experience true brilliance',
     url: 'https://shrinanugems.com',
     siteName: 'Shri Nanu Gems',
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Shri Nanu Gems | Authentic Gemstones',
+    title: 'Shri Nanu Gems | Jewellery and Gemstone',
     description: 'Shri Nanu Gems offers Jewellery and Gemstone, certified gemstones crafted with premium quality.',
     images: ['https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png'], // <-- Same image for Twitter
   },
