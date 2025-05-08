@@ -26,6 +26,7 @@ const orderSchema = new Schema({
       required: true 
     },
     variantId: { type: String, required: true },
+    sizeId: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true },
     name: { type: String, required: true },

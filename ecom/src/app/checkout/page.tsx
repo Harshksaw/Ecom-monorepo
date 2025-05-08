@@ -237,6 +237,7 @@ const CheckoutPage = () => {
       const formattedItems = cartItems.map((item) => ({
         productId: item.productId,
         variantId: item.variantId,
+        sizeId: item?.sizeId,
         name: item.name,
         quantity: item.quantity,
         price: item.price, // Always use INR price in the backend

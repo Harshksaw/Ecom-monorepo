@@ -363,7 +363,8 @@ const cancelOrder = async (req, res) => {
 
 const getAllAdminOrders = async (req, res) => {
   try {
-    const orders = await Order.find().sort({ orderDate: -1 }).lean();
+    const orders = await Order.find().sort({ orderDate: -1 }).populate('userId', 'items productId').lean();
+    
     return res.status(200).json({
       success: true,
       count: orders.length,
