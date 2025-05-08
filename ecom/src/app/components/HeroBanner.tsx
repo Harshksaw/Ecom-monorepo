@@ -112,32 +112,28 @@ export const HeroBanner = () => {
 
 // after your fetch‑media useEffect, but before your slide‑interval useEffect
 useEffect(() => {
-  if (media.length > 0 && media[currentSlide]?.type === "video") {
-    const timer = setTimeout(() => {
-      const vid = videoRefs.current[currentSlide];
-      if (!vid) return;
-      
-      // 1. unmute & full volume
-      vid.muted = false;
-      vid.volume = 1;
-      
-      // 2. try to play with audio
-      vid.play()
-        .then(() => {
-          console.log("✅ Autoplay with audio succeeded");
-          setShowPlayOverlay(false);
-        })
-        .catch(err => {
-          console.warn("🔇 Autoplay with audio blocked:", err);
-          // fallback to muted autoplay
-          vid.muted = true;
-          vid.play().catch(e => console.error("Muted fallback failed:", e));
-        });
-    }, 1000); // 1 second delay
+  if (!videoRefs.current[currentSlide]) return;
+  const vid = videoRefs.current[currentSlide]!;
 
-    return () => clearTimeout(timer);
-  }
-}, [media, currentSlide]);
+  // 1️⃣ Kick off a muted autoplay immediately
+  vid.muted = true;
+  vid.volume = 0;
+  vid.play().catch(console.warn);
+
+  // 2️⃣ After 1 second, unmute and re‑play with sound
+  const timer = setTimeout(() => {
+    vid.muted = false;
+    vid.volume = 1;
+    vid.play().catch(err => {
+      console.warn("Unmuted autoplay blocked:", err);
+      // if it still fails, you’re back to muted playback
+      vid.muted = true;
+      vid.play().catch(console.error);
+    });
+  }, 1000);
+
+  return () => clearTimeout(timer);
+}, [currentSlide, media]);
 
 
   const startSlideInterval = () => {
