@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
@@ -30,8 +30,6 @@ const CreateCategoryPage = () => {
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Fetch categories on mount
- 
   // Fetch all categories
   const fetchCategories = async () => {
     setIsLoading(true);
@@ -46,10 +44,10 @@ const CreateCategoryPage = () => {
     }
   };
 
-  useState(() => {
+  // Fetch categories on mount
+  useEffect(() => {
     fetchCategories();
-  });
-  
+  }, []);
   
   // Handle image selection
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,44 +84,39 @@ const CreateCategoryPage = () => {
     setIsLoading(true);
     
     try {
-      let imageUrl = '';
-      
-      // Upload image if one is selected
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append('images', imageFile);
-        formData.append('name', categoryName);
-        formData.append('slug', categoryName);
-        
-        const uploadResponse = await axios.post(`${API_URL}/categories`, formData);
-        if(uploadResponse.status == 201) {
-          toast.success('Category created');
-          window.location.reload();
-        }
-        imageUrl = uploadResponse.data.url;
-      }
-      
-      // Create or update category
       if (editingId) {
-        // Update existing category
-        await axios.patch(`${API_URL}/categories/${editingId}`, {
-          name: categoryName,
-          ...(imageUrl && { imageUrl })
+        // Update existing category name only
+        const response = await axios.post(`${API_URL}/categories/${editingId}`, {
+          name: categoryName
         });
-        toast.success('Category updated');
+        
+        if (response.status === 200) {
+          toast.success('Category updated successfully');
+          fetchCategories();
+          clearForm();
+        }
       } else {
         // Create new category
-        await axios.post(`${API_URL}/categories`, {
-          name: categoryName,
-          slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
-          ...(imageUrl && { imageUrl })
+        const formData = new FormData();
+        formData.append('name', categoryName);
+        formData.append('slug', categoryName.toLowerCase().replace(/\s+/g, '-'));
+        
+        if (imageFile) {
+          formData.append('images', imageFile);
+        }
+        
+        const response = await axios.post(`${API_URL}/categories`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
         });
-        toast.success('Category created');
+        
+        if (response.status === 201) {
+          toast.success('Category created successfully');
+          fetchCategories();
+          clearForm();
+        }
       }
-      
-      // Refresh categories and clear form
-      fetchCategories();
-      clearForm();
     } catch (error) {
       console.error('Error saving category:', error);
       toast.error('Failed to save category');

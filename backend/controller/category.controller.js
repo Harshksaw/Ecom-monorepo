@@ -9,6 +9,7 @@ exports.createCategory = async (req, res) => {
 
     const file = req.files && req.files.length > 0 ? req.files[0].path : null;
     console.log("🚀 ~ exports.createCategory= ~ file:", file)
+
     
     // Check if category with same name or slug exists
     const existingCategory = await Category.findOne({ $or: [{ name }, { slug }] });
@@ -61,44 +62,47 @@ exports.getCategoryById = async (req, res) => {
 };
 
 // Update category
+// Backend update handler for category name updates
 exports.updateCategory = async (req, res) => {
   try {
-    const { name, description, slug, imageUrl, isActive } = req.body;
+    const { name } = req.body;
     
-    // Check if updated slug or name conflicts with another category
-    if (slug || name) {
-      const query = { _id: { $ne: req.params.id } };
-      if (slug) query.slug = slug;
-      if (name) query.name = name;
+    // Check if the category exists
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    
+    // If updating name, check for duplicates
+    if (name) {
+      const existingCategory = await Category.findOne({ 
+        name, 
+        _id: { $ne: req.params.id } 
+      });
       
-      const existingCategory = await Category.findOne(query);
       if (existingCategory) {
-        return res.status(400).json({ message: 'Category with same name or slug already exists' });
+        return res.status(400).json({ 
+          message: 'Category with this name already exists' 
+        });
       }
     }
     
+    // Update the category
     const updatedCategory = await Category.findByIdAndUpdate(
       req.params.id,
-      {
-        ...(name && { name }),
-        ...(description && { description }),
-        ...(slug && { slug }),
-        ...(imageUrl && { imageUrl }),
-        ...(typeof isActive === 'boolean' && { isActive }),
-        updatedAt: Date.now()
+      { 
+        name,
+        updatedAt: Date.now() 
       },
       { new: true }
     );
-    
-    if (!updatedCategory) {
-      return res.status(404).json({ message: 'Category not found' });
-    }
     
     res.status(200).json({
       message: 'Category updated successfully',
       category: updatedCategory
     });
   } catch (error) {
+    console.error('Error updating category:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
