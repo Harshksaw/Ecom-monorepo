@@ -1,9 +1,11 @@
 import Link from "next/link";
 
-import { HeroBanner } from "./components/HeroBanner";
+
 import HomeProductGrid from "./components/HomeProductGrid";
 
 import { ProductService } from "./lib/api";
+import { HeroBanner } from "./components/HeroBanner";
+
 
 export default async function Home() {
   // In a real application, you would fetch data from your API
