@@ -4,7 +4,7 @@ interface UserState {
     id: string;
     name: string;
     email: string;
-    address: {
+    address?: {
         street?: string;
         city?: string;
         state?: string;

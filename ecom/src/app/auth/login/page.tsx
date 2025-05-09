@@ -24,7 +24,7 @@ export default function LoginPage() {
   const callbackUrl = searchParams.get('callback') || '/';
 
   // Handle form submission for login
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e:any) => {
     e.preventDefault();
     
     try {
@@ -39,7 +39,8 @@ export default function LoginPage() {
           name: result.user?.firstName || '',
           email: result.user?.email || '',
           phone: result.user?.phoneNumber || '',
-          isLoggedIn: true
+          isLoggedIn: true,
+          
         }));
         
         toast.success(result.message || 'Login successful!');
@@ -158,7 +159,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-400 hover:text-gray-600 transition"
-                  tabIndex="-1" // Prevent tab focus on this button
+                  tabIndex={-1} // Prevent tab focus on this button
                 >
                   {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
                 </button>
