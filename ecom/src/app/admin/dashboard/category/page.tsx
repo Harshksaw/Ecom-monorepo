@@ -86,9 +86,11 @@ const CreateCategoryPage = () => {
     try {
       if (editingId) {
         // Update existing category name only
-        const response = await axios.post(`${API_URL}/categories/${editingId}`, {
-          name: categoryName
-        });
+
+        const formData = new FormData();
+        formData.append('name', categoryName);
+        formData.append('images', imageFile || ''); 
+        const response = await axios.post(`${API_URL}/categories/${editingId}`, formData);
         
         if (response.status === 200) {
           toast.success('Category updated successfully');

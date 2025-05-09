@@ -16,15 +16,15 @@ exports.createCategory = async (req, res) => {
     if (existingCategory) {
       return res.status(400).json({ message: 'Category with same name or slug already exists' });
     }
-    
+
     const newCategory = new Category({
       name,
       imageUrl: imagePath,
       slug,
     });
-    
+
     await newCategory.save();
-    
+
     res.status(201).json({
       message: 'Category created successfully',
       category: newCategory
@@ -65,37 +65,55 @@ exports.getCategoryById = async (req, res) => {
 exports.updateCategory = async (req, res) => {
   try {
     const { name } = req.body;
-    
+    const imagePath = req.files && req.files.images && req.files.images[0] ? req.files.images[0].path : null;
+    console.log("🚀 ~ exports.createCategory= ~ imagePath:", imagePath)
     // Check if the category exists
     const category = await Category.findById(req.params.id);
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
-    
+
     // If updating name, check for duplicates
     if (name) {
-      const existingCategory = await Category.findOne({ 
-        name, 
-        _id: { $ne: req.params.id } 
+      const existingCategory = await Category.findOne({
+        name,
+        _id: { $ne: req.params.id }
+
       });
-      
+
       if (existingCategory) {
-        return res.status(400).json({ 
-          message: 'Category with this name already exists' 
+        return res.status(400).json({
+          message: 'Category with this name already exists'
         });
       }
     }
-    
+
     // Update the category
-    const updatedCategory = await Category.findByIdAndUpdate(
-      req.params.id,
-      { 
-        name,
-        updatedAt: Date.now() 
-      },
-      { new: true }
-    );
-    
+    // If imagePath is null, keep the existing imageUrl
+    if (imagePath) {
+      var updatedCategory = await Category.findByIdAndUpdate(
+        req.params.id,
+        {
+          name,
+          imageUrl: imagePath,
+          updatedAt: Date.now()
+        },
+        { new: true }
+      );
+
+    }
+    else {
+      var updatedCategory = await Category.findByIdAndUpdate(
+        req.params.id,
+        {
+          name,
+          updatedAt: Date.now()
+        },
+        { new: true }
+      );
+    }
+
+
     res.status(200).json({
       message: 'Category updated successfully',
       category: updatedCategory
@@ -117,12 +135,12 @@ exports.deleteCategory = async (req, res) => {
         count: productsUsingCategory
       });
     }
-    
+
     const deletedCategory = await Category.findByIdAndDelete(req.params.id);
     if (!deletedCategory) {
       return res.status(404).json({ message: 'Category not found' });
     }
-    
+
     res.status(200).json({ message: 'Category deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });

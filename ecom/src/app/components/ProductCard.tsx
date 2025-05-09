@@ -200,7 +200,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Product Details */}
       <div className="p-4">
-        <Link href={`/products/${product.slug || product._id}`}>
+        <Link href={`/product/${product._id}`}>
           <h3 className="text-lg font-semibold mb-2 line-clamp-2">
             {product.name}
           </h3>

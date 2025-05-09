@@ -9,7 +9,7 @@ router.post('/',handleUpload, categoryController.createCategory);
 
 // Get all categories
 router.get('/', categoryController.getAllCategories);
-router.post('/:id', categoryController.updateCategory);
+router.post('/:id',handleUpload, categoryController.updateCategory);
 
 // Get category by ID
 router.get('/:id', categoryController.getCategoryById);
