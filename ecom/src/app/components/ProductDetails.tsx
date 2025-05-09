@@ -177,7 +177,7 @@ const handleBuyNow = () => {
           </div>
 
           {/* Thumbnail navigation */}
-          {displayImages.length > 1 && (
+          {/* {displayImages.length > 1 && (
             <div className="mt-4 flex flex-wrap gap-2 justify-center">
               {displayImages.slice(0, 5).map((img, idx) => (
                 <div
@@ -188,7 +188,7 @@ const handleBuyNow = () => {
               ))}
             
             </div>
-          )}
+          )} */}
 
           {/* Gem details section */}
           {product?.gems && product.gems.length > 0 && (
