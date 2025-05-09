@@ -15,6 +15,8 @@ router.get('/:id', productController.getProductById);
 router.get('/sku/:sku', productController.getProductBySlug);
 router.get('/:id/related', productController.getRelatedProducts);
 
+router.get('/products/search', productController.searchProducts);
+
 // Admin routes
 
 router.post('/:id',handleUpload , productController.updateProduct)

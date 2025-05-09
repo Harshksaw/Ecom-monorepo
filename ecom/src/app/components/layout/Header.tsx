@@ -1,3 +1,4 @@
+// Updated Header.tsx with search functionality
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -10,6 +11,7 @@ import CategoryTabs from './CategoryTabs'
 import Link from 'next/link'
 import { selectCartItemsCount } from '@/app/store/slices/cartSlice'
 import CurrencySelector from '../CurrencySelector'
+import SearchBar from '../SearchBar'
 
 const Header = ({ categories }: any) => {
   const [mobileMenu, setMobileMenu] = useState(false)
@@ -26,22 +28,6 @@ const Header = ({ categories }: any) => {
   const sideMenuRef = useRef<HTMLDivElement>(null)
 
   const isAdmin = user?.role === 'Admin'
-
-  // useEffect(() => {
-  //   const controlNavbar = () => {
-  //     if (window.scrollY > 200) {
-  //       if (window.scrollY > lastScrollY) setShow('-translate-y-full')
-  //       else setShow('translate-y-0')
-  //       setIsFixed(true)
-  //     } else {
-  //       setShow('translate-y-0')
-  //       setIsFixed(false)
-  //     }
-  //     setLastScrollY(window.scrollY)
-  //   }
-  //   window.addEventListener('scroll', controlNavbar)
-  //   return () => window.removeEventListener('scroll', controlNavbar)
-  // }, [lastScrollY])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -94,6 +80,10 @@ const Header = ({ categories }: any) => {
 
           {/* Right: Actions */}
           <div className="flex items-center space-x-4">
+            {/* Search Bar */}
+            <SearchBar />
+
+            {/* Currency Selector */}
             <div className="hidden md:block">
               <CurrencySelector />
             </div>

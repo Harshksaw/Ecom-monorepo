@@ -802,3 +802,64 @@ exports.searchProducts = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+// Add this to your product.controller.js file
+
+// Search products
+exports.searchProducts = async (req, res) => {
+  try {
+    const { query, limit = 10 } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Search query is required' 
+      });
+    }
+
+    const products = await Product.find({
+      isActive: true,
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } },
+        { sku: { $regex: query, $options: 'i' } },
+        { tags: { $in: [new RegExp(query, 'i')] } },
+        { 'variants.metalColor': { $regex: query, $options: 'i' } },
+        { materialType: { $regex: query, $options: 'i' } },
+        { purity: { $regex: query, $options: 'i' } },
+        { 'gems.type': { $regex: query, $options: 'i' } }
+      ]
+    })
+      .populate('categoryId', 'name slug')
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit));
+
+    res.status(200).json({ 
+      success: true,
+      products: products.map(product => ({
+        _id: product._id,
+        name: product.name,
+        sku: product.sku,
+        images: product.images,
+        categoryId: product.categoryId,
+        variants: product.variants,
+        materialType: product.materialType,
+        purity: product.purity,
+        shape: product.shape,
+        tags: product.tags,
+        color: product.color
+      }))
+    });
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+};
+
+// Don't forget to add this to your routes!
+// In your routes file, add:
+// router.get('/products/search', productController.searchProducts);
