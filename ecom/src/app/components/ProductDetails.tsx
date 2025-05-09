@@ -186,11 +186,7 @@ const handleBuyNow = () => {
                   style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                 />
               ))}
-              {displayImages.length > 5 && (
-                <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">
-                  +{displayImages.length - 5} more
-                </div>
-              )}
+            
             </div>
           )}
 
