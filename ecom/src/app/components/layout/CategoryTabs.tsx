@@ -139,7 +139,7 @@ const CategoryTabs = ({ activeCategory, categories }:any) => {
             </div>
           ))}
         </div>
-          //@ts-ignore
+
         <button 
           onClick={scrollRight} 
           className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full w-10 h-10 shadow flex items-center justify-center"
