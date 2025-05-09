@@ -423,6 +423,8 @@ export default function ProductsListPage() {
                 {products.map((product) => (
                   <tr key={product._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
+
+                      <Link href={`/product/${product._id}`} className="text-lg text-gray-900">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 relative">
                           {product?.variants &&Array.isArray(product.variants)  && product?.variants[0]?.images.length > 0 ? (
@@ -448,6 +450,7 @@ export default function ProductsListPage() {
                           </div>
                         </div>
                       </div>
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
@@ -464,23 +467,7 @@ export default function ProductsListPage() {
                         </Link>
 
                     </td>
-                    {/* <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-sm ${product.stockQuantity <= 5 ? 'text-red-500 font-medium' : 'text-gray-900'}`}>
-                        {product.stockQuantity}
-                      </div>
-                    </td> */}
-                    {/* <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${product.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {product.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                        {product.isFeatured && (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                            Featured
-                          </span>
-                        )}
-                      </div>
-                    </td> */}
+               
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-3">
                         {/* <Link

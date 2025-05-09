@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CategoryService } from '@/app/lib/api';
+
 import { FaChevronLeft, FaChevronRight, FaGem, FaRegGem } from 'react-icons/fa';
 
 // Placeholder color by category
-const getCategoryColor = (category: string) => {
-  const colors: Record<string, string> = {
+const getCategoryColor = (category) => {
+  const colors = {
     rings: 'bg-gray-100',
     earrings: 'bg-yellow-100',
     pendant: 'bg-blue-100',
@@ -20,27 +20,18 @@ const getCategoryColor = (category: string) => {
   return colors[category] || 'bg-gray-50';
 };
 
-interface CategoryTabsProps {
-  activeCategory?: string;
-  categories: any[];
-}
+const CategoryTabs = ({ activeCategory, categories }) => {
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const scrollRef = useRef(null);
 
-const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeCategory , categories}:any) => {
-  // const [categories, setCategories] = useState<any[]>([]);
-  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Memoize sorted list (New Arrivals first)
-  const orderedCategories = useMemo(() => {
-    const priority = ['New Arrivals'];
-    const top = priority
-      .map(name => categories.find((c: any) => c.name === name))
-      .filter(Boolean) as any[];
-    const rest = categories.filter((c: any) => !priority.includes(c.name));
-    return [...top, ...rest];
-  }, [categories]);
-
-
+  // Sort categories directly in the component (instead of using useMemo)
+  // New Arrivals category gets priority
+  const priority = ['New Arrivals'];
+  const top = priority
+    .map(name => categories.find(c => c.name === name))
+    .filter(Boolean);
+  const rest = categories.filter(c => !priority.includes(c.name));
+  const orderedCategories = [...top, ...rest];
 
   const scrollLeft = () => scrollRef.current?.scrollBy({ left: -250, behavior: 'smooth' });
   const scrollRight = () => scrollRef.current?.scrollBy({ left: 250, behavior: 'smooth' });
