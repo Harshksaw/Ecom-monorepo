@@ -9,17 +9,17 @@ import { API_URL } from '../lib/api';
 import Image from 'next/image';
 
 const SearchBar = () => {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const searchRef = useRef(null);
-  const inputRef = useRef(null);
+  const [query, setQuery] = useState<string>('');
+  const [results, setResults] = useState<any[]>([]);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showMobileSearch, setShowMobileSearch] = useState<boolean>(false);
+  const searchRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
 
   // Handle search query
-  const handleSearch = async (searchQuery) => {
+  const handleSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       setResults([]);
       setIsLoading(false);
@@ -53,8 +53,8 @@ const SearchBar = () => {
 
   // Close search when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -69,13 +69,14 @@ const SearchBar = () => {
   useEffect(() => {
     if (showMobileSearch && inputRef.current) {
       setTimeout(() => {
+        //@ts-ignore
         inputRef.current.focus();
       }, 100);
     }
   }, [showMobileSearch]);
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
       router.push(`/search?q=${encodeURIComponent(query)}`);
@@ -85,7 +86,7 @@ const SearchBar = () => {
   };
 
   // Get product image
-  const getProductImage = (product) => {
+  const getProductImage = (product: any): string => {
     if (product.images && product.images.length > 0) {
       return product.images[0];
     }
@@ -98,6 +99,73 @@ const SearchBar = () => {
     }
     
     return '/placeholder-image.jpg';
+  };
+
+  // Reusable function to render search results
+  const renderSearchResults = () => {
+    if (isLoading) {
+      return (
+        <div className="p-4 text-center text-gray-500">
+          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-2 text-sm">Searching...</p>
+        </div>
+      );
+    }
+
+    if (results.length > 0) {
+      return (
+        <div className="max-h-[60vh] overflow-y-auto">
+          {results.map((product: any) => (
+            <Link 
+              href={`/product/${product._id}`} 
+              key={product._id}
+              onClick={() => {
+                setIsOpen(false);
+                setShowMobileSearch(false);
+              }}
+              className="flex items-center p-3 hover:bg-gray-50 border-b border-gray-100"
+            >
+              <div className="w-12 h-12 relative bg-gray-100 rounded flex-shrink-0 mr-3">
+                <Image
+                  src={getProductImage(product)}
+                  alt={product.name}
+                  fill
+                  className="object-cover rounded"
+                  sizes="48px"
+                />
+              </div>
+              <div className="flex-grow">
+                <p className="text-sm font-medium text-gray-900 line-clamp-1">{product.name}</p>
+                <p className="text-xs text-gray-500">
+                  {product.variants && product.variants.length > 0 
+                    ? `${product.variants.length} variant${product.variants.length > 1 ? 's' : ''}`
+                    : 'No variants'}
+                </p>
+              </div>
+            </Link>
+          ))}
+          
+          <div className="p-3 bg-gray-50">
+            <Link 
+              href={`/search?q=${encodeURIComponent(query)}`}
+              onClick={() => {
+                setIsOpen(false);
+                setShowMobileSearch(false);
+              }}
+              className="block text-center text-sm text-blue-600 font-medium"
+            >
+              View all results for "{query}"
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-4 text-center text-gray-500 text-sm">
+        No results found for "{query}"
+      </div>
+    );
   };
 
   return (
@@ -198,73 +266,6 @@ const SearchBar = () => {
       )}
     </>
   );
-
-  // Reusable function to render search results
-  function renderSearchResults() {
-    if (isLoading) {
-      return (
-        <div className="p-4 text-center text-gray-500">
-          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-2 text-sm">Searching...</p>
-        </div>
-      );
-    }
-
-    if (results.length > 0) {
-      return (
-        <div className="max-h-[60vh] overflow-y-auto">
-          {results.map(product => (
-            <Link 
-              href={`/product/${product._id}`} 
-              key={product._id}
-              onClick={() => {
-                setIsOpen(false);
-                setShowMobileSearch(false);
-              }}
-              className="flex items-center p-3 hover:bg-gray-50 border-b border-gray-100"
-            >
-              <div className="w-12 h-12 relative bg-gray-100 rounded flex-shrink-0 mr-3">
-                <Image
-                  src={getProductImage(product)}
-                  alt={product.name}
-                  fill
-                  className="object-cover rounded"
-                  sizes="48px"
-                />
-              </div>
-              <div className="flex-grow">
-                <p className="text-sm font-medium text-gray-900 line-clamp-1">{product.name}</p>
-                <p className="text-xs text-gray-500">
-                  {product.variants && product.variants.length > 0 
-                    ? `${product.variants.length} variant${product.variants.length > 1 ? 's' : ''}`
-                    : 'No variants'}
-                </p>
-              </div>
-            </Link>
-          ))}
-          
-          <div className="p-3 bg-gray-50">
-            <Link 
-              href={`/search?q=${encodeURIComponent(query)}`}
-              onClick={() => {
-                setIsOpen(false);
-                setShowMobileSearch(false);
-              }}
-              className="block text-center text-sm text-blue-600 font-medium"
-            >
-              View all results for "{query}"
-            </Link>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="p-4 text-center text-gray-500 text-sm">
-        No results found for "{query}"
-      </div>
-    );
-  }
 };
 
 export default SearchBar;

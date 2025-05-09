@@ -74,7 +74,7 @@ const Header = ({ categories }: any) => {
             </div>
 
             {/* Center: Logo */}
-            <div className="flex justify-center absolute left-1/2 transform -translate-x-1/2">
+            <div className="flex justify-center absolute left-1/2 transform -translate-x-1/2 ">
               <Link href="/" className="flex items-center">
                 <Image 
                   src="/logo.png" 
