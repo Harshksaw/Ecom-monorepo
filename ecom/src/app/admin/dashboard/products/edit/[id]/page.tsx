@@ -925,16 +925,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                 required
               >
                 <option value="">Select Material Type</option>
-                <option value="gold">Gold</option>
-                <option value="rosegold">Rose Gold</option>
-                <option value="silver">Silver</option>
-                <option value="titanium">Titanium</option>
-
-
-
-                <option value="platinum">Platinum</option>
-                <option value="diamond">Diamond</option>
-                <option value="sterling">Sterling Silver</option>
+       <option value="gold">Gold</option>
+              <option value="yellow-gold">Yellow Gold</option>
+              <option value="rose-gold">Rose Gold</option>
+              <option value="white-gold">White Gold</option>
+              <option value="silver">Silver</option>
+              <option value="titanium">Titanium</option>
+              <option value="platinum">Platinum</option>
+              <option value="sterling-silver">Sterling Silver</option>    
               </select>
             </div>
 

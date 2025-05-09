@@ -36,18 +36,7 @@ const EmptyCart = () => {
         </div>
         
         {/* Suggested Products */}
-        <div className="mt-16">
-          <h2 className="text-xl font-semibold mb-6">You Might Like</h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* This would typically be populated with actual featured products */}
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="bg-gray-100 rounded-lg p-4 h-40 flex items-center justify-center text-gray-400">
-                Featured Item {item}
-              </div>
-            ))}
-          </div>
-        </div>
+   
       </div>
     </Wrapper>
   );
