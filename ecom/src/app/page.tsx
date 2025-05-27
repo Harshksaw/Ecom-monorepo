@@ -21,7 +21,7 @@ export default async function Home() {
       <div className="text-center max-w-[800px] mx-auto  md:my-[80px] px-4">
         <Link href="/">
           <div className="text-3xl md:text-4xl mt-4 mb-5 font-bold leading-tight text-gray-800">
-            Shri Nanu Gems & Jewelers
+{/*             Shri Nanu Gems & Jewelers */}
           </div>
         </Link>
 
