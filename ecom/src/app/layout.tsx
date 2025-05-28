@@ -9,7 +9,7 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/authcontext'
 import Script from 'next/script'
 import { CategoryService } from './lib/api'
-
+import { SpeedInsights } from '@vercel/speed-insights/next';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -153,27 +153,21 @@ export default async function RootLayout({
             </div>
           </AuthProvider>
         </Providers>
-
+        <SpeedInsights />
         {/* Tawk.to Script */}
         <Script
           id="tawk-to-widget"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              var Tawk_API = Tawk_API || {};
-              // as soon as it loads, hide the widget
-              Tawk_API.onLoad = function() {
-                Tawk_API.minimize(); // Ensures chat window is not open
-              };
-
+              var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
               (function(){
-                var s1 = document.createElement("script"),
-                    s0 = document.getElementsByTagName("script")[0];
-                s1.async = true;
-                s1.src = 'https://embed.tawk.to/6801d026c31dfa190da6b641/1ip3ha67o';
-                s1.charset = 'UTF-8';
-                s1.setAttribute('crossorigin', '*');
-                s0.parentNode.insertBefore(s1, s0);
+                var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+                s1.async=true;
+                s1.src='https://embed.tawk.to/6836b1010f6bcf190fc272ab/1isaq6rm0';
+                s1.charset='UTF-8';
+                s1.setAttribute('crossorigin','*');
+                s0.parentNode.insertBefore(s1,s0);
               })();
             `,
           }}
