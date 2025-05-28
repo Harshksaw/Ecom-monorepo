@@ -6,7 +6,7 @@ import HomeProductGrid from "./components/HomeProductGrid";
 import { ProductService } from "./lib/api";
 import { HeroBanner } from "./components/HeroBanner";
 
-
+import Zoom from 'react-medium-image-zoom';
 export default async function Home() {
   // In a real application, you would fetch data from your API
 
@@ -15,7 +15,7 @@ export default async function Home() {
   return (
     <main className="bg-white">
       {/* Hero Banner */}
-{/*       <HeroBanner /> */}
+      <HeroBanner />
 
       {/* Welcome Section */}
       <div className="text-center max-w-[800px] mx-auto  md:my-[80px] px-4">
@@ -43,7 +43,7 @@ export default async function Home() {
         </h2>
 
         {/* Product Grid */}
-{/*         <HomeProductGrid products={products} /> */}
+        <HomeProductGrid products={products} />
       </section>
     </main>
   );
