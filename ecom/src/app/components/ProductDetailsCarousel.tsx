@@ -37,6 +37,8 @@ const ProductDetailsCarousel: React.FC<ProductDetailsCarouselProps> = ({ images 
         showIndicators={false}
         showStatus={false}
         thumbWidth={60}
+        preventMovementUntilSwipeScrollTolerance={true}
+        swipeScrollTolerance={30}
         className="productCarousel"
       >
         {images.map((img:any) => (
