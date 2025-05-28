@@ -18,10 +18,10 @@ import {
   FaPoundSign,
   FaTshirt
 } from 'react-icons/fa';
-import ProductDetailsCarousel from './ProductDetailsCarousel';
+import ProductDetailsCarousel from '@/app/components/ProductDetailsCarousel';
 import AddToCartButton from './AddToCartButton';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '../store/slices/cartSlice';
+import { addToCart } from '@/app/store/slices/cartSlice';
 import { useCurrency } from '../../hooks/useCurrency';
 import { CurrencyCode } from '../store/slices/currencySlice';
 import CustomerReviews from './ProductReviews';
@@ -86,11 +86,13 @@ interface Product {
 type ProductDetailsProps = { product: Product };
 
 export default function ProductDetails({ product }: ProductDetailsProps) {
+  const dispatch = useDispatch();
   const router = useRouter();
+  const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [selectedSizeId, setSelectedSizeId] = useState<any>(null);
-  const dispatch = useDispatch();
-  const { selectedCurrency, changeCurrency, formatPrice, currencySymbol } = useCurrency();
+  const [selectedItem, setSelectedItem] = useState(0);
+  const { selectedCurrency: currency, changeCurrency, formatPrice, currencySymbol } = useCurrency();
   const selectedVariant = product?.variants?.[selectedVariantIndex] || product?.variants?.[0];
   console.log("🚀 ~ ProductDetails ~ selectedVariant:", selectedVariant)
 
@@ -100,14 +102,12 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     } else {
       setSelectedSizeId(null);
     }
+    setSelectedItem(0);
   }, [selectedVariantIndex, selectedVariant]);
 
   const selectedSize = selectedVariant?.size?.find(size => size._id === selectedSizeId);
 
-  const displayImages = [
-    ...(selectedVariant?.images || []),
-    ...(product?.images || [])
-  ].filter((img): img is string => img !== null);
+  const displayImages = selectedVariant?.images?.filter(img => img !== null) || product?.images?.filter(img => img !== null) || [];
 
   // Helper to get currency icon based on currency code
   const getCurrencyIcon = (currency: CurrencyCode) => {
@@ -173,22 +173,23 @@ const handleBuyNow = () => {
         {/* Left column with product images */}
         <div className="w-full lg:w-3/5">
           <div className="bg-white p-4 rounded-2xl shadow-sm transition-all hover:shadow-md border border-gray-100">
-            <ProductDetailsCarousel images={displayImages} />
+            <ProductDetailsCarousel images={displayImages} selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
           </div>
 
           {/* Thumbnail navigation */}
-          {/* {displayImages.length > 1 && (
+          {displayImages.length > 1 && (
             <div className="mt-4 flex flex-wrap gap-2 justify-center">
               {displayImages.slice(0, 5).map((img, idx) => (
                 <div
                   key={idx}
                   className="w-16 h-16 relative rounded-lg overflow-hidden border-2 border-white shadow-sm cursor-pointer hover:border-indigo-300 transition-all"
                   style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                  onClick={() => setSelectedItem(idx)}
                 />
               ))}
-            
+
             </div>
-          )} */}
+          )}
 
           {/* Gem details section */}
           {product?.gems && product.gems.length > 0 && (

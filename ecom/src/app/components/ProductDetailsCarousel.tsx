@@ -1,6 +1,6 @@
 'use client';
 
-import React from "react";
+import React, { useState } from "react";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import Zoom from 'react-medium-image-zoom';
@@ -20,6 +20,8 @@ interface ProductDetailsCarouselProps {
 }
 
 const ProductDetailsCarousel: React.FC<ProductDetailsCarouselProps> = ({ images }:any) => {
+  const [selectedItem, setSelectedItem] = useState(0);
+
   // console.log("🚀 ~ images:", images)
   // If no images are provided, show a placeholder
   if (!images || images.length === 0) {
@@ -36,17 +38,20 @@ const ProductDetailsCarousel: React.FC<ProductDetailsCarouselProps> = ({ images 
         infiniteLoop={true}
         showIndicators={false}
         showStatus={false}
+        showThumbs={true}
         thumbWidth={60}
         preventMovementUntilSwipeScrollTolerance={true}
         swipeScrollTolerance={30}
         className="productCarousel"
+        selectedItem={selectedItem}
+        onClickThumb={(index) => setSelectedItem(index)}
       >
         {images.map((img:any) => (
           <div key={img.id}>
             <Zoom>
               <img
-                src={img}
-                alt={img || "Product image"}
+                src={img.attributes.url}
+                alt={img.attributes.name || "Product image"}
                 className="object-contain"
               />
             </Zoom>
