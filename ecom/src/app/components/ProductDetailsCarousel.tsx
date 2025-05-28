@@ -3,6 +3,8 @@
 import React from "react";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
 
 
 interface ProductImage {
@@ -39,11 +41,13 @@ const ProductDetailsCarousel: React.FC<ProductDetailsCarouselProps> = ({ images 
       >
         {images.map((img:any) => (
           <div key={img.id}>
-            <img
-              src={img}
-              alt={img || "Product image"}
-              className="object-contain"
-            />
+            <Zoom>
+              <img
+                src={img}
+                alt={img || "Product image"}
+                className="object-contain"
+              />
+            </Zoom>
           </div>
         ))}
       </Carousel>
