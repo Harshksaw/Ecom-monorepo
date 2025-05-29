@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     other: [
       {
         rel: 'logo',
-        url: '/logo.png',
+        url: 'https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png',
         type: 'image/png'
       }
     ]
@@ -88,12 +88,12 @@ export default async function RootLayout({
         rel="icon"
         type="image/png"
         sizes="32x32"
-        href="/logo2.png"
+        href="https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png"
       />
       <link
         rel="apple-touch-icon"
         sizes="180x180"
-        href="/logo.png"
+        href="https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png"
       />
         <script
           type="application/ld+json"
