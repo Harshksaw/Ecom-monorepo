@@ -23,13 +23,13 @@ export const metadata: Metadata = {
 
   icons: {
     icon: [
-      { url: '/favicon.svg',        type: 'image/svg+xml' },
-      { url: '/favicon.ico',        type: 'image/x-icon' },
-      { url: '/favicon-96x96.png',  type: 'image/png',      sizes: '96x96' },
-      { url: '/favicon-32x32.png',  type: 'image/png',      sizes: '32x32' },
+      { url: '/favicon.svg?v=2',        type: 'image/svg+xml' },
+      { url: '/favicon.ico?v=2',        type: 'image/x-icon' },
+      { url: '/favicon-96x96.png?v=2',  type: 'image/png',      sizes: '96x96' },
+      { url: '/favicon-32x32.png?v=2',  type: 'image/png',      sizes: '32x32' },
     ],
-    shortcut: '/favicon.ico',           // <link rel="shortcut icon">
-    apple:    '/apple-touch-icon.png',  // <link rel="apple-touch-icon">
+    shortcut: '/favicon.ico?v=2',
+    apple:    '/apple-touch-icon.png?v=2',
   },
 
    openGraph: {
