@@ -90,6 +90,8 @@ export default async function RootLayout({
         href="/favicon.svg"
       />
 
+      <link rel="manifest" href="/site.webmanifest" />
+
       {/* Fallback ICO: */}
       <link
         rel="shortcut icon"
