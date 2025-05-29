@@ -40,6 +40,7 @@ interface Dimensions {
   length: string;
   width: string;
   height: string;
+  unit: string;
 }
 
 interface Weight {
@@ -83,7 +84,6 @@ export default function EditProductPage({ params }: any) {
   
   // Basic product info
   const [name, setName] = useState("");
-  console.log("🚀 ~ EditProductPage ~ name:", name)
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -108,6 +108,7 @@ export default function EditProductPage({ params }: any) {
     length: "",
     width: "",
     height: "",
+    unit: "cm"
   });
 
   // Gems
@@ -134,6 +135,11 @@ export default function EditProductPage({ params }: any) {
     type: "Standard",
     duration: "5-7 business days",
     price: "200"
+  },
+  {
+    type: "International",
+    duration: "7-11 business days",
+    price: "1500"
   }]);
 
   // Tags
@@ -176,7 +182,7 @@ export default function EditProductPage({ params }: any) {
         // Populate weight
         if (product.weight) {
           setWeight({
-            value: product.weight.value.toString(),
+            value: product.weight.value?.toString() || "",
             unit: product.weight.unit || "grams"
           });
         }
@@ -186,7 +192,8 @@ export default function EditProductPage({ params }: any) {
           setDimensions({
             length: product.dimensions.length?.toString() || "",
             width: product.dimensions.width?.toString() || "",
-            height: product.dimensions.height?.toString() || ""
+            height: product.dimensions.height?.toString() || "",
+            unit: product.dimensions.unit || "cm"
           });
         }
         
@@ -561,134 +568,139 @@ export default function EditProductPage({ params }: any) {
     setReviews(newReviews);
   };
 
+  // Fixed handleSubmit function for the EditProductPage
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
+    try {
+      // Basic validation
+      if (!name.trim() || !category || !materialType || !purity) {
+        toast.error("Please fill all required fields");
+        setIsLoading(false);
+        return;
+      }
 
-// Fixed handleSubmit function for the EditProductPage
+      const defaultPrice = variants[0]?.price?.default || 0;
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+      // Create form data
+      const formData = new FormData();
+      
+      // Add basic fields
+      formData.append("name", name);
+      formData.append("sku", sku);
+      formData.append("description", description);
+      formData.append("categoryId", category);
+      formData.append("isActive", isActive.toString());
+      formData.append("isFeatured", isFeatured.toString());
+      formData.append("price", defaultPrice.toString());
+      formData.append("materialType", materialType);
+      formData.append("purity", purity);
+      
+      // Optional fields
+      if (shape) formData.append("shape", shape);
+      if (color) formData.append("color", color);
 
-  try {
-    // Basic validation
-    if (!name.trim() || !category || !materialType || !purity) {
-      toast.error("Please fill all required fields");
+      // Weight
+      if (weight.value) {
+        formData.append("weight[value]", weight.value);
+        formData.append("weight[unit]", weight.unit);
+      }
+
+      // Dimensions
+      if (dimensions.length || dimensions.width || dimensions.height || dimensions.unit) {
+        if (dimensions.length) formData.append("dimensions[length]", dimensions.length);
+        if (dimensions.width) formData.append("dimensions[width]", dimensions.width);
+        if (dimensions.height) formData.append("dimensions[height]", dimensions.height);
+        formData.append("dimensions[unit]", dimensions.unit);
+      }
+
+      // Materials
+      materials.forEach((material, index) => {
+        if (material.trim()) {
+          formData.append(`materials[${index}]`, material);
+        }
+      });
+
+      // Gems
+      gems.forEach((gem, index) => {
+        if (gem.type.trim()) {
+          formData.append(`gems[${index}][type]`, gem.type);
+          formData.append(`gems[${index}][carat]`, gem.carat);
+          formData.append(`gems[${index}][color]`, gem.color);
+          formData.append(`gems[${index}][clarity]`, gem.clarity);
+        }
+      });
+
+      // Existing images as JSON
+      formData.append("existingImages", JSON.stringify(existingImages));
+
+      // Prepare variants data
+      const variantsToSend = variants.map(variant => {
+        return {
+          _id: variant._id,
+          metalColor: variant.metalColor,
+          price: variant.price,
+          stock: variant.stock,
+          existingImages: variant.existingImages || [],
+          images: variant.existingImages || [],
+          size: variant.sizes
+        };
+      });
+      
+      // Add variants as JSON
+      formData.append("variants", JSON.stringify(variantsToSend));
+
+      // Add new product images
+      images.forEach(image => {
+        formData.append("images", image);
+      });
+
+      // Add variant images
+      variants.forEach((variant, variantIndex) => {
+        if (variant.images && variant.images.length > 0) {
+          variant.images.forEach(image => {
+            formData.append(`variant_${variantIndex}_images`, image);
+          });
+        }
+      });
+
+      // Add reviews as JSON
+      formData.append("reviews", JSON.stringify(reviews));
+
+      // Add delivery options as JSON
+      formData.append("deliveryOptions", JSON.stringify(deliveryOptions));
+
+      // Add tags
+      tags.forEach((tag, index) => {
+        if (tag.trim()) {
+          formData.append(`tags[${index}]`, tag);
+        }
+      });
+
+      const response = await axios({
+        method: 'post',
+        url: `${API_URL}/products/${productId}`,
+        data: formData,
+        headers: {
+          // Let axios set this automatically for multipart/form-data
+        }
+      });
+
+      if (response.status === 200) {
+        toast.success("Product updated successfully");
+        router.push("/admin/dashboard/products");
+      } else {
+        toast.error("Failed to update product");
+      }
+    } catch (error: any) {
+      console.error("API Error:", error.response?.data || error.message);
+      toast.error(error.message || "Failed to update product");
+    } finally {
       setIsLoading(false);
-      return;
     }
+  };
 
-    // Create form data
-    const formData = new FormData();
-    
-    // Add basic fields
-    formData.append("name", name);
-    formData.append("sku", sku);
-    formData.append("description", description);
-    formData.append("categoryId", category);
-    formData.append("isActive", isActive.toString());
-    formData.append("isFeatured", isFeatured.toString());
-    formData.append("materialType", materialType);
-    formData.append("purity", purity);
-    
-    // Optional fields
-    if (shape) formData.append("shape", shape);
-    if (color) formData.append("color", color);
-
-    // Weight as JSON
-    if (weight.value) {
-      formData.append("weight", JSON.stringify(weight));
-    }
-
-    // Dimensions as JSON
-    if (dimensions.length || dimensions.width || dimensions.height) {
-      formData.append("dimensions", JSON.stringify(dimensions));
-    }
-
-    // Materials as JSON
-    if (materials.length > 0) {
-      formData.append("materials", JSON.stringify(materials.filter(m => m.trim())));
-    }
-
-    // Gems as JSON
-    if (gems.length > 0) {
-      formData.append("gems", JSON.stringify(gems.filter(g => g.type.trim())));
-    }
-
-    // Existing images as JSON
-    formData.append("existingImages", JSON.stringify(existingImages));
-
-    // Prepare variants data
-    const variantsToSend = variants.map(variant => {
-      // Create a new object with only the data we want to send
-      return {
-        _id: variant._id,
-        metalColor: variant.metalColor,
-        price: variant.price,
-        stock: variant.stock,
-        existingImages: variant.existingImages || [],
-        images: variant.existingImages || [] ,
-        size: variant.sizes // The backend expects 'size' not 'sizes'
-      };
-    });
-    
-    // Add variants as JSON
-    formData.append("variants", JSON.stringify(variantsToSend));
-
-    // Add new product images
-    images.forEach(image => {
-      formData.append("images", image);
-    });
-
-    // Add variant images
-    variants.forEach((variant, variantIndex) => {
-      if (variant.images && variant.images.length > 0) {
-        variant.images.forEach(image => {
-          formData.append(`variant_${variantIndex}_images`, image);
-        });
-      }
-    });
-
-    // Add reviews as JSON
-    formData.append("reviews", JSON.stringify(reviews));
-
-    // Add delivery options as JSON
-    formData.append("deliveryOptions", JSON.stringify(deliveryOptions));
-
-    // Add tags as JSON
-    formData.append("tags", JSON.stringify(tags.filter(t => t.trim())));
-
-    // Debug output - what's in the FormData
-    console.log("FormData entries:");
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key} → ${value instanceof File ? `File: ${value.name}` : value}`);
-    }
-
-    // IMPORTANT: Send the correct HTTP method and use the actual FormData object
-    const response = await axios({
-      method: 'post', // Your backend uses POST for the edit endpoint
-      url: `${API_URL}/products/${productId}`,
-      data: formData, // Send the actual FormData object, not formDataEntries
-      headers: {
-        // Let axios set this automatically for multipart/form-data
-        // Don't manually set Content-Type for FormData
-      }
-    });
-
-    console.log("API Response:", response.data);
-
-    if (response.status === 200) {
-      toast.success("Product updated successfully");
-      router.push("/admin/dashboard/products");
-    } else {
-      toast.error("Failed to update product");
-    }
-  } catch (error: any) {
-    console.error("API Error:", error.response?.data || error.message);
-    toast.error(error.message || "Failed to update product");
-  } finally {
-    setIsLoading(false);
-  }
-};
   if (isLoadingProduct) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-screen">
@@ -705,7 +717,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       <h1 className="text-3xl font-bold mb-6">Edit Product</h1>
 
       <form
-        onSubmit={(e)=> handleSubmit(e)}
+        onSubmit={handleSubmit}
         className="mx-auto bg-white shadow-md rounded-lg p-8"
       >
         {/* Basic Information Section */}
@@ -740,6 +752,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 type="text"
                 id="sku"
                 value={sku}
+                onChange={(e) => setSku(e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
                 placeholder="SKU"
                 readOnly
@@ -853,7 +866,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           )}
           
           {/* New Image Upload */}
-          {/* <div>
+          <div>
             <label className="block text-gray-700 font-bold mb-2">
               Add New Images
             </label>
@@ -901,8 +914,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                 Upload up to 5 images. JPEG, PNG or GIF only. Max 5MB each.
               </p>
             </div>
-          </div> */}
-      </div>
+          </div>
+        </div>
 
         {/* Material Properties Section */}
         <div className="mb-8">
@@ -917,23 +930,15 @@ const handleSubmit = async (e: React.FormEvent) => {
               >
                 Material Type*
               </label>
-              <select
+              <input
+                type="text"
                 id="materialType"
                 value={materialType}
                 onChange={(e) => setMaterialType(e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., Gold, Silver, Platinum, Titanium"
                 required
-              >
-                <option value="">Select Material Type</option>
-       <option value="gold">Gold</option>
-              <option value="yellow-gold">Yellow Gold</option>
-              <option value="rose-gold">Rose Gold</option>
-              <option value="white-gold">White Gold</option>
-              <option value="silver">Silver</option>
-              <option value="titanium">Titanium</option>
-              <option value="platinum">Platinum</option>
-              <option value="sterling-silver">Sterling Silver</option>    
-              </select>
+              />
             </div>
 
             {/* Purity */}
@@ -1058,9 +1063,9 @@ const handleSubmit = async (e: React.FormEvent) => {
           {/* Dimensions */}
           <div>
             <label className="block text-gray-700 font-bold mb-2">
-              Dimensions (mm)
+              Dimensions
             </label>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-4 gap-4">
               <div>
                 <input
                   type="number"
@@ -1099,6 +1104,18 @@ const handleSubmit = async (e: React.FormEvent) => {
                   min="0"
                   step="0.1"
                 />
+              </div>
+              <div>
+                <select
+                  value={dimensions.unit}
+                  onChange={(e) =>
+                    setDimensions({ ...dimensions, unit: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="cm">cm</option>
+                  <option value="mm">mm</option>
+                </select>
               </div>
             </div>
           </div>
@@ -1213,27 +1230,15 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <label className="block text-gray-700 text-sm font-bold mb-1">
                     Metal Color*
                   </label>
-                  <select
+                  <input
+                    type="text"
                     value={variant.metalColor}
                     onChange={(e) => updateVariant(variantIndex, "metalColor", e.target.value)}
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., Gold, Silver, Rose Gold, White Gold"
                     required
-                  >
-                    <option value="gold">Gold</option>
-                    <option value="silver">Silver</option>
-                    <option value="yellowgold">Yellow Gold</option>
-                    <option value="rosegold">Rose Gold</option>
-                    <option value="whitegold">White Gold</option>
-                    <option value="sterlingsilver">Sterling Silver</option>
-                    <option value="platinum">Platinum</option>
-                    <option value="bronze">Bronze</option>
-                    <option value="copper">Copper</option>
-                    <option value="blackgold">Black Gold</option>
-                    <option value="titanium">Titanium</option>
-                  </select>
+                  />
                 </div>
-
-         
               </div>
 
               {/* Pricing */}
@@ -1367,7 +1372,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 )}
 
                 {/* New Variant Images */}
-                {/* <div className={`border-2 border-dashed rounded-lg p-4 ${
+                <div className={`border-2 border-dashed rounded-lg p-4 ${
                   variant.metalColor === 'gold' ? 'bg-yellow-50 border-yellow-300' :
                   variant.metalColor === 'silver' ? 'bg-gray-50 border-gray-300' :
                   variant.metalColor === 'rosegold' ? 'bg-gray-50 border-pink-300' :
@@ -1416,18 +1421,52 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <p className="text-xs text-gray-500 mt-2 text-center">
                     Upload images showing this product in <span className="font-medium capitalize">{variant.metalColor}</span> color
                   </p>
-                </div> */}
+                </div>
               </div>
             </div>
           ))}
 
-          {/* <button
+          <button
             type="button"
             onClick={addVariant}
             className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
           >
             <FaPlus className="mr-2" /> Add Variant
-          </button> */}
+          </button>
+        </div>
+
+        {/* Tags */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Tags</h2>
+          
+          {tags.map((tag, index) => (
+            <div key={index} className="flex items-center space-x-2 mb-2">
+              <input
+                type="text"
+                value={tag}
+                onChange={(e) => updateTag(index, e.target.value)}
+                className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter tag"
+              />
+              {index > 0 && (
+                <button
+                  type="button"
+                  onClick={() => removeTag(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <FaTrash />
+                </button>
+              )}
+            </div>
+          ))}
+          
+          <button
+            type="button"
+            onClick={addTag}
+            className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
+          >
+            <FaPlus className="mr-2" /> Add Tag
+          </button>
         </div>
 
         {/* Delivery Options Section */}
@@ -1502,40 +1541,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
           >
             <FaPlus className="mr-2" /> Add Delivery Option
-          </button>
-        </div>
-
-        {/* Tags */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4 pb-2 border-b">Tags</h2>
-          
-          {tags.map((tag, index) => (
-            <div key={index} className="flex items-center space-x-2 mb-2">
-              <input
-                type="text"
-                value={tag}
-                onChange={(e) => updateTag(index, e.target.value)}
-                className="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter tag"
-              />
-              {index > 0 && (
-                <button
-                  type="button"
-                  onClick={() => removeTag(index)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <FaTrash />
-                </button>
-              )}
-            </div>
-          ))}
-          
-          <button
-            type="button"
-            onClick={addTag}
-            className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
-          >
-            <FaPlus className="mr-2" /> Add Tag
           </button>
         </div>
 
