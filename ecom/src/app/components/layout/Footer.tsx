@@ -41,21 +41,55 @@ const Footer = ({categories}:any) => {
           </div>
 
           {/* Categories Section */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">Categories</h3>
-            <ul className="space-y-2">
-            {categories?.filter((cat:any )=> cat.isActive).sort((a:any, b:any) => {
-       if(a.name === "New Arrivals") return -1;
-       if(b.name === "New Arrivals") return 1;
-       return 0;
-     }).map((category: any) => (
-              <li key={category._id}>
-                <Link href={`/category/${category.slug}`} className="text-gray-400 hover:text-white">
-                  {category.name}
-                </Link>
-              </li>
-            ))}         </ul>
-          </div>
+     <div className="space-y-3">
+  <h3 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">Categories</h3>
+  <ul className="space-y-2">
+    {categories?.filter((cat: any) => cat.isActive)
+      .sort((a: any, b: any) => {
+        // Define the desired order
+        const categoryOrder = [
+          "New Arrivals",
+          "Necklace",
+          "Pendant", 
+          "Rings",
+          "Earring",
+          "Bracelet",
+          "Gift",
+          "Watches",
+          "Gemstones"
+        ];
+        
+        // Get the index of each category in the desired order
+        const indexA = categoryOrder.findIndex(cat => 
+          cat.toLowerCase() === a.name.toLowerCase()
+        );
+        const indexB = categoryOrder.findIndex(cat => 
+          cat.toLowerCase() === b.name.toLowerCase()
+        );
+        
+        // If both categories are in the order array
+        if (indexA !== -1 && indexB !== -1) {
+          return indexA - indexB;
+        }
+        
+        // If only category A is in the order array, it comes first
+        if (indexA !== -1) return -1;
+        
+        // If only category B is in the order array, it comes first
+        if (indexB !== -1) return 1;
+        
+        // If neither category is in the order array, sort alphabetically
+        return a.name.localeCompare(b.name);
+      })
+      .map((category: any) => (
+        <li key={category._id}>
+          <Link href={`/category/${category.slug}`} className="text-gray-400 hover:text-white">
+            {category.name}
+          </Link>
+        </li>
+      ))}
+  </ul>
+</div>
         </div>
 
         {/* Social Media */}

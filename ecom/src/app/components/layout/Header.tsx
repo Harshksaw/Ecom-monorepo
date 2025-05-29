@@ -231,28 +231,59 @@ const Header = ({ categories }: any) => {
         </nav>
 
         {/* Categories section */}
-        <div className="border-t border-gray-300 px-4 py-3">
-          <h3 className="font-medium mb-2 text-black">Categories</h3>
-          <ul className="space-y-1">
-            {categories?.filter((cat:any) => cat.isActive)
-              .sort((a:any, b:any) => {
-                if(a.name === "New Arrivals") return -1;
-                if(b.name === "New Arrivals") return 1;
-                return 0;
-              })
-              .map((category: any) => (
-                <li key={category._id}>
-                  <Link 
-                    href={`/category/${category.slug}`} 
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-300 rounded-md" 
-                    onClick={() => setMobileMenu(false)}
-                  >
-                    {category.name}
-                  </Link>
-                </li>
-              ))}
-          </ul>
-        </div>
+     <div className="border-t border-gray-300 px-4 py-3">
+  <h3 className="font-medium mb-2 text-black">Categories</h3>
+  <ul className="space-y-1">
+    {categories?.filter((cat: any) => cat.isActive)
+      .sort((a: any, b: any) => {
+        // Define the desired order
+        const categoryOrder = [
+          "New Arrivals",
+          "Necklace",
+          "Pendant", 
+          "Rings",
+          "Earring",
+          "Bracelet",
+          "Gift",
+          "Watches",
+          "Gemstones"
+        ];
+        
+        // Get the index of each category in the desired order
+        const indexA = categoryOrder.findIndex(cat => 
+          cat.toLowerCase() === a.name.toLowerCase()
+        );
+        const indexB = categoryOrder.findIndex(cat => 
+          cat.toLowerCase() === b.name.toLowerCase()
+        );
+        
+        // If both categories are in the order array
+        if (indexA !== -1 && indexB !== -1) {
+          return indexA - indexB;
+        }
+        
+        // If only category A is in the order array, it comes first
+        if (indexA !== -1) return -1;
+        
+        // If only category B is in the order array, it comes first
+        if (indexB !== -1) return 1;
+        
+        // If neither category is in the order array, sort alphabetically
+        return a.name.localeCompare(b.name);
+      })
+      .map((category: any) => (
+        <li key={category._id}>
+          <Link 
+            href={`/category/${category.slug}`} 
+            className="block px-4 py-2 text-gray-700 hover:bg-gray-300 rounded-md" 
+            onClick={() => setMobileMenu(false)}
+          >
+            {category.name}
+          </Link>
+        </li>
+      ))}
+  </ul>
+</div>
 
         {/* Policies section */}
         <div className="border-t border-gray-300 px-4 py-3">
