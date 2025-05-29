@@ -43,17 +43,17 @@ const CategoryTabs = ({ activeCategory, categories }:any) => {
   const sortedCategories = categories?.filter((cat: any) => cat.isActive)
     .sort((a: any, b: any) => {
       // Define the same order as in your mobile menu
-      const categoryOrder = [
-        "New Arrivals",
-        "Necklace",
-        "Pendant", 
-        "Rings",
-        "Earring",
-        "Bracelet",
-        "Gift",
-        "Watches",
-        "Gemstones"
-      ];
+const categoryOrder = [
+  "New Arrivals",
+  "Necklace",
+  "Pendant", 
+  "Rings",
+  "Earrings",  // Fixed: was "Earring" 
+  "Bracelets", // Fixed: was "Bracelet"
+  "Watches",   // Moved up to match your order
+  "Gifts",     // Fixed: was "Gift"
+  "Gemstones"
+];
       
       // Get the index of each category in the desired order
       const indexA = categoryOrder.findIndex(cat => 

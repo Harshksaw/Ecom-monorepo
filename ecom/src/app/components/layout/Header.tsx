@@ -53,6 +53,35 @@ const Header = ({ categories }: any) => {
   
   const toggleMobileMenu = () => setMobileMenu(!mobileMenu)
 
+    const sortedCategories = categories?.filter((cat: any) => cat.isActive)
+    .sort((a: any, b: any) => {
+      const categoryOrder = [
+        "New Arrivals",
+        "Necklace",
+        "Pendant", 
+        "Rings",
+        "Earring",
+        "Bracelet",
+        "Gift",
+        "Watches",
+        "Gemstones"
+      ];
+      
+      const indexA = categoryOrder.findIndex(cat => 
+        cat.toLowerCase() === a.name.toLowerCase()
+      );
+      const indexB = categoryOrder.findIndex(cat => 
+        cat.toLowerCase() === b.name.toLowerCase()
+      );
+      
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
   return (
     <>
       {/* Fixed header */}
@@ -178,7 +207,7 @@ const Header = ({ categories }: any) => {
 
       {/* Category tabs */}
       <div className="w-full z-30 bg-white">
-        <CategoryTabs activeCategory={undefined} categories={categories} />
+        <CategoryTabs activeCategory={undefined} categories={sortedCategories} />
       </div>
 
       {/* Mobile side menu */}
@@ -237,17 +266,17 @@ const Header = ({ categories }: any) => {
     {categories?.filter((cat: any) => cat.isActive)
       .sort((a: any, b: any) => {
         // Define the desired order
-        const categoryOrder = [
-          "New Arrivals",
-          "Necklace",
-          "Pendant", 
-          "Rings",
-          "Earring",
-          "Bracelet",
-          "Gift",
-          "Watches",
-          "Gemstones"
-        ];
+ const categoryOrder = [
+  "New Arrivals",
+  "Necklace",
+  "Pendant", 
+  "Rings",
+  "Earrings",  // Fixed: was "Earring" 
+  "Bracelets", // Fixed: was "Bracelet"
+  "Watches",   // Moved up to match your order
+  "Gifts",     // Fixed: was "Gift"
+  "Gemstones"
+];
         
         // Get the index of each category in the desired order
         const indexA = categoryOrder.findIndex(cat => 
