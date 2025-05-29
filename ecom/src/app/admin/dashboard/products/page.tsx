@@ -712,30 +712,23 @@ export default function CreateProductPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* Material Type */}
-            <div>
-              <label
-                htmlFor="materialType"
-                className="block text-gray-700 font-bold mb-2"
-              >
-                Material Type*
-              </label>
-              <select
-                id="materialType"
-                value={materialType}
-                onChange={(e) => setMaterialType(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">Select Material Type</option>
-                <option value="gold">Gold</option>
-              <option value="yellow-gold">Yellow Gold</option>
-              <option value="rose-gold">Rose Gold</option>
-              <option value="white-gold">White Gold</option>
-              <option value="silver">Silver</option>
-              <option value="titanium">Titanium</option>
-              <option value="platinum">Platinum</option>
-              <option value="sterling-silver">Sterling Silver</option>              </select>
-            </div>
+       <div>
+  <label
+    htmlFor="materialType"
+    className="block text-gray-700 font-bold mb-2"
+  >
+    Material Type*
+  </label>
+  <input
+    type="text"
+    id="materialType"
+    value={materialType}
+    onChange={(e) => setMaterialType(e.target.value)}
+    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    placeholder="e.g., Gold, Silver, Platinum, Titanium"
+    required
+  />
+</div>
 
             {/* Purity */}
             {/* Purity */}
@@ -1015,30 +1008,19 @@ export default function CreateProductPage() {
 
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 {/* Metal Color */}
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-1">
-                    Metal Color*
-                  </label>
-                  <select
-                    value={variant.metalColor}
-                    onChange={(e) => updateVariant(variantIndex, "metalColor", e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="gold">Gold</option>
-                    <option value="silver">Silver</option>
-                    <option value="yellowgold">Yellow Gold</option>
-                    <option value="rosegold">Rose Gold</option>
-                    <option value="whitegold">White Gold</option>
-                    <option value="silver">Silver</option>
-                    <option value="sterlingsilver">Sterling Silver</option>
-                    <option value="platinum">Platinum</option>
-                    <option value="bronze">Bronze</option>
-                    <option value="copper">Copper</option>
-                    <option value="blackgold">Black Gold</option>
-                    <option value="titanium">Titanium</option>
-                  </select>
-                </div>
+             <div>
+  <label className="block text-gray-700 text-sm font-bold mb-1">
+    Metal Color*
+  </label>
+  <input
+    type="text"
+    value={variant.metalColor}
+    onChange={(e) => updateVariant(variantIndex, "metalColor", e.target.value)}
+    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    placeholder="e.g., Gold, Silver, Rose Gold, White Gold"
+    required
+  />
+</div>
 
                 {/* Stock */}
                 {/* <div>

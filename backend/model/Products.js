@@ -3,22 +3,22 @@ const { ObjectId } = mongoose.Schema.Types;
 // schema design
 const validator = require("validator");
 const productSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  sku: { type: String, required: true, unique: true },
-  description: { type: String, required: true },
+  name: { type: String, required: false },
+  sku: { type: String, required: false, unique: true },
+  description: { type: String, required: false },
 
 
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
-    required: true,
+    required: false,
   },
   images: [{ type: String }],
   weight: {
     value: { type: Number },
     unit: {
       type: String,
-      enum: ["grams", "carat", "tola", "oz"],
+     
       default: "grams"
     }
   },
@@ -40,158 +40,36 @@ const productSchema = new mongoose.Schema({
 
   materialType: {
     type: String,
-    enum: [
-      "gold",
-      "silver",
-      "platinum",
-      "rose_gold",
-      "white_gold",
-      "yellow_gold",
-      "diamond",
-      "pearl",
-      "gemstone",
-      "brass",
-      "bronze",
-      "titanium",
-      "stainless_steel",
-      "palladium",
-      "rhodium",
-      "sterling",
-      "kundan",
-      "polki",
-      "meenakari",
-      "jadau",
-      "antique",
-      "oxidized",
-      "filigree",
-      "enamel",
-      "lac",
-      "wood",
-      "bone",
-      "ivory",
-      "coral",
-      "amber",
-      "turquoise",
-      "lapis_lazuli",
-      "onyx",
-      "agate",
-      "jade",
-      "ruby",
-      "emerald",
-      "sapphire",
-      "aquamarine",
-      "garnet",
-      "amethyst",
-      "topaz",
-      "zircon",
-      "moonstone",
-      "opal",
-      "peridot",
-      "tanzanite",
-      "alexandrite",
-      "spinel",
-      "tourmaline"
-    ],
-    required: true,
+  
+    required: false,
   },
   materialFinish: {
     type: String,
-    enum: [
-      "polished",
-      "matte",
-      "brushed",
-      "hammered",
-      "sandblasted",
-      "oxidized",
-      "satin",
-      "mirror",
-      "textured",
-      "engraved"
-    ]
+  
   },
   materialGrade: {
     type: String,
-    enum: [
-      "premium",
-      "standard",
-      "commercial",
-      "luxury",
-      "exclusive"
-    ]
+ 
   },
   materialCertification: {
     type: String,
-    enum: [
-      "hallmark",
-      "bureau_of_indian_standards",
-      "international_standards_organization",
-      "american_gem_society",
-      "gemological_institute_of_america",
-      "international_gemological_institute",
-      "european_gemological_laboratory"
-    ]
+ 
   },
   materialOrigin: {
     type: String,
-    enum: [
-      "india",
-      "italy",
-      "switzerland",
-      "germany",
-      "japan",
-      "thailand",
-      "china",
-      "usa",
-      "uk",
-      "france",
-      "australia",
-      "south_africa",
-      "russia",
-      "brazil",
-      "colombia"
-    ]
+    
   },
   materialPurity: {
     type: String,
-    enum: [
-      "24k",
-      "22k",
-      "18k",
-      "14k",
-      "10k",
-      "925",
-      "950",
-      "900",
-      "800",
-      "750",
-      "585",
-      "375"
-    ]
+    
   },
   materialTreatment: {
     type: String,
-    enum: [
-      "none",
-      "heat_treated",
-      "irradiated",
-      "coated",
-      "filled",
-      "dyed",
-      "bleached",
-      "diffusion_treated"
-    ]
+  
   },
   materialSustainability: {
     type: String,
-    enum: [
-      "recycled",
-      "ethically_sourced",
-      "fair_trade",
-      "conflict_free",
-      "sustainable_mining",
-      "lab_grown",
-      "vintage"
-    ]
+
   },
   purity: {
     type: String,
@@ -211,7 +89,7 @@ variants: [
     metalColor: {
       type: String,
 
-      required: true,
+      required: false,
     },
     images: [{ type: String }],
     price: {
@@ -241,21 +119,21 @@ deliveryOptions: [
 reviews: [
   {
 
-    userName: { type: String, required: true },
+    userName: { type: String, required: false },
     rating: {
       type: Number,
-      required: true,
+      required: false,
       min: 1,
       max: 5
     },
     title: {
       type: String,
-      required: true,
+      required: false,
       trim: true
     },
     comment: {
       type: String,
-      required: true,
+      required: false,
       trim: true
     },
 
