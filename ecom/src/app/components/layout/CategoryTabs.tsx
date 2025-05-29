@@ -49,7 +49,7 @@ const categoryOrder = [
   "Pendant", 
   "Rings",
   "Earrings",  // Fixed: was "Earring" 
-  "Bracelets", // Fixed: was "Bracelet"
+  "Bracelet", // Fixed: was "Bracelet"
   "Watches",   // Moved up to match your order
   "Gifts",     // Fixed: was "Gift"
   "Gemstones"
