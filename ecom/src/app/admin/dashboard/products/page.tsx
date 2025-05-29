@@ -89,8 +89,9 @@ export default function CreateProductPage() {
   length: "",
   width: "",
   height: "",
-  unit: "cm"  // Add this line
+  unit: "cm"  
 });
+ console.log("🚀 ~ CreateProductPage ~ dimensions:", dimensions)
 
   // Gems
   const [gems, setGems] = useState<Gem[]>([]);
@@ -460,11 +461,12 @@ export default function CreateProductPage() {
 
 
     // Add dimensions
-    if (dimensions.length || dimensions.width || dimensions.height) {
-      if (dimensions.length) formData.append("dimensions[length]", dimensions.length);
-      if (dimensions.width) formData.append("dimensions[width]", dimensions.width);
-      if (dimensions.height) formData.append("dimensions[height]", dimensions.height);
-    }
+   if (dimensions.length || dimensions.width || dimensions.height || dimensions.unit) {
+  if (dimensions.length) formData.append("dimensions[length]", dimensions.length);
+  if (dimensions.width) formData.append("dimensions[width]", dimensions.width);
+  if (dimensions.height) formData.append("dimensions[height]", dimensions.height);
+  formData.append("dimensions[unit]", dimensions.unit); // This line was missing!
+}
 
     // Add materials
     materials.forEach((material, index) => {
