@@ -46,6 +46,7 @@ export default function LoginPage() {
         toast.success(result.message || 'Login successful!');
         // Navigate to callback URL or dashboard after successful login
         router.push(callbackUrl);
+
       }
     } catch (err) {
       // Additional error handling if needed
@@ -60,9 +61,11 @@ export default function LoginPage() {
       const result = await adminLogin(email, password);
       
       if (result.success) {
-        toast.success(result.message || 'Admin login successful!');
         // Original navigation handled by admin login
-        router.push('/admin/dashboard');
+        router.replace('/admin/dashboard');
+
+        toast.success(result.message || 'Admin login successful!');
+        // router.navigate('/admin/dashboard');
       }
     } catch (err) {
       console.error('Admin login error:', err);

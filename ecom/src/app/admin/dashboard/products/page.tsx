@@ -39,6 +39,7 @@ interface Dimensions {
   length: string;
   width: string;
   height: string;
+  unit:string;
 }
 
 interface Weight {
@@ -84,11 +85,12 @@ export default function CreateProductPage() {
     value: "",
     unit: "grams"
   });
-  const [dimensions, setDimensions] = useState<Dimensions>({
-    length: "",
-    width: "",
-    height: "",
-  });
+ const [dimensions, setDimensions] = useState<Dimensions>({
+  length: "",
+  width: "",
+  height: "",
+  unit: "cm"  // Add this line
+});
 
   // Gems
   const [gems, setGems] = useState<Gem[]>([]);
@@ -855,52 +857,64 @@ export default function CreateProductPage() {
           </div>
 
           {/* Dimensions */}
-          <div>
-            <label className="block text-gray-700 font-bold mb-2">
-              Dimensions (cm)
-            </label>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div>
-                <input
-                  type="number"
-                  value={dimensions.length}
-                  onChange={(e) =>
-                    setDimensions({ ...dimensions, length: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Length"
-                  min="0"
-                  step="0.1"
-                />
-              </div>
-              <div>
-                <input
-                  type="number"
-                  value={dimensions.width}
-                  onChange={(e) =>
-                    setDimensions({ ...dimensions, width: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Width"
-                  min="0"
-                  step="0.1"
-                />
-              </div>
-              <div>
-                <input
-                  type="number"
-                  value={dimensions.height}
-                  onChange={(e) =>
-                    setDimensions({ ...dimensions, height: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Height"
-                  min="0"
-                  step="0.1"
-                />
-              </div>
-            </div>
-          </div>
+       <div>
+  <label className="block text-gray-700 font-bold mb-2">
+    Dimensions
+  </label>
+  <div className="grid md:grid-cols-4 gap-4">
+    <div>
+      <input
+        type="number"
+        value={dimensions.length}
+        onChange={(e) =>
+          setDimensions({ ...dimensions, length: e.target.value })
+        }
+        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Length"
+        min="0"
+        step="0.1"
+      />
+    </div>
+    <div>
+      <input
+        type="number"
+        value={dimensions.width}
+        onChange={(e) =>
+          setDimensions({ ...dimensions, width: e.target.value })
+        }
+        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Width"
+        min="0"
+        step="0.1"
+      />
+    </div>
+    <div>
+      <input
+        type="number"
+        value={dimensions.height}
+        onChange={(e) =>
+          setDimensions({ ...dimensions, height: e.target.value })
+        }
+        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Height"
+        min="0"
+        step="0.1"
+      />
+    </div>
+    <div>
+      <select
+        value={dimensions.unit}
+        onChange={(e) =>
+          setDimensions({ ...dimensions, unit: e.target.value })
+        }
+        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="cm">cm</option>
+        <option value="mm">mm</option>
+      </select>
+    </div>
+  </div>
+</div>
         </div>
 
         {/* Gems Section */}

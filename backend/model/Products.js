@@ -27,6 +27,11 @@ const productSchema = new mongoose.Schema({
     length: { type: Number },
     width: { type: Number },
     height: { type: Number },
+      unit: { 
+    type: String, 
+    enum: ['cm', 'mm'], 
+    default: 'cm' 
+  }
   },
   materials: [{ type: String }],
   gems: [
@@ -36,6 +41,7 @@ const productSchema = new mongoose.Schema({
       color: { type: String },
       clarity: { type: String },
     },
+    
   ],
 
   materialType: {

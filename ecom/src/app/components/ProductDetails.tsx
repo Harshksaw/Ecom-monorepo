@@ -46,6 +46,7 @@ interface Dimensions {
   length: number;
   width: number;
   height?: number;
+  unit?: string; // Add this line
 }
 
 interface Gem {
@@ -430,15 +431,16 @@ const handleBuyNow = () => {
                 <span className="font-medium text-gray-700">SKU:</span>
                 <span className="ml-1 text-gray-600">{product?.sku}</span>
               </div>
-              {product?.dimensions && (
-                <div className="text-sm flex items-center">
-                  <FaRuler className="mr-1 text-gray-500" size={12} />
-                  <span className="font-medium text-gray-700">Size:</span>
-                  <span className="ml-1 text-gray-600">
-                    {product.dimensions.length}×{product.dimensions.width}×{product.dimensions.height || 0} mm
-                  </span>
-                </div>
-              )}
+           {product?.dimensions && (
+  <div className="text-sm flex items-center">
+    <FaRuler className="mr-1 text-gray-500" size={12} />
+    <span className="font-medium text-gray-700">Size:</span>
+    <span className="ml-1 text-gray-600">
+      {product.dimensions.length}×{product.dimensions.width}×{product.dimensions.height || 0} {product.dimensions.unit || 'cm'}
+    </span>
+  </div>
+)}
+
             </div>
           </div>
 
