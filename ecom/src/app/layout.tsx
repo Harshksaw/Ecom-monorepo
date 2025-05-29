@@ -84,7 +84,17 @@ export default async function RootLayout({
         <title>Shri Nanu Gems | Jewellery and Gemstone</title>
         <meta name="description" content="Shri Nanu Gems offers Jewellery and Gemstone, certified gemstones crafted with premium quality. Discover timeless jewelry and stunning gemstones that elevate your elegance." />
          <link rel="icon" href="/favicon.ico" />
-
+<link
+        rel="icon"
+        type="image/png"
+        sizes="32x32"
+        href="/logo2.png"
+      />
+      <link
+        rel="apple-touch-icon"
+        sizes="180x180"
+        href="/logo.png"
+      />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
