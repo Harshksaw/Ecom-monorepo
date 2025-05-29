@@ -39,13 +39,44 @@ const CategoryTabs = ({ activeCategory, categories }:any) => {
   // Fix the ref type to properly handle the HTMLDivElement
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // Sort categories directly in the component
-  const priority = ['New Arrivals'];
-  const top = priority
-    .map(name => categories.find((c:any) => c.name === name))
-    .filter(Boolean) as Category[]; // Cast the filtered array to Category[]
-  const rest = categories.filter((c:any) => !priority.includes(c.name));
-  const orderedCategories = [...top, ...rest];
+  // Updated sorting logic to match mobile menu
+  const sortedCategories = categories?.filter((cat: any) => cat.isActive)
+    .sort((a: any, b: any) => {
+      // Define the same order as in your mobile menu
+      const categoryOrder = [
+        "New Arrivals",
+        "Necklace",
+        "Pendant", 
+        "Rings",
+        "Earring",
+        "Bracelet",
+        "Gift",
+        "Watches",
+        "Gemstones"
+      ];
+      
+      // Get the index of each category in the desired order
+      const indexA = categoryOrder.findIndex(cat => 
+        cat.toLowerCase() === a.name.toLowerCase()
+      );
+      const indexB = categoryOrder.findIndex(cat => 
+        cat.toLowerCase() === b.name.toLowerCase()
+      );
+      
+      // If both categories are in the order array
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+      
+      // If only category A is in the order array, it comes first
+      if (indexA !== -1) return -1;
+      
+      // If only category B is in the order array, it comes first
+      if (indexB !== -1) return 1;
+      
+      // If neither category is in the order array, sort alphabetically
+      return a.name.localeCompare(b.name);
+    }) || [];
 
   // Define the scroll functions with proper type safety
   const scrollLeft = () => {
@@ -75,7 +106,7 @@ const CategoryTabs = ({ activeCategory, categories }:any) => {
           className="flex space-x-6 overflow-x-auto overflow-y-visible py-4 px-12 scrollbar-hide" 
           style={{ scrollbarWidth: 'none' }}
         >
-          {orderedCategories.map(cat => (
+          {sortedCategories.map((cat: any) => (
             <div
               key={cat._id}
               className="relative flex-shrink-0"
