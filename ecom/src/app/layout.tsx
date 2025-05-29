@@ -19,18 +19,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
+    manifest: '/site.webmanifest',
 
   icons: {
     icon: [
-      { url: '/logo.png', type: 'image/png', sizes: 'any' }
+      { url: '/favicon.svg',        type: 'image/svg+xml' },
+      { url: '/favicon.ico',        type: 'image/x-icon' },
+      { url: '/favicon-96x96.png',  type: 'image/png',      sizes: '96x96' },
+      { url: '/favicon-32x32.png',  type: 'image/png',      sizes: '32x32' },
     ],
-    other: [
-      {
-        rel: 'logo',
-        url: 'https://res.cloudinary.com/dbnnlqq5v/image/upload/v1746508540/jewelry-ecommerce/r1l9wkcblfmjacphpfdi.png',
-        type: 'image/png'
-      }
-    ]
+    shortcut: '/favicon.ico',           // <link rel="shortcut icon">
+    apple:    '/apple-touch-icon.png',  // <link rel="apple-touch-icon">
   },
 
    openGraph: {
@@ -83,39 +82,6 @@ export default async function RootLayout({
       <head>
         <title>Shri Nanu Gems | Jewellery and Gemstone</title>
         <meta name="description" content="Shri Nanu Gems offers Jewellery and Gemstone, certified gemstones crafted with premium quality. Discover timeless jewelry and stunning gemstones that elevate your elegance." />
-         <link rel="icon" href="/favicon.ico" />
- <link
-        rel="icon"
-        type="image/svg+xml"
-        href="/favicon.svg"
-      />
-
-      <link rel="manifest" href="/site.webmanifest" />
-
-      {/* Fallback ICO: */}
-      <link
-        rel="shortcut icon"
-        href="/favicon.ico"
-      />
-
-      {/* PNGs at specific sizes: */}
-      <link
-        rel="icon"
-        type="image/png"
-        sizes="96x96"
-        href="/favicon-96x96.png"
-      />
-      <link
-        rel="icon"
-        type="image/png"
-        sizes="32x32"
-        href="/favicon-32x32.png"
-      />
-      <link
-        rel="apple-touch-icon"
-        sizes="180x180"
-        href="/apple-touch-icon.png"
-      />
 
         <script
           type="application/ld+json"
