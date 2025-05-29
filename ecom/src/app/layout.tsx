@@ -9,7 +9,7 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/authcontext'
 import Script from 'next/script'
 import { CategoryService } from './lib/api'
-import { SpeedInsights } from '@vercel/speed-insights/next';
+// import { SpeedInsights } from '@vercel/speed-insights/next';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -153,8 +153,7 @@ export default async function RootLayout({
             </div>
           </AuthProvider>
         </Providers>
-        <SpeedInsights />
-        {/* Tawk.to Script */}
+
         <Script
           id="tawk-to-widget"
           strategy="afterInteractive"
