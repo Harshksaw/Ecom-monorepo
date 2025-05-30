@@ -43,15 +43,7 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: '/favicon-32x32.png',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
-          },
-        ],
-      },
+   
       {
         source: '/favicon-96x96.png',
         headers: [
