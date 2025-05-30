@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     domains: [
       'plus.unsplash.com',
       'images.unsplash.com',
-      'res.cloudinary.com'
+      'res.cloudinary.com',
     ],
     remotePatterns: [
       {
@@ -23,11 +23,46 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // 👇 Add headers to disable favicon/icon caching
   async headers() {
     return [
       {
-        source: '/:path*(favicon.ico|favicon-.*\\.(png|svg)|apple-touch-icon.png)',
+        source: '/favicon.ico',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/favicon.svg',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/favicon-32x32.png',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/favicon-96x96.png',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/apple-touch-icon.png',
         headers: [
           {
             key: 'Cache-Control',
